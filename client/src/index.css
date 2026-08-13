@@ -1,0 +1,65 @@
+@import "./fonts.css";
+
+:root {
+  --bg: #eeeae1;
+  --surface: #ffffff;
+  --surface-2: #f5f1e8;
+  --surface-3: #e9e2d2;
+  --text: #221f1a;
+  --text-muted: #6f6655;
+  --border: #d9d0bd;
+  --border-strong: #c2b69d;
+  --accent: #b8420c;
+  --accent-ink: #fff8ef;
+  --accent-soft: #f2d9c4;
+  --focus: #1c6e8c;
+  --chip-bg: #221f1a;
+  --chip-ink: #fdf8ee;
+  --danger: #b0362b;
+  --shadow: 0 20px 45px -20px rgba(40, 30, 15, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16130f;
+    --surface: #1f1b15;
+    --surface-2: #262019;
+    --surface-3: #332b20;
+    --text: #f1ebdd;
+    --text-muted: #a99d86;
+    --border: #3a3225;
+    --border-strong: #4c422f;
+    --accent: #e2762f;
+    --accent-ink: #1a1006;
+    --accent-soft: #4a2c17;
+    --focus: #5fb8d9;
+    --chip-bg: #e2762f;
+    --chip-ink: #1a1006;
+    --shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.6);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+button {
+  font-family: inherit;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

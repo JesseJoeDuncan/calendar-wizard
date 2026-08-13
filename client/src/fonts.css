@@ -1,0 +1,44 @@
+@font-face {
+  font-family: "Market Deco";
+  src: url("/assets/fonts/Market-Deco.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Futura Wizard";
+  src: url("/assets/fonts/Futura-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Futura Wizard";
+  src: url("/assets/fonts/Futura-MediumItalic.ttf") format("truetype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Futura Wizard";
+  src: url("/assets/fonts/Futura-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Futura Wizard Condensed";
+  src: url("/assets/fonts/Futura-CondensedMedium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Futura Wizard Condensed";
+  src: url("/assets/fonts/Futura-CondensedExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-display: swap;
+}

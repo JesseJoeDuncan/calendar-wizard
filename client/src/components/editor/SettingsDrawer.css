@@ -1,0 +1,71 @@
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 16, 10, 0.35);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 50;
+}
+
+.drawer {
+  width: 320px;
+  max-width: 90vw;
+  height: 100%;
+  background: var(--surface);
+  padding: 1.2rem;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.drawer-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.drawer-section {
+  margin-bottom: 1.4rem;
+}
+
+.drawer-section h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 0.6rem;
+}
+
+.drawer-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.82rem;
+}
+
+.drawer-field span {
+  color: var(--text-muted);
+  flex: none;
+  width: 8rem;
+}
+
+.drawer-field input[type="text"],
+.drawer-field input:not([type]) {
+  flex: 1;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.drawer-field input[type="range"] {
+  flex: 1;
+}

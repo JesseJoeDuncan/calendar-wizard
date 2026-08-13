@@ -1,0 +1,70 @@
+.series-mini {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0.55rem 0.7rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.sm-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sm-title {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text);
+  min-width: 0;
+}
+
+.sm-title:focus {
+  outline: none;
+  border-bottom: 1px solid var(--focus);
+}
+
+.sm-style-btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 6px;
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex: none;
+}
+
+.sm-sub {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  margin-top: 0.15rem;
+}
+
+.sm-style-panel {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sm-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.sm-field select,
+.sm-field input[type="range"] {
+  flex: 1;
+  max-width: 8.5rem;
+}
