@@ -33,6 +33,7 @@ export interface TmdbImageCandidate {
   fullUrl: string;
   kind: "backdrop" | "poster";
   voteScore: number;
+  aspectRatio: number;
 }
 
 export interface TmdbMovieDetail {
@@ -62,6 +63,7 @@ function rankedCandidates(images: any[], kind: "backdrop" | "poster", thumbSize:
       fullUrl: `${IMG_BASE}/${fullSize}${img.file_path}`,
       kind,
       voteScore: score(img),
+      aspectRatio: typeof img.aspect_ratio === "number" ? img.aspect_ratio : kind === "backdrop" ? 16 / 9 : 2 / 3,
     }));
 }
 

@@ -1,5 +1,6 @@
 import { Image as KonvaImage, Rect, Text } from "react-konva";
 import useImage from "use-image";
+import { proxiedImageUrl } from "../../lib/imageProxy";
 import type { Calendar } from "../../types/calendar";
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 export function HeaderNode({ calendar, x, y, w, h }: Props) {
   const { venue, theme, season, customSeasonLabel, year } = calendar;
-  const [logo] = useImage(venue.logoUrl, "anonymous");
+  const [logo] = useImage(proxiedImageUrl(venue.logoUrl), "anonymous");
 
   const badgeH = h * 0.4;
   const logoH = badgeH * 0.62;

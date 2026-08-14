@@ -26,6 +26,7 @@ export interface ImageCandidate {
   fullUrl: string;
   kind: "backdrop" | "poster";
   voteScore: number;
+  aspectRatio: number;
 }
 
 export interface TitleTextStyle {

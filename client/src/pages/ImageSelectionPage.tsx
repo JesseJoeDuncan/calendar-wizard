@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { HScrollStrip } from "../components/HScrollStrip";
 import { api } from "../lib/api";
-import { DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
-import { buildLayout } from "../lib/layoutEngine";
+import { DEFAULT_SPACING } from "../lib/calendarGeometry";
 import type { Calendar, ImageCandidate, MpaRating, Title } from "../types/calendar";
 import "./ImageSelectionPage.css";
+
+const STRIP_HEIGHT = 180;
 
 const INITIAL_BACKDROPS = 6;
 const INITIAL_POSTERS = 4;
@@ -103,16 +105,6 @@ export function ImageSelectionPage() {
     };
   }, [id]);
 
-  const layout = useMemo(() => (calendar ? buildLayout(calendar.titles, calendar.series) : null), [calendar]);
-  const geometry = useMemo(() => (layout && calendar ? computeGeometry(layout, calendar.theme.spacing) : null), [layout, calendar]);
-
-  const aspectByTitleId = useMemo(() => {
-    const map: Record<string, number> = {};
-    if (!geometry) return map;
-    for (const row of geometry.rows) for (const box of row.boxes) map[box.titleId] = box.w / box.h;
-    return map;
-  }, [geometry]);
-
   const sortedTitles = useMemo(() => (calendar ? [...calendar.titles].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)) : []), [calendar]);
 
   function selectCandidate(titleId: string, candidate: ImageCandidate) {
@@ -204,7 +196,6 @@ export function ImageSelectionPage() {
       <div className="isel-list">
         {sortedTitles.map((t) => {
           const s = states[t.id] ?? emptyState();
-          const aspect = aspectByTitleId[t.id] ?? 0.75;
           const visibleBackdrops = s.backdrops.slice(0, s.backdropReveal);
           const visiblePosters = s.posters.slice(0, s.posterReveal);
           const visible = [...visibleBackdrops, ...visiblePosters];
@@ -219,13 +210,13 @@ export function ImageSelectionPage() {
                 {s.loading && <span className="isel-loading-note">fetching images…</span>}
                 {s.error && <span className="isel-error-note">{s.error}</span>}
               </div>
-              <div className="isel-strip">
+              <HScrollStrip className="isel-strip">
                 {visible.map((c) => (
                   <button
                     key={c.tmdbPath}
                     type="button"
                     className={`isel-tile ${isSelected(c) ? "sel" : ""}`}
-                    style={{ aspectRatio: `${aspect}` }}
+                    style={{ width: STRIP_HEIGHT * c.aspectRatio }}
                     onClick={() => selectCandidate(t.id, c)}
                   >
                     <img src={c.thumbUrl} alt="" loading="lazy" />
@@ -235,7 +226,7 @@ export function ImageSelectionPage() {
                 <button
                   type="button"
                   className={`isel-tile isel-upload ${s.uploadedUrl ? "sel" : ""}`}
-                  style={{ aspectRatio: `${aspect}` }}
+                  style={{ width: 130 }}
                   onClick={() => fileInputRefs.current[t.id]?.click()}
                   disabled={s.uploading}
                 >
@@ -256,7 +247,7 @@ export function ImageSelectionPage() {
                 />
 
                 {hasMore && (
-                  <button type="button" className="isel-tile isel-more" style={{ aspectRatio: `${aspect}` }} onClick={() => loadMore(t.id)}>
+                  <button type="button" className="isel-tile isel-more" onClick={() => loadMore(t.id)}>
                     + Load more
                   </button>
                 )}
@@ -264,7 +255,7 @@ export function ImageSelectionPage() {
                 {!s.loading && visible.length === 0 && !s.uploadedUrl && (
                   <div className="isel-empty-note">{t.tmdbId ? "No candidate images found — upload your own." : "Custom title — upload an image to use."}</div>
                 )}
-              </div>
+              </HScrollStrip>
             </div>
           );
         })}

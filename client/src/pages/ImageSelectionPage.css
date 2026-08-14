@@ -105,7 +105,8 @@
 .isel-tile img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: var(--surface-3);
   display: block;
 }
 

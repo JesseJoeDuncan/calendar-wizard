@@ -2,6 +2,7 @@ import { Shape, Text } from "react-konva";
 import useImage from "use-image";
 import { Image as KonvaImage } from "react-konva";
 import type { Calendar } from "../../types/calendar";
+import { proxiedImageUrl } from "../../lib/imageProxy";
 import { FillRect } from "./FillRect";
 import { KonvaImg } from "./KonvaImg";
 
@@ -20,7 +21,7 @@ export function FooterNode({ calendar, x, y, w, h }: Props) {
   const count = Math.round(w / bumpD);
   const step = w / count;
 
-  const [footerLogo] = useImage(venue.footerLogoUrl || "", "anonymous");
+  const [footerLogo] = useImage(proxiedImageUrl(venue.footerLogoUrl), "anonymous");
   const logoH = h * 0.5;
   const logoW = footerLogo ? (footerLogo.width / footerLogo.height) * logoH : logoH;
   const textLeft = x + 22 + (venue.footerLogoUrl ? logoW + 12 : 0);

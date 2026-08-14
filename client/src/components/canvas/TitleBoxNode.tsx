@@ -6,6 +6,7 @@ import type { BoxLayout, CornerWeight } from "../../lib/layoutEngine";
 import { placeholderGradient } from "../../lib/placeholderPalette";
 import { roundedRectPath } from "../../lib/roundedRectPath";
 import type { Title } from "../../types/calendar";
+import { proxiedImageUrl } from "../../lib/imageProxy";
 import { BadgeNode } from "./BadgeNode";
 import { MpaBadge } from "./MpaBadge";
 import { RichWordText } from "./RichWordText";
@@ -34,7 +35,7 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
   ];
   const [gradA, gradB] = placeholderGradient(title.id);
 
-  const [img] = useImage(title.image?.url || "", "anonymous");
+  const [img] = useImage(proxiedImageUrl(title.image?.url), "anonymous");
 
   let drawImg: { drawX: number; drawY: number; drawW: number; drawH: number } | null = null;
   if (img) {

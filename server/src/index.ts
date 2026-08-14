@@ -3,6 +3,7 @@ import "dotenv/config";
 import express from "express";
 import { calendarsRouter } from "./routes/calendars.js";
 import { cutoutRouter } from "./routes/cutout.js";
+import { imageProxyRouter } from "./routes/imageProxy.js";
 import { imagesRouter, uploadsDir } from "./routes/images.js";
 import { tmdbRouter } from "./routes/tmdb.js";
 import { visionRouter } from "./routes/vision.js";
@@ -20,6 +21,7 @@ app.use("/api/cutout", cutoutRouter);
 app.use("/api/images", imagesRouter);
 app.use("/api/calendars", calendarsRouter);
 app.use("/api/vision", visionRouter);
+app.use("/api/image-proxy", imageProxyRouter);
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
