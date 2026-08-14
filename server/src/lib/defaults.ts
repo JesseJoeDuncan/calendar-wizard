@@ -33,6 +33,8 @@ export const DEFAULT_TITLE_TEXT_STYLE: TitleTextStyle = {
   kerning: 0,
   justify: "left",
   dropShadow: true,
+  offsetX: 0,
+  offsetY: 0,
 };
 
 export const DEFAULT_SERIES_BAND_STYLE: SeriesBandStyle = {
@@ -40,6 +42,10 @@ export const DEFAULT_SERIES_BAND_STYLE: SeriesBandStyle = {
   fontFamily: "Futura Wizard",
   fontSize: 13,
   textColor: "#fce9c7",
+  kerning: 1.5,
+  justify: "center",
+  offsetX: 0,
+  offsetY: 0,
 };
 
 export function makeEmptyTitle(id: string, date: string): Title {

@@ -117,8 +117,59 @@
   gap: 0.5rem;
 }
 
-.slider-pair input {
+.slider-pair input[type="range"] {
   flex: 1;
+}
+
+.num-input {
+  flex: none;
+  width: 4.4rem;
+  text-align: right;
+}
+
+.axis-label {
+  flex: none;
+  width: 0.9rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  align-self: center;
+}
+
+.word-size-list {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.word-size-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.word-label {
+  width: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .just-row {

@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { api } from "../../lib/api";
 import { nextId } from "../../lib/draftTypes";
-import type { Calendar, MpaRating, Title } from "../../types/calendar";
+import type { Calendar, ImageCandidate, MpaRating, Title } from "../../types/calendar";
 import "./DetailsPanel.css";
 
 const MPA_OPTIONS: MpaRating[] = ["NR", "G", "PG", "PG-13", "R", "NC-17"];
@@ -14,36 +14,23 @@ interface Props {
 }
 
 export function DetailsPanel({ title, onChange, onBack }: Props) {
-  const [busy, setBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function pickCandidate(candidate: { url: string; tmdbPath: string }) {
-    setBusy(true);
-    try {
-      const { cutoutUrl } = await api.cutoutFromUrl(candidate.url);
-      onChange({
-        ...title,
-        image: { source: "tmdb", tmdbPath: candidate.tmdbPath, url: candidate.url, cutoutUrl, scale: 1, offsetX: 0, offsetY: 0 },
-      });
-    } catch (err) {
-      console.error(err);
-      onChange({ ...title, image: { source: "tmdb", tmdbPath: candidate.tmdbPath, url: candidate.url, scale: 1, offsetX: 0, offsetY: 0 } });
-    } finally {
-      setBusy(false);
-    }
+  function pickCandidate(candidate: ImageCandidate) {
+    onChange({
+      ...title,
+      image: { source: "tmdb", tmdbPath: candidate.tmdbPath, url: candidate.fullUrl, scale: 1, offsetX: 0, offsetY: 0 },
+    });
   }
 
   async function handleUpload(file: File) {
-    setBusy(true);
     const localUrl = URL.createObjectURL(file);
     try {
-      const { cutoutUrl } = await api.cutoutFromUpload(file);
-      onChange({ ...title, image: { source: "upload", url: localUrl, cutoutUrl, scale: 1, offsetX: 0, offsetY: 0 } });
+      const { url } = await api.uploadImage(file);
+      onChange({ ...title, image: { source: "upload", url, scale: 1, offsetX: 0, offsetY: 0 } });
     } catch (err) {
       console.error(err);
       onChange({ ...title, image: { source: "upload", url: localUrl, scale: 1, offsetX: 0, offsetY: 0 } });
-    } finally {
-      setBusy(false);
     }
   }
 
@@ -59,8 +46,20 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
     onChange({ ...title, badges: title.badges.filter((b) => b.id !== id) });
   }
 
+  function updateWordSize(index: number, size: number) {
+    const words = title.name.split(/\s+/).filter(Boolean);
+    const next = words.map((_, i) => title.titleTextStyle.wordSizes?.[i] ?? title.titleTextStyle.fontSize);
+    next[index] = size;
+    onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, wordSizes: next } });
+  }
+
+  function resetWordSizes() {
+    onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, wordSizes: undefined } });
+  }
+
   const candidates = title.imageCandidates ?? [];
   const currentUrl = title.image?.url;
+  const words = title.name.split(/\s+/).filter(Boolean);
 
   return (
     <div className="details-left">
@@ -102,14 +101,14 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
       </div>
 
       <div className="field-group">
-        <label>Image {busy && <span className="busy-note">generating cutout…</span>}</label>
+        <label>Image</label>
         <div className="img-grid">
           {candidates.map((c) => (
-            <button key={c.url} type="button" className={`img-opt ${currentUrl === c.url ? "sel" : ""}`} onClick={() => pickCandidate(c)} disabled={busy}>
-              <img src={c.url} alt="" />
+            <button key={c.tmdbPath} type="button" className={`img-opt ${currentUrl === c.fullUrl ? "sel" : ""}`} onClick={() => pickCandidate(c)}>
+              <img src={c.thumbUrl} alt="" loading="lazy" />
             </button>
           ))}
-          <button type="button" className="img-opt upload" onClick={() => fileInputRef.current?.click()} disabled={busy}>
+          <button type="button" className="img-opt upload" onClick={() => fileInputRef.current?.click()}>
             Upload
           </button>
           <input
@@ -128,32 +127,66 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
 
       <div className="field-group">
         <label>Image scale</label>
-        <input
-          type="range"
-          min={0.5}
-          max={2.5}
-          step={0.02}
-          value={title.image?.scale ?? 1}
-          onChange={(e) => onChange({ ...title, image: { ...(title.image as any), scale: Number(e.target.value) } })}
-          disabled={!title.image}
-        />
-      </div>
-
-      <div className="field-group">
-        <label>Image position</label>
         <div className="slider-pair">
           <input
             type="range"
-            min={-120}
-            max={120}
+            min={0.5}
+            max={4}
+            step={0.001}
+            value={title.image?.scale ?? 1}
+            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), scale: Number(e.target.value) } })}
+            disabled={!title.image}
+          />
+          <input
+            type="number"
+            className="field-input num-input"
+            min={0.1}
+            max={8}
+            step={0.001}
+            value={title.image?.scale ?? 1}
+            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), scale: Number(e.target.value) } })}
+            disabled={!title.image}
+          />
+        </div>
+      </div>
+
+      <div className="field-group">
+        <label>Image position (px)</label>
+        <div className="slider-pair">
+          <span className="axis-label">X</span>
+          <input
+            type="range"
+            min={-300}
+            max={300}
+            step={0.5}
             value={title.image?.offsetX ?? 0}
             onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetX: Number(e.target.value) } })}
             disabled={!title.image}
           />
           <input
+            type="number"
+            className="field-input num-input"
+            step={0.5}
+            value={title.image?.offsetX ?? 0}
+            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetX: Number(e.target.value) } })}
+            disabled={!title.image}
+          />
+        </div>
+        <div className="slider-pair">
+          <span className="axis-label">Y</span>
+          <input
             type="range"
-            min={-120}
-            max={120}
+            min={-300}
+            max={300}
+            step={0.5}
+            value={title.image?.offsetY ?? 0}
+            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetY: Number(e.target.value) } })}
+            disabled={!title.image}
+          />
+          <input
+            type="number"
+            className="field-input num-input"
+            step={0.5}
             value={title.image?.offsetY ?? 0}
             onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetY: Number(e.target.value) } })}
             disabled={!title.image}
@@ -192,11 +225,19 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
           </label>
         </div>
         <div className="slider-labeled">
-          <span>Size</span>
+          <span>Base size</span>
           <input
             type="range"
-            min={9}
-            max={26}
+            min={6}
+            max={40}
+            step={0.1}
+            value={title.titleTextStyle.fontSize}
+            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, fontSize: Number(e.target.value) } })}
+          />
+          <input
+            type="number"
+            className="field-input num-input"
+            step={0.1}
             value={title.titleTextStyle.fontSize}
             onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, fontSize: Number(e.target.value) } })}
           />
@@ -205,12 +246,61 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
           <span>Kerning</span>
           <input
             type="range"
-            min={-2}
-            max={6}
+            min={-4}
+            max={12}
+            step={0.1}
             value={title.titleTextStyle.kerning}
             onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, kerning: Number(e.target.value) } })}
           />
         </div>
+        <div className="slider-labeled">
+          <span>Position X</span>
+          <input
+            type="range"
+            min={-100}
+            max={100}
+            step={0.5}
+            value={title.titleTextStyle.offsetX}
+            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, offsetX: Number(e.target.value) } })}
+          />
+        </div>
+        <div className="slider-labeled">
+          <span>Position Y</span>
+          <input
+            type="range"
+            min={-100}
+            max={100}
+            step={0.5}
+            value={title.titleTextStyle.offsetY}
+            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, offsetY: Number(e.target.value) } })}
+          />
+        </div>
+
+        {words.length > 1 && (
+          <div className="word-size-list">
+            <div className="word-size-head">
+              <span>Per-word size</span>
+              <button type="button" className="link-btn" onClick={resetWordSizes}>
+                Reset all
+              </button>
+            </div>
+            {words.map((word, i) => (
+              <div className="slider-labeled" key={i}>
+                <span className="word-label" title={word}>
+                  {word}
+                </span>
+                <input
+                  type="range"
+                  min={6}
+                  max={60}
+                  step={0.1}
+                  value={title.titleTextStyle.wordSizes?.[i] ?? title.titleTextStyle.fontSize}
+                  onChange={(e) => updateWordSize(i, Number(e.target.value))}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="field-group">

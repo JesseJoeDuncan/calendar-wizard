@@ -9,7 +9,6 @@ import { SeriesMiniCard } from "../components/editor/SeriesMiniCard";
 import { TitleCard } from "../components/editor/TitleCard";
 import { api } from "../lib/api";
 import { DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
-import { enrichCalendar, type EnrichProgress } from "../lib/enrichCalendar";
 import { exportCalendarPdf } from "../lib/exportPdf";
 import { buildLayout, validateTitleCount } from "../lib/layoutEngine";
 import type { Calendar, CalendarSummary } from "../types/calendar";
@@ -22,7 +21,6 @@ export function EditorPage() {
   const [calendar, setCalendar] = useState<Calendar | null>(null);
   const [summaries, setSummaries] = useState<CalendarSummary[]>([]);
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
-  const [enrichProgress, setEnrichProgress] = useState<EnrichProgress | null>(null);
   const [saving, setSaving] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,13 +46,7 @@ export function EditorPage() {
           theme: { ...fetched.theme, spacing: { ...DEFAULT_SPACING, ...fetched.theme.spacing } },
           venue: { ...fetched.venue, footerLogoUrl: fetched.venue.footerLogoUrl || "/assets/logos/nevada-theatre-logo.png" },
         };
-        const enriched = await enrichCalendar(loaded, (p) => !cancelled && setEnrichProgress(p));
-        if (cancelled) return;
-        setEnrichProgress(null);
-        if (enriched !== loaded) {
-          await api.saveCalendar(enriched);
-        }
-        setCalendar(enriched);
+        setCalendar(loaded);
       } catch (err) {
         console.error(err);
         if (!cancelled) setError("Couldn't load this calendar. Check that the server is running.");
@@ -113,13 +105,7 @@ export function EditorPage() {
 
   if (error) return <div className="editor-error">{error}</div>;
   if (!calendar || !layout || !geometry) {
-    return (
-      <div className="editor-loading">
-        {enrichProgress
-          ? `Fetching movie details & generating cutouts… (${enrichProgress.done}/${enrichProgress.total})`
-          : "Loading calendar…"}
-      </div>
-    );
+    return <div className="editor-loading">Loading calendar…</div>;
   }
 
   const label = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;

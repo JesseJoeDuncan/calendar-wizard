@@ -1,4 +1,4 @@
-import type { Calendar, CalendarSummary, MpaRating, Season } from "../types/calendar";
+import type { Calendar, CalendarSummary, ImageCandidate, MpaRating, Season } from "../types/calendar";
 
 async function json<T>(resPromise: Promise<Response>): Promise<T> {
   const res = await resPromise;
@@ -18,8 +18,8 @@ export interface TmdbMovieDetail {
   title: string;
   runtimeMinutes: number | null;
   mpaRating: MpaRating;
-  posterUrl: string | null;
-  images: { url: string; tmdbPath: string }[];
+  backdrops: ImageCandidate[];
+  posters: ImageCandidate[];
 }
 
 export const api = {
@@ -49,6 +49,13 @@ export const api = {
       })
     ),
 
+  uploadImage: (file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return json<{ url: string }>(fetch("/api/images/upload", { method: "POST", body: form }));
+  },
+
+  // Dormant while cutout functionality is on hold — kept so it's ready to wire back in later.
   cutoutFromUrl: (url: string) =>
     json<{ cutoutUrl: string }>(
       fetch("/api/cutout/from-url", {

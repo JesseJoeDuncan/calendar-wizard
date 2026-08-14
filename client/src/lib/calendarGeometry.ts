@@ -59,11 +59,12 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
 
   const rows: RowGeometry[] = layout.rows.map((row, i) => {
     const rowTop = bodyTop + i * rowHeight;
-    const hasBand = row.seriesBands.length > 0;
-    const bandH = hasBand ? rowHeight * bandHeightRatio : 0;
-    const boxH = rowHeight - bandH - rowGap;
-    const boxTop = rowTop;
-    const bandTop = boxTop + boxH + rowGap * 0.3;
+    const bandH = rowHeight * bandHeightRatio;
+    // Every row reserves the same bottom gap before the next row, whether or not it has a band.
+    const fullBoxH = rowHeight - rowGap;
+    // A box that belongs to a series band is shorter by exactly the band's height, so the band's
+    // own bottom edge lines up with the bottom of the row's full-height (non-series) boxes.
+    const bandedBoxH = fullBoxH - bandH;
 
     const n = row.boxes.length;
     const totalGutter = boxGutter * (n - 1);
@@ -72,9 +73,9 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
     const boxes: BoxGeometry[] = row.boxes.map((b, k) => ({
       titleId: b.titleId,
       x: outerMargin + k * (boxW + boxGutter),
-      y: boxTop,
+      y: rowTop,
       w: boxW,
-      h: boxH,
+      h: b.seriesId ? bandedBoxH : fullBoxH,
     }));
 
     const bands: BandGeometry[] = row.seriesBands.map((band) => {
@@ -83,9 +84,9 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
       return {
         seriesId: band.seriesId,
         x: startBox.x + bandInset,
-        y: bandTop,
+        y: rowTop + bandedBoxH,
         w: endBox.x + endBox.w - startBox.x - bandInset * 2,
-        h: bandH - rowGap * 0.3,
+        h: bandH,
       };
     });
 

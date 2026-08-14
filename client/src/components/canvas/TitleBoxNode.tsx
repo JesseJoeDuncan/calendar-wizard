@@ -8,6 +8,7 @@ import { roundedRectPath } from "../../lib/roundedRectPath";
 import type { Title } from "../../types/calendar";
 import { BadgeNode } from "./BadgeNode";
 import { MpaBadge } from "./MpaBadge";
+import { RichWordText } from "./RichWordText";
 
 /** Corner radius as a fraction of box width, per adjacency weight. */
 const RADIUS_FRACTION: Record<CornerWeight, number> = { most: 0.13, some: 0.045, least: 0.01 };
@@ -33,16 +34,14 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
   ];
   const [gradA, gradB] = placeholderGradient(title.id);
 
-  const [baseImg] = useImage(title.image?.url || "", "anonymous");
-  const [cutoutImg] = useImage(title.image?.cutoutUrl || "", "anonymous");
-  const dimSource = baseImg || cutoutImg;
+  const [img] = useImage(title.image?.url || "", "anonymous");
 
   let drawImg: { drawX: number; drawY: number; drawW: number; drawH: number } | null = null;
-  if (dimSource) {
+  if (img) {
     const scale = title.image?.scale ?? 1;
-    const cover = Math.max(w / dimSource.width, h / dimSource.height) * scale;
-    const drawW = dimSource.width * cover;
-    const drawH = dimSource.height * cover;
+    const cover = Math.max(w / img.width, h / img.height) * scale;
+    const drawW = img.width * cover;
+    const drawH = img.height * cover;
     drawImg = {
       drawW,
       drawH,
@@ -54,6 +53,7 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
   const { mo, dy } = formatDateBadge(title.date);
   const runtimeLabel = formatRuntime(title.runtimeMinutes);
   const nameSize = title.titleTextStyle.fontSize;
+  const titleBlockH = Math.max(nameSize * 2.6, h * 0.32);
 
   return (
     <Group
@@ -65,11 +65,10 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
       onMouseEnter={interactive ? () => onHover(true) : undefined}
       onMouseLeave={interactive ? () => onHover(false) : undefined}
     >
-      {/* Base layer: flat placeholder, then the full source still underneath everything */}
+      {/* Base layer: flat placeholder, then the selected image on top, covering the box */}
       <Rect x={x} y={y} width={w} height={h} fillLinearGradientStartPoint={{ x: 0, y: 0 }} fillLinearGradientEndPoint={{ x: w, y: h }} fillLinearGradientColorStops={[0, gradA, 1, gradB]} />
-      {drawImg && baseImg && <KonvaImage image={baseImg} x={drawImg.drawX} y={drawImg.drawY} width={drawImg.drawW} height={drawImg.drawH} />}
+      {drawImg && img && <KonvaImage image={img} x={drawImg.drawX} y={drawImg.drawY} width={drawImg.drawW} height={drawImg.drawH} />}
 
-      {/* Date badge sits between the background photo and the cutout subject, so the subject can overlap it */}
       <Text
         x={x + 8 + (title.dateOffsetX ?? 0)}
         y={y + 6 + (title.dateOffsetY ?? 0)}
@@ -96,30 +95,30 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
         shadowOpacity={0.65}
       />
 
-      {/* Cutout subject: same registration as the base photo, layered on top of the date */}
-      {drawImg && cutoutImg && <KonvaImage image={cutoutImg} x={drawImg.drawX} y={drawImg.drawY} width={drawImg.drawW} height={drawImg.drawH} />}
-
       {hovered && interactive && !selected && <Rect x={x} y={y} width={w} height={h} fill="#ffffff" opacity={0.12} />}
 
       {title.ratingVisible && <MpaBadge rating={title.mpaRating} x={x + w - 30} y={y + 8} opacity={title.ratingOpacity} />}
 
-      {/* Title text */}
-      <Text
-        x={x + 8}
-        y={y + h - nameSize * 2.3}
-        width={w - 16}
-        text={title.name.toUpperCase()}
-        fontFamily="Futura Wizard"
-        fontStyle="bold"
-        fontSize={nameSize}
-        letterSpacing={title.titleTextStyle.kerning}
-        align={title.titleTextStyle.justify}
-        fill="#ffffff"
-        shadowColor="black"
-        shadowBlur={title.titleTextStyle.dropShadow ? 5 : 0}
-        shadowOpacity={title.titleTextStyle.dropShadow ? 0.7 : 0}
-        lineHeight={1.05}
-      />
+      {title.name && (
+        <RichWordText
+          text={title.name}
+          x={x + 8}
+          y={y + h - titleBlockH - 4}
+          width={w - 16}
+          height={titleBlockH}
+          baseFontSize={nameSize}
+          wordSizes={title.titleTextStyle.wordSizes}
+          fontFamily="Futura Wizard"
+          kerning={title.titleTextStyle.kerning}
+          justify={title.titleTextStyle.justify}
+          color="#ffffff"
+          dropShadow={title.titleTextStyle.dropShadow}
+          verticalAlign="bottom"
+          uppercase
+          offsetX={title.titleTextStyle.offsetX}
+          offsetY={title.titleTextStyle.offsetY}
+        />
+      )}
 
       {/* Runtime, rotated to run top-to-bottom along the right edge */}
       {runtimeLabel && (

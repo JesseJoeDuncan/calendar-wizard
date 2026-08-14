@@ -68,3 +68,82 @@
   flex: 1;
   max-width: 8.5rem;
 }
+
+.sm-num-row {
+  display: flex;
+  gap: 0.35rem;
+  flex: 1;
+  max-width: 8.5rem;
+}
+
+.sm-num-row input[type="range"] {
+  max-width: none;
+}
+
+.sm-num {
+  flex: none;
+  width: 3.2rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.15rem 0.3rem;
+  font-size: 0.72rem;
+}
+
+.sm-just-row {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.sm-just-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.sm-just-btn.sel {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.sm-word-sizes {
+  margin-top: 0.3rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed var(--border);
+}
+
+.sm-word-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.sm-link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.7rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sm-word-label {
+  width: 4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

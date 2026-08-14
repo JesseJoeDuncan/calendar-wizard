@@ -69,7 +69,7 @@ export function StartPage() {
         date: t.date,
         mpaRating: "NR" as const,
         ratingVisible: false,
-        titleTextStyle: { fontSize: 15, kerning: 0, justify: "left" as const, dropShadow: true },
+        titleTextStyle: { fontSize: 15, kerning: 0, justify: "left" as const, dropShadow: true, offsetX: 0, offsetY: 0 },
         runtimeOpacity: 0.85,
         ratingOpacity: 0.85,
         dateOffsetX: 0,
@@ -89,12 +89,16 @@ export function StartPage() {
             fontFamily: "Futura Wizard",
             fontSize: 13,
             textColor: "#fce9c7",
+            kerning: 1.5,
+            justify: "center" as const,
+            offsetX: 0,
+            offsetY: 0,
           },
         }));
 
       const finalCalendar: Calendar = { ...created, titles: fullTitles, series: fullSeries };
       await api.saveCalendar(finalCalendar);
-      navigate(`/edit/${created.id}`);
+      navigate(`/select-images/${created.id}`);
     } catch (err) {
       console.error(err);
       setError("Something went wrong creating the calendar. Check that the server is running.");

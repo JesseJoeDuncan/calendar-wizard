@@ -1,0 +1,154 @@
+.isel-page {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  padding-bottom: 3rem;
+}
+
+.isel-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.isel-top h1 {
+  font-size: 1.1rem;
+  margin: 0 0 0.15rem;
+}
+
+.isel-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.isel-continue {
+  flex: none;
+  background: var(--chip-bg);
+  color: var(--chip-ink);
+  border: none;
+  border-radius: 9px;
+  padding: 0.65rem 1.3rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.isel-continue:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.isel-list {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.isel-row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.isel-title-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.isel-title-date {
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.isel-loading-note,
+.isel-error-note {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.isel-error-note {
+  color: var(--danger);
+}
+
+.isel-strip {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  height: 180px;
+}
+
+.isel-tile {
+  flex: none;
+  height: 100%;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.isel-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.isel-tile.sel {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.isel-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+.isel-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.8rem;
+  width: 90px;
+  min-width: 90px;
+}
+
+.isel-empty-note {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding-left: 0.3rem;
+}
+
+.isel-loading,
+.isel-error {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-muted);
+}

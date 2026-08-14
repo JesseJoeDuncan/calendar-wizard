@@ -27,16 +27,43 @@ export async function searchMovies(query: string): Promise<TmdbSearchResult[]> {
   }));
 }
 
+export interface TmdbImageCandidate {
+  tmdbPath: string;
+  thumbUrl: string;
+  fullUrl: string;
+  kind: "backdrop" | "poster";
+  voteScore: number;
+}
+
 export interface TmdbMovieDetail {
   id: number;
   title: string;
   runtimeMinutes: number | null;
   mpaRating: string;
-  posterUrl: string | null;
-  images: { url: string; tmdbPath: string }[];
+  backdrops: TmdbImageCandidate[];
+  posters: TmdbImageCandidate[];
 }
 
 const US_RATING_ORDER = ["NR", "G", "PG", "PG-13", "R", "NC-17"];
+
+// Ranked by TMDB's own community score (vote_average weighted by how many people voted)
+// rather than whatever order TMDB happens to return.
+function score(img: any): number {
+  return (img.vote_average ?? 0) * Math.log2((img.vote_count ?? 0) + 2);
+}
+
+function rankedCandidates(images: any[], kind: "backdrop" | "poster", thumbSize: string, fullSize: string, cap: number): TmdbImageCandidate[] {
+  return [...images]
+    .sort((a, b) => score(b) - score(a))
+    .slice(0, cap)
+    .map((img) => ({
+      tmdbPath: img.file_path as string,
+      thumbUrl: `${IMG_BASE}/${thumbSize}${img.file_path}`,
+      fullUrl: `${IMG_BASE}/${fullSize}${img.file_path}`,
+      kind,
+      voteScore: score(img),
+    }));
+}
 
 export async function getMovieDetail(id: number): Promise<TmdbMovieDetail> {
   const [detailRes, releaseRes, imagesRes] = await Promise.all([
@@ -55,22 +82,14 @@ export async function getMovieDetail(id: number): Promise<TmdbMovieDetail> {
     if (cert && US_RATING_ORDER.includes(cert)) mpaRating = cert;
   }
 
-  let images: { url: string; tmdbPath: string }[] = [];
+  let backdrops: TmdbImageCandidate[] = [];
+  let posters: TmdbImageCandidate[] = [];
   if (imagesRes.ok) {
     const imgData = (await imagesRes.json()) as { backdrops: any[]; posters: any[] };
-    // Rank by TMDB's own community score (vote_average weighted by how many people voted)
-    // rather than just taking whatever TMDB returns first.
-    const score = (img: any) => (img.vote_average ?? 0) * Math.log2((img.vote_count ?? 0) + 2);
-    const rankedBackdrops = [...imgData.backdrops].sort((a, b) => score(b) - score(a));
-    const backdrops = rankedBackdrops.slice(0, 8).map((b) => ({
-      url: `${IMG_BASE}/w780${b.file_path}`,
-      tmdbPath: b.file_path as string,
-    }));
-    const posters = imgData.posters.slice(0, 2).map((p) => ({
-      url: `${IMG_BASE}/w500${p.file_path}`,
-      tmdbPath: p.file_path as string,
-    }));
-    images = [...backdrops, ...posters];
+    // Metadata only (URLs + scores) — cheap to fetch broadly; the browser only downloads a
+    // thumbnail's actual bytes once its tile scrolls into view / "load more" reveals it.
+    backdrops = rankedCandidates(imgData.backdrops, "backdrop", "w300", "w1280", 24);
+    posters = rankedCandidates(imgData.posters, "poster", "w185", "w780", 12);
   }
 
   return {
@@ -78,7 +97,7 @@ export async function getMovieDetail(id: number): Promise<TmdbMovieDetail> {
     title: detail.title,
     runtimeMinutes: detail.runtime || null,
     mpaRating,
-    posterUrl: detail.poster_path ? `${IMG_BASE}/w342${detail.poster_path}` : null,
-    images,
+    backdrops,
+    posters,
   };
 }

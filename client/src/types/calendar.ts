@@ -14,10 +14,19 @@ export interface ImageState {
   source: "tmdb" | "upload";
   tmdbPath?: string;
   url: string;
+  /** Dormant while cutout functionality is on hold; kept so re-enabling it later needs no migration. */
   cutoutUrl?: string;
   scale: number;
   offsetX: number;
   offsetY: number;
+}
+
+export interface ImageCandidate {
+  tmdbPath: string;
+  thumbUrl: string;
+  fullUrl: string;
+  kind: "backdrop" | "poster";
+  voteScore: number;
 }
 
 export interface TitleTextStyle {
@@ -25,6 +34,10 @@ export interface TitleTextStyle {
   kerning: number;
   justify: "left" | "center" | "right";
   dropShadow: boolean;
+  offsetX: number;
+  offsetY: number;
+  /** Per-word font-size overrides, parallel to the title split on whitespace. Missing/undefined entries use fontSize. */
+  wordSizes?: number[];
 }
 
 export interface Title {
@@ -36,7 +49,7 @@ export interface Title {
   mpaRating: MpaRating;
   ratingVisible: boolean;
   image?: ImageState;
-  imageCandidates?: { url: string; tmdbPath: string }[];
+  imageCandidates?: ImageCandidate[];
   titleTextStyle: TitleTextStyle;
   runtimeOpacity: number;
   ratingOpacity: number;
@@ -57,6 +70,12 @@ export interface SeriesBandStyle {
   fontFamily: string;
   fontSize: number;
   textColor: string;
+  kerning: number;
+  justify: "left" | "center" | "right";
+  offsetX: number;
+  offsetY: number;
+  /** Per-word font-size overrides, parallel to the series name split on whitespace. */
+  wordSizes?: number[];
 }
 
 export interface Series {
