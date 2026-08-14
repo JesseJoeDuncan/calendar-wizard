@@ -1,36 +1,29 @@
-import type { Calendar, CalendarTheme, SeriesBandStyle, Title, TitleTextStyle, VenueSettings } from "../types.js";
+import type { Calendar, CalendarTheme, SeriesBandStyle, Title, TitleTextStyle } from "../types.js";
 
-export const DEFAULT_VENUE: VenueSettings = {
-  kicker: "SUNDAY NIGHT MOVIES AT THE NEVADA THEATRE",
-  logoUrl: "/assets/logos/OnyxDowntown_Logo_POS.png",
-  footerLogoUrl: "/assets/logos/nevada-theatre-logo.png",
-  venueName: "THE NEVADA THEATRE",
-  address: "401 BROAD ST, NEVADA CITY, CA",
-  doorsTime: "6:30",
-  showTime: "7:00",
-  ticketPrice: "$10",
-  qrCodeUrl: "/assets/OnyxDowntown-QRcode.png",
-  qrTargetUrl: "TheOnyxTheatre.com",
-  ageNote: "ALL AGES WELCOME!",
-};
-
+// Row height is derived from the fixed canvas layout (CANVAS_H 1100, HEADER_H 150, FOOTER_H 92,
+// 3 rows): (1100-150-92)/3 = 286px. These defaults are that value's 7% / 4% / 2%, matching the
+// requested row-gap / box-gutter / intra-series-gutter proportions.
 export const DEFAULT_THEME: CalendarTheme = {
-  headerBackground: { type: "color", value: "#e8879a" },
-  footerBackground: { type: "color", value: "#3f7688" },
-  seasonTextColor: "#1c4f61",
-  accentColor: "#e8879a",
+  background: { type: "color", value: "#e8879a" },
   spacing: {
     outerMargin: 34,
-    boxGutter: 6,
-    rowGap: 10,
+    boxGutter: 11,
+    seriesBoxGutter: 6,
+    rowGap: 20,
     bandInset: 14,
     bandHeightRatio: 0.15,
+    primaryRadius: 25,
+    secondaryRadius: 9,
+    tertiaryRadius: 2,
   },
 };
 
 export const DEFAULT_TITLE_TEXT_STYLE: TitleTextStyle = {
-  fontSize: 15,
+  // 0 is a sentinel meaning "never auto-fit yet" — the editor computes a real value the first
+  // time this title's box geometry is known, then it behaves like any other stored setting.
+  fontSize: 0,
   kerning: 0,
+  lineSpacing: 1.08,
   justify: "left",
   dropShadow: true,
   offsetX: 0,
@@ -43,6 +36,7 @@ export const DEFAULT_SERIES_BAND_STYLE: SeriesBandStyle = {
   fontSize: 13,
   textColor: "#fce9c7",
   kerning: 1.5,
+  lineSpacing: 1.08,
   justify: "center",
   offsetX: 0,
   offsetY: 0,
@@ -74,7 +68,6 @@ export function makeNewCalendar(id: string, season: Calendar["season"], year: nu
     year,
     titles,
     series: [],
-    venue: { ...DEFAULT_VENUE },
     theme: { ...DEFAULT_THEME },
     createdAt: now,
     updatedAt: now,

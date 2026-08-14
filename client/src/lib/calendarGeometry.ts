@@ -7,12 +7,18 @@ export const CANVAS_H = 1100;
 export const HEADER_H = 150;
 export const FOOTER_H = 92;
 
+// Row height is (CANVAS_H - HEADER_H - FOOTER_H) / 3 = 286px. rowGap/boxGutter/seriesBoxGutter
+// defaults below are that value's 7% / 4% / 2%.
 export const DEFAULT_SPACING: CalendarSpacing = {
   outerMargin: 34,
-  boxGutter: 6,
-  rowGap: 10,
+  boxGutter: 11,
+  seriesBoxGutter: 6,
+  rowGap: 20,
   bandInset: 14,
   bandHeightRatio: 0.15,
+  primaryRadius: 25,
+  secondaryRadius: 9,
+  tertiaryRadius: 2,
 };
 
 export interface BoxGeometry {
@@ -46,7 +52,7 @@ export interface CalendarGeometry {
 }
 
 export function computeGeometry(layout: CalendarLayout, spacing: Partial<CalendarSpacing> | undefined): CalendarGeometry {
-  const { outerMargin, boxGutter, rowGap, bandInset, bandHeightRatio } = { ...DEFAULT_SPACING, ...spacing };
+  const { outerMargin, boxGutter, seriesBoxGutter, rowGap, bandInset, bandHeightRatio } = { ...DEFAULT_SPACING, ...spacing };
 
   const header = { x: 0, y: 0, w: CANVAS_W, h: HEADER_H };
   const footer = { x: 0, y: CANVAS_H - FOOTER_H, w: CANVAS_W, h: FOOTER_H };
@@ -67,16 +73,29 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
     const bandedBoxH = fullBoxH - bandH;
 
     const n = row.boxes.length;
-    const totalGutter = boxGutter * (n - 1);
+    // Gap between box k and k+1 is the tighter intra-series gutter when both share a series,
+    // otherwise the regular box gutter.
+    const gaps: number[] = [];
+    for (let k = 0; k < n - 1; k++) {
+      const a = row.boxes[k].seriesId;
+      const b = row.boxes[k + 1].seriesId;
+      gaps.push(a && a === b ? seriesBoxGutter : boxGutter);
+    }
+    const totalGutter = gaps.reduce((sum, g) => sum + g, 0);
     const boxW = (CANVAS_W - 2 * outerMargin - totalGutter) / n;
 
-    const boxes: BoxGeometry[] = row.boxes.map((b, k) => ({
-      titleId: b.titleId,
-      x: outerMargin + k * (boxW + boxGutter),
-      y: rowTop,
-      w: boxW,
-      h: b.seriesId ? bandedBoxH : fullBoxH,
-    }));
+    const boxes: BoxGeometry[] = [];
+    let cursorX = outerMargin;
+    row.boxes.forEach((b, k) => {
+      boxes.push({
+        titleId: b.titleId,
+        x: cursorX,
+        y: rowTop,
+        w: boxW,
+        h: b.seriesId ? bandedBoxH : fullBoxH,
+      });
+      cursorX += boxW + (gaps[k] ?? 0);
+    });
 
     const bands: BandGeometry[] = row.seriesBands.map((band) => {
       const startBox = boxes[band.startBoxIndex];

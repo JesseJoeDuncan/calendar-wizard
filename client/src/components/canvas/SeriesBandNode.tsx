@@ -27,12 +27,14 @@ export function SeriesBandNode({ geometry, series }: Props) {
           wordSizes={style.wordSizes}
           fontFamily={style.fontFamily}
           kerning={style.kerning}
+          lineHeightMultiplier={style.lineSpacing || 1.08}
           justify={style.justify}
           color={style.textColor}
           verticalAlign="middle"
           uppercase
           offsetX={style.offsetX}
           offsetY={style.offsetY}
+          listening={false}
         />
       )}
     </>

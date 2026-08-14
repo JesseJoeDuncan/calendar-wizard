@@ -15,14 +15,15 @@ interface Props {
   layout: CalendarLayout;
   geometry: CalendarGeometry;
   selectedTitleId: string | null;
-  onSelectTitle: (id: string) => void;
+  onSelectTitle: (id: string | null) => void;
+  onImageOffsetChange?: (titleId: string, offsetX: number, offsetY: number) => void;
   stageRef?: React.RefObject<Konva.Stage | null>;
 }
 
 const MIN_ZOOM = 0.4;
 const MAX_ZOOM = 4;
 
-export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, stageRef }: Props) {
+export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, stageRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const internalStageRef = useRef<Konva.Stage>(null);
   const actualStageRef = stageRef ?? internalStageRef;
@@ -48,11 +49,9 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
   const baseScale = Math.min((containerSize.w * 0.92) / CANVAS_W, (containerSize.h * 0.92) / CANVAS_H);
   const scale = baseScale * zoom;
 
-  useEffect(() => {
-    setStagePos({ x: (containerSize.w - CANVAS_W * scale) / 2, y: (containerSize.h - CANVAS_H * scale) / 2 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [containerSize.w, containerSize.h, baseScale]);
-
+  // Re-centers on the selected box (or the full calendar, if nothing is selected) whenever the
+  // selection changes OR the container is resized — e.g. the details panel opening/closing next
+  // to the canvas changes its width, which would otherwise leave a stale pan/zoom behind.
   useEffect(() => {
     if (!selectedTitleId) {
       setZoom(1);
@@ -70,7 +69,7 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
     setZoom(newZoom);
     setStagePos({ x: containerSize.w / 2 - cx * newScale, y: containerSize.h / 2 - cy * newScale });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTitleId]);
+  }, [selectedTitleId, containerSize.w, containerSize.h, baseScale]);
 
   function handleWheel(e: Konva.KonvaEventObject<WheelEvent>) {
     e.evt.preventDefault();
@@ -92,6 +91,13 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
   function resetView() {
     setZoom(1);
     setStagePos({ x: (containerSize.w - CANVAS_W * baseScale) / 2, y: (containerSize.h - CANVAS_H * baseScale) / 2 });
+  }
+
+  // Clicking truly empty canvas (not any box/band shape) deselects and zooms back out. Clicking a
+  // box is handled by that box's own onClick, which bubbles here too — only act when the click
+  // target is the stage itself, so a box click never gets overridden by this.
+  function handleStageClick(e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
+    if (e.target === e.target.getStage()) onSelectTitle(null);
   }
 
   return (
@@ -127,6 +133,8 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
           draggable={mode === "pan"}
           onDragEnd={(e) => setStagePos({ x: e.target.x(), y: e.target.y() })}
           onWheel={handleWheel}
+          onClick={handleStageClick}
+          onTap={handleStageClick}
         >
           <Layer>
             <CalendarScene
@@ -138,6 +146,7 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
               interactive={mode === "select"}
               onSelectTitle={onSelectTitle}
               onHoverTitle={setHoveredTitleId}
+              onImageOffsetChange={onImageOffsetChange}
             />
           </Layer>
         </Stage>

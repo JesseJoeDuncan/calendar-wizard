@@ -30,21 +30,15 @@
   flex-wrap: wrap;
 }
 
-.pill {
-  padding: 0.42rem 0.95rem;
-  border-radius: 999px;
+.season-select {
+  padding: 0.42rem 0.75rem;
+  border-radius: 8px;
   border: 1px solid var(--border-strong);
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text);
   background: var(--surface-2);
   cursor: pointer;
-}
-
-.pill.on {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: var(--accent);
 }
 
 .custom-season-input,

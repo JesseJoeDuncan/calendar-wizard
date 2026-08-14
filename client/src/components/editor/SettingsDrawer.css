@@ -69,3 +69,39 @@
 .drawer-field input[type="range"] {
   flex: 1;
 }
+
+.drawer-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-reset-all {
+  background: var(--chip-bg);
+  color: var(--chip-ink);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.drawer-save-default {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.drawer-save-default:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}

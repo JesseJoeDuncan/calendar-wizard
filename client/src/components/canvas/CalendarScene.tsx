@@ -1,10 +1,8 @@
 import { Fragment } from "react";
-import { CANVAS_W, type CalendarGeometry } from "../../lib/calendarGeometry";
+import { CANVAS_H, CANVAS_W, type CalendarGeometry } from "../../lib/calendarGeometry";
 import type { CalendarLayout } from "../../lib/layoutEngine";
 import type { Calendar } from "../../types/calendar";
 import { FillRect } from "./FillRect";
-import { FooterNode } from "./FooterNode";
-import { HeaderNode } from "./HeaderNode";
 import { SeriesBandNode } from "./SeriesBandNode";
 import { TitleBoxNode } from "./TitleBoxNode";
 
@@ -17,17 +15,27 @@ interface Props {
   interactive: boolean;
   onSelectTitle: (id: string) => void;
   onHoverTitle: (id: string | null) => void;
+  onImageOffsetChange?: (titleId: string, offsetX: number, offsetY: number) => void;
 }
 
-export function CalendarScene({ calendar, layout, geometry, selectedTitleId, hoveredTitleId, interactive, onSelectTitle, onHoverTitle }: Props) {
+export function CalendarScene({
+  calendar,
+  layout,
+  geometry,
+  selectedTitleId,
+  hoveredTitleId,
+  interactive,
+  onSelectTitle,
+  onHoverTitle,
+  onImageOffsetChange,
+}: Props) {
   const titleById = new Map(calendar.titles.map((t) => [t.id, t]));
   const seriesById = new Map(calendar.series.map((s) => [s.id, s]));
 
   return (
     <>
-      {/* Header + body share one continuous background so boxes appear to float on a single poster, not a page. */}
-      <FillRect fill={calendar.theme.headerBackground} x={0} y={0} w={CANVAS_W} h={geometry.footer.y} />
-      <HeaderNode calendar={calendar} {...geometry.header} />
+      {/* Header/footer are blank space on this same background for now — content comes later. */}
+      <FillRect fill={calendar.theme.background} x={0} y={0} w={CANVAS_W} h={CANVAS_H} />
 
       {layout.rows.map((row, ri) => {
         const rowGeo = geometry.rows[ri];
@@ -43,11 +51,14 @@ export function CalendarScene({ calendar, layout, geometry, selectedTitleId, hov
                   geometry={boxGeo}
                   boxLayout={boxLayout}
                   title={title}
+                  rowHeight={rowGeo.height}
+                  radii={calendar.theme.spacing}
                   selected={selectedTitleId === title.id}
                   hovered={hoveredTitleId === title.id}
                   interactive={interactive}
                   onSelect={() => onSelectTitle(title.id)}
                   onHover={(h) => onHoverTitle(h ? title.id : null)}
+                  onImageOffsetChange={onImageOffsetChange}
                 />
               );
             })}
@@ -60,8 +71,6 @@ export function CalendarScene({ calendar, layout, geometry, selectedTitleId, hov
           </Fragment>
         );
       })}
-
-      <FooterNode calendar={calendar} {...geometry.footer} />
     </>
   );
 }

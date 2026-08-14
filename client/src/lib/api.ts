@@ -49,6 +49,11 @@ export const api = {
       })
     ),
 
+  deleteCalendar: async (id: string) => {
+    const res = await fetch(`/api/calendars/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+  },
+
   uploadImage: (file: File) => {
     const form = new FormData();
     form.append("image", file);

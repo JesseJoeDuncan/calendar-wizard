@@ -6,6 +6,11 @@
   margin-bottom: 0.6rem;
 }
 
+.title-card-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
 .tc-name {
   width: 100%;
   border: none;

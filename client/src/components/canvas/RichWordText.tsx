@@ -10,6 +10,8 @@ export interface RichWordTextProps {
   height: number;
   baseFontSize: number;
   wordSizes?: number[];
+  /** Word indices (0-based) after which to force a line break, regardless of remaining width. */
+  manualLineBreaks?: number[];
   fontFamily: string;
   fontStyle?: string;
   kerning: number;
@@ -21,6 +23,7 @@ export interface RichWordTextProps {
   offsetX?: number;
   offsetY?: number;
   lineHeightMultiplier?: number;
+  listening?: boolean;
 }
 
 interface PlacedWord {
@@ -45,6 +48,7 @@ export function RichWordText({
   height,
   baseFontSize,
   wordSizes,
+  manualLineBreaks,
   fontFamily,
   fontStyle = "bold",
   kerning,
@@ -56,6 +60,7 @@ export function RichWordText({
   offsetX = 0,
   offsetY = 0,
   lineHeightMultiplier = 1.08,
+  listening = true,
 }: RichWordTextProps) {
   const placed = useMemo<PlacedWord[]>(() => {
     const rawWords = text.split(/\s+/).filter(Boolean);
@@ -84,6 +89,10 @@ export function RichWordText({
       current.words.push({ text: display[i], width: w, size: sizes[i] });
       current.width = newWidth;
       current.maxSize = Math.max(current.maxSize, sizes[i]);
+      if (manualLineBreaks?.includes(i)) {
+        lines.push(current);
+        current = { words: [], width: 0, maxSize: 0 };
+      }
     }
     if (current.words.length > 0) lines.push(current);
 
@@ -114,7 +123,7 @@ export function RichWordText({
     });
 
     return result;
-  }, [text, JSON.stringify(wordSizes), baseFontSize, fontFamily, fontStyle, kerning, justify, uppercase, width, height, x, y, offsetX, offsetY, lineHeightMultiplier]);
+  }, [text, JSON.stringify(wordSizes), JSON.stringify(manualLineBreaks), baseFontSize, fontFamily, fontStyle, kerning, justify, uppercase, width, height, x, y, offsetX, offsetY, lineHeightMultiplier]);
 
   return (
     <>
@@ -129,6 +138,7 @@ export function RichWordText({
           fontSize={w.fontSize}
           letterSpacing={kerning}
           fill={color}
+          listening={listening}
           shadowColor="black"
           shadowBlur={dropShadow ? 5 : 0}
           shadowOpacity={dropShadow ? 0.7 : 0}

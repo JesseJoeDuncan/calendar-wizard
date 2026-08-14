@@ -4,16 +4,17 @@ import "./TitleCard.css";
 interface Props {
   title: Title;
   series: Series[];
+  selected?: boolean;
   onChange: (next: Title) => void;
   onSeriesChange: (seriesId: string | undefined) => void;
   onOpenDetails: () => void;
 }
 
-export function TitleCard({ title, series, onChange, onSeriesChange, onOpenDetails }: Props) {
+export function TitleCard({ title, series, selected, onChange, onSeriesChange, onOpenDetails }: Props) {
   const swatchUrl = title.image?.cutoutUrl || title.image?.url;
 
   return (
-    <div className="title-card">
+    <div className={`title-card ${selected ? "title-card-selected" : ""}`}>
       <input className="tc-name" value={title.name} onChange={(e) => onChange({ ...title, name: e.target.value })} placeholder="Title" />
       <div className="tc-row">
         {swatchUrl ? <img className="tc-swatch" src={swatchUrl} alt="" /> : <div className="tc-swatch tc-swatch-empty" />}

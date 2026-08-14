@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
-import { getCalendar, listCalendars, saveCalendar } from "../lib/calendarStore.js";
+import { deleteCalendar, getCalendar, listCalendars, saveCalendar } from "../lib/calendarStore.js";
 import { makeNewCalendar } from "../lib/defaults.js";
 import type { Calendar } from "../types.js";
 
@@ -35,4 +35,13 @@ calendarsRouter.put("/:id", async (req, res) => {
   }
   await saveCalendar(incoming);
   res.json(incoming);
+});
+
+calendarsRouter.delete("/:id", async (req, res) => {
+  const ok = await deleteCalendar(req.params.id);
+  if (!ok) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+  res.status(204).end();
 });

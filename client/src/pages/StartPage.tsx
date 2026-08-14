@@ -5,20 +5,26 @@ import { TitleRow } from "../components/TitleRow";
 import { api } from "../lib/api";
 import { nextId, type DraftSeries, type DraftTitle } from "../lib/draftTypes";
 import { MAX_TITLES, MIN_TITLES, validateTitleCount } from "../lib/layoutEngine";
+import { computeSmartStartDefaults } from "../lib/smartDefaults";
+import { getDefaultTheme } from "../lib/userDefaults";
 import type { Calendar, Season } from "../types/calendar";
 import "./StartPage.css";
 
 const SEASONS: Season[] = ["Spring", "Summer", "Fall", "Winter", "Custom"];
 
+const SMART_DEFAULTS = computeSmartStartDefaults(new Date());
+
 function makeDefaultTitles(): DraftTitle[] {
-  return Array.from({ length: 12 }, () => ({ id: nextId("title"), date: "", name: "" }));
+  const dates = SMART_DEFAULTS.dates;
+  const rows = dates.length > 0 ? dates : Array.from({ length: 12 }, () => "");
+  return rows.map((date) => ({ id: nextId("title"), date, name: "" }));
 }
 
 export function StartPage() {
   const navigate = useNavigate();
-  const [season, setSeason] = useState<Season>("Summer");
+  const [season, setSeason] = useState<Season>(SMART_DEFAULTS.season);
   const [customSeasonLabel, setCustomSeasonLabel] = useState("");
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [year, setYear] = useState(SMART_DEFAULTS.year);
   const [titles, setTitles] = useState<DraftTitle[]>(makeDefaultTitles());
   const [series, setSeries] = useState<DraftSeries[]>([]);
   const [creating, setCreating] = useState(false);
@@ -69,7 +75,9 @@ export function StartPage() {
         date: t.date,
         mpaRating: "NR" as const,
         ratingVisible: false,
-        titleTextStyle: { fontSize: 15, kerning: 0, justify: "left" as const, dropShadow: true, offsetX: 0, offsetY: 0 },
+        // fontSize 0 is the "not yet auto-fit" sentinel — the editor computes a real size once it
+        // knows this title's actual box width.
+        titleTextStyle: { fontSize: 0, kerning: 0, lineSpacing: 1.08, justify: "left" as const, dropShadow: true, offsetX: 0, offsetY: 0 },
         runtimeOpacity: 0.85,
         ratingOpacity: 0.85,
         dateOffsetX: 0,
@@ -90,13 +98,14 @@ export function StartPage() {
             fontSize: 13,
             textColor: "#fce9c7",
             kerning: 1.5,
+            lineSpacing: 1.08,
             justify: "center" as const,
             offsetX: 0,
             offsetY: 0,
           },
         }));
 
-      const finalCalendar: Calendar = { ...created, titles: fullTitles, series: fullSeries };
+      const finalCalendar: Calendar = { ...created, titles: fullTitles, series: fullSeries, theme: getDefaultTheme() };
       await api.saveCalendar(finalCalendar);
       navigate(`/select-images/${created.id}`);
     } catch (err) {
@@ -115,11 +124,13 @@ export function StartPage() {
           <div className="sub">Onyx Downtown at the Nevada Theatre</div>
         </div>
         <div className="season-row">
-          {SEASONS.map((s) => (
-            <button key={s} type="button" className={`pill ${season === s ? "on" : ""}`} onClick={() => setSeason(s)}>
-              {s}
-            </button>
-          ))}
+          <select className="season-select" value={season} onChange={(e) => setSeason(e.target.value as Season)}>
+            {SEASONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
           {season === "Custom" && (
             <input
               className="custom-season-input"

@@ -32,11 +32,13 @@ export interface ImageCandidate {
 export interface TitleTextStyle {
   fontSize: number;
   kerning: number;
+  lineSpacing: number;
   justify: "left" | "center" | "right";
   dropShadow: boolean;
   offsetX: number;
   offsetY: number;
   wordSizes?: number[];
+  manualLineBreaks?: number[];
 }
 
 export interface Title {
@@ -64,6 +66,7 @@ export interface SeriesBandStyle {
   fontSize: number;
   textColor: string;
   kerning: number;
+  lineSpacing: number;
   justify: "left" | "center" | "right";
   offsetX: number;
   offsetY: number;
@@ -77,33 +80,20 @@ export interface Series {
   bandStyle: SeriesBandStyle;
 }
 
-export interface VenueSettings {
-  kicker: string;
-  logoUrl: string;
-  footerLogoUrl: string;
-  venueName: string;
-  address: string;
-  doorsTime: string;
-  showTime: string;
-  ticketPrice: string;
-  qrCodeUrl: string;
-  qrTargetUrl: string;
-  ageNote: string;
-}
-
 export interface CalendarSpacing {
   outerMargin: number;
   boxGutter: number;
+  seriesBoxGutter: number;
   rowGap: number;
   bandInset: number;
   bandHeightRatio: number;
+  primaryRadius: number;
+  secondaryRadius: number;
+  tertiaryRadius: number;
 }
 
 export interface CalendarTheme {
-  headerBackground: { type: "color" | "gradient" | "image"; value: string; value2?: string };
-  footerBackground: { type: "color" | "gradient"; value: string; value2?: string };
-  seasonTextColor: string;
-  accentColor: string;
+  background: { type: "color" | "gradient" | "image"; value: string; value2?: string };
   spacing: CalendarSpacing;
 }
 
@@ -114,7 +104,6 @@ export interface Calendar {
   year: number;
   titles: Title[];
   series: Series[];
-  venue: VenueSettings;
   theme: CalendarTheme;
   createdAt: string;
   updatedAt: string;

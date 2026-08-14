@@ -33,12 +33,15 @@ export interface ImageCandidate {
 export interface TitleTextStyle {
   fontSize: number;
   kerning: number;
+  lineSpacing: number;
   justify: "left" | "center" | "right";
   dropShadow: boolean;
   offsetX: number;
   offsetY: number;
   /** Per-word font-size overrides, parallel to the title split on whitespace. Missing/undefined entries use fontSize. */
   wordSizes?: number[];
+  /** Word indices (0-based) after which to force a line break, set once by the auto-fit default. */
+  manualLineBreaks?: number[];
 }
 
 export interface Title {
@@ -72,6 +75,7 @@ export interface SeriesBandStyle {
   fontSize: number;
   textColor: string;
   kerning: number;
+  lineSpacing: number;
   justify: "left" | "center" | "right";
   offsetX: number;
   offsetY: number;
@@ -86,33 +90,26 @@ export interface Series {
   bandStyle: SeriesBandStyle;
 }
 
-export interface VenueSettings {
-  kicker: string;
-  logoUrl: string;
-  footerLogoUrl: string;
-  venueName: string;
-  address: string;
-  doorsTime: string;
-  showTime: string;
-  ticketPrice: string;
-  qrCodeUrl: string;
-  qrTargetUrl: string;
-  ageNote: string;
-}
-
 export interface CalendarSpacing {
   outerMargin: number;
+  /** Gap between two adjacent boxes that are NOT in the same series. */
   boxGutter: number;
+  /** Gap between two adjacent boxes that ARE in the same series. */
+  seriesBoxGutter: number;
   rowGap: number;
   bandInset: number;
   bandHeightRatio: number;
+  /** Corner radius, px, for free corners (touch neither a band nor a same-series neighbor). */
+  primaryRadius: number;
+  /** Corner radius, px, for corners between two boxes in the same series. */
+  secondaryRadius: number;
+  /** Corner radius, px, for corners where a box meets its series band. */
+  tertiaryRadius: number;
 }
 
 export interface CalendarTheme {
-  headerBackground: FillStyle;
-  footerBackground: FillStyle;
-  seasonTextColor: string;
-  accentColor: string;
+  /** Single fill spanning the whole canvas — header/footer are blank space on this background for now. */
+  background: FillStyle;
   spacing: CalendarSpacing;
 }
 
@@ -123,7 +120,6 @@ export interface Calendar {
   year: number;
   titles: Title[];
   series: Series[];
-  venue: VenueSettings;
   theme: CalendarTheme;
   createdAt: string;
   updatedAt: string;
@@ -135,4 +131,5 @@ export interface CalendarSummary {
   customSeasonLabel?: string;
   year: number;
   updatedAt: string;
+  createdAt: string;
 }

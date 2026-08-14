@@ -1,0 +1,64 @@
+.setting-row {
+  margin-bottom: 0.65rem;
+}
+
+.setting-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.setting-row-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.setting-row-value {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.setting-num {
+  width: 4.2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 0.2rem 0.4rem;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-align: right;
+}
+
+.setting-unit {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.setting-reset {
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.15rem 0.25rem;
+  border-radius: 5px;
+}
+
+.setting-reset:hover:not(:disabled) {
+  color: var(--accent);
+  background: var(--surface-2);
+}
+
+.setting-reset:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.setting-row input[type="range"] {
+  width: 100%;
+}

@@ -1,5 +1,7 @@
 import { useRef } from "react";
+import { SettingRow } from "../SettingRow";
 import { api } from "../../lib/api";
+import { computeAutoFitTitleText } from "../../lib/autoFitText";
 import { nextId } from "../../lib/draftTypes";
 import type { Calendar, ImageCandidate, MpaRating, Title } from "../../types/calendar";
 import "./DetailsPanel.css";
@@ -9,11 +11,12 @@ const MPA_OPTIONS: MpaRating[] = ["NR", "G", "PG", "PG-13", "R", "NC-17"];
 interface Props {
   calendar: Calendar;
   title: Title;
+  boxWidth: number | null;
   onChange: (next: Title) => void;
   onBack: () => void;
 }
 
-export function DetailsPanel({ title, onChange, onBack }: Props) {
+export function DetailsPanel({ title, boxWidth, onChange, onBack }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function pickCandidate(candidate: ImageCandidate) {
@@ -32,6 +35,11 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
       console.error(err);
       onChange({ ...title, image: { source: "upload", url: localUrl, scale: 1, offsetX: 0, offsetY: 0 } });
     }
+  }
+
+  function centerImage() {
+    if (!title.image) return;
+    onChange({ ...title, image: { ...title.image, offsetX: 0, offsetY: 0 } });
   }
 
   function addBadge() {
@@ -60,11 +68,13 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
   const candidates = title.imageCandidates ?? [];
   const currentUrl = title.image?.url;
   const words = title.name.split(/\s+/).filter(Boolean);
+  const style = title.titleTextStyle;
+  const defaultFit = boxWidth ? computeAutoFitTitleText(title.name, boxWidth, "Futura Wizard") : null;
 
   return (
     <div className="details-left">
       <div className="details-back" onClick={onBack}>
-        ← Back to all titles
+        ✕ Close details
       </div>
       <div className="details-h">{title.name || "Untitled"}</div>
 
@@ -126,80 +136,67 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
       </div>
 
       <div className="field-group">
-        <label>Image scale</label>
-        <div className="slider-pair">
-          <input
-            type="range"
-            min={0.5}
-            max={4}
-            step={0.001}
-            value={title.image?.scale ?? 1}
-            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), scale: Number(e.target.value) } })}
-            disabled={!title.image}
-          />
-          <input
-            type="number"
-            className="field-input num-input"
-            min={0.1}
-            max={8}
-            step={0.001}
-            value={title.image?.scale ?? 1}
-            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), scale: Number(e.target.value) } })}
-            disabled={!title.image}
-          />
+        <div className="field-group-head">
+          <label>Image position &amp; scale</label>
+          <button type="button" className="link-btn" onClick={centerImage} disabled={!title.image}>
+            Center image
+          </button>
         </div>
-      </div>
-
-      <div className="field-group">
-        <label>Image position (px)</label>
-        <div className="slider-pair">
-          <span className="axis-label">X</span>
-          <input
-            type="range"
-            min={-300}
-            max={300}
-            step={0.5}
-            value={title.image?.offsetX ?? 0}
-            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetX: Number(e.target.value) } })}
-            disabled={!title.image}
-          />
-          <input
-            type="number"
-            className="field-input num-input"
-            step={0.5}
-            value={title.image?.offsetX ?? 0}
-            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetX: Number(e.target.value) } })}
-            disabled={!title.image}
-          />
-        </div>
-        <div className="slider-pair">
-          <span className="axis-label">Y</span>
-          <input
-            type="range"
-            min={-300}
-            max={300}
-            step={0.5}
-            value={title.image?.offsetY ?? 0}
-            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetY: Number(e.target.value) } })}
-            disabled={!title.image}
-          />
-          <input
-            type="number"
-            className="field-input num-input"
-            step={0.5}
-            value={title.image?.offsetY ?? 0}
-            onChange={(e) => onChange({ ...title, image: { ...(title.image as any), offsetY: Number(e.target.value) } })}
-            disabled={!title.image}
-          />
-        </div>
+        <p className="field-hint">Tip: drag the image directly on the preview (select mode, this title open) to reposition it.</p>
+        <SettingRow
+          label="Scale"
+          value={title.image?.scale ?? 1}
+          defaultValue={1}
+          min={0.1}
+          max={8}
+          step={0.001}
+          disabled={!title.image}
+          onChange={(v) => onChange({ ...title, image: { ...(title.image as Title["image"] & object), scale: v } })}
+        />
+        <SettingRow
+          label="Position X"
+          value={title.image?.offsetX ?? 0}
+          defaultValue={0}
+          min={-300}
+          max={300}
+          step={0.5}
+          unit="px"
+          disabled={!title.image}
+          onChange={(v) => onChange({ ...title, image: { ...(title.image as Title["image"] & object), offsetX: v } })}
+        />
+        <SettingRow
+          label="Position Y"
+          value={title.image?.offsetY ?? 0}
+          defaultValue={0}
+          min={-300}
+          max={300}
+          step={0.5}
+          unit="px"
+          disabled={!title.image}
+          onChange={(v) => onChange({ ...title, image: { ...(title.image as Title["image"] & object), offsetY: v } })}
+        />
       </div>
 
       <div className="field-group">
         <label>Date position (limited)</label>
-        <div className="slider-pair">
-          <input type="range" min={-6} max={6} value={title.dateOffsetX} onChange={(e) => onChange({ ...title, dateOffsetX: Number(e.target.value) })} />
-          <input type="range" min={-6} max={6} value={title.dateOffsetY} onChange={(e) => onChange({ ...title, dateOffsetY: Number(e.target.value) })} />
-        </div>
+        <SettingRow
+          label="X"
+          value={title.dateOffsetX}
+          defaultValue={0}
+          min={-6}
+          max={6}
+          step={1}
+          onChange={(v) => onChange({ ...title, dateOffsetX: v })}
+        />
+        <SettingRow
+          label="Y"
+          value={title.dateOffsetY}
+          defaultValue={0}
+          min={-6}
+          max={6}
+          step={1}
+          onChange={(v) => onChange({ ...title, dateOffsetY: v })}
+        />
       </div>
 
       <div className="field-group">
@@ -209,72 +206,39 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
             <button
               key={j}
               type="button"
-              className={`just-btn ${title.titleTextStyle.justify === j ? "sel" : ""}`}
-              onClick={() => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, justify: j } })}
+              className={`just-btn ${style.justify === j ? "sel" : ""}`}
+              onClick={() => onChange({ ...title, titleTextStyle: { ...style, justify: j } })}
             >
               {j === "left" ? "◧" : j === "right" ? "◨" : "▦"}
             </button>
           ))}
           <label className="toggle-row">
-            <input
-              type="checkbox"
-              checked={title.titleTextStyle.dropShadow}
-              onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, dropShadow: e.target.checked } })}
-            />
+            <input type="checkbox" checked={style.dropShadow} onChange={(e) => onChange({ ...title, titleTextStyle: { ...style, dropShadow: e.target.checked } })} />
             Shadow
           </label>
         </div>
-        <div className="slider-labeled">
-          <span>Base size</span>
-          <input
-            type="range"
-            min={6}
-            max={40}
-            step={0.1}
-            value={title.titleTextStyle.fontSize}
-            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, fontSize: Number(e.target.value) } })}
-          />
-          <input
-            type="number"
-            className="field-input num-input"
-            step={0.1}
-            value={title.titleTextStyle.fontSize}
-            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, fontSize: Number(e.target.value) } })}
-          />
-        </div>
-        <div className="slider-labeled">
-          <span>Kerning</span>
-          <input
-            type="range"
-            min={-4}
-            max={12}
-            step={0.1}
-            value={title.titleTextStyle.kerning}
-            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, kerning: Number(e.target.value) } })}
-          />
-        </div>
-        <div className="slider-labeled">
-          <span>Position X</span>
-          <input
-            type="range"
-            min={-100}
-            max={100}
-            step={0.5}
-            value={title.titleTextStyle.offsetX}
-            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, offsetX: Number(e.target.value) } })}
-          />
-        </div>
-        <div className="slider-labeled">
-          <span>Position Y</span>
-          <input
-            type="range"
-            min={-100}
-            max={100}
-            step={0.5}
-            value={title.titleTextStyle.offsetY}
-            onChange={(e) => onChange({ ...title, titleTextStyle: { ...title.titleTextStyle, offsetY: Number(e.target.value) } })}
-          />
-        </div>
+        <SettingRow
+          label="Base size"
+          value={style.fontSize}
+          defaultValue={defaultFit?.fontSize ?? style.fontSize}
+          min={6}
+          max={40}
+          step={0.1}
+          disabled={!defaultFit}
+          onChange={(v) => onChange({ ...title, titleTextStyle: { ...style, fontSize: v } })}
+        />
+        <SettingRow label="Kerning" value={style.kerning} defaultValue={0} min={-4} max={12} step={0.1} onChange={(v) => onChange({ ...title, titleTextStyle: { ...style, kerning: v } })} />
+        <SettingRow
+          label="Line spacing"
+          value={style.lineSpacing || 1.08}
+          defaultValue={1.08}
+          min={0.8}
+          max={2}
+          step={0.01}
+          onChange={(v) => onChange({ ...title, titleTextStyle: { ...style, lineSpacing: v } })}
+        />
+        <SettingRow label="Position X" value={style.offsetX} defaultValue={0} min={-100} max={100} step={0.5} unit="px" onChange={(v) => onChange({ ...title, titleTextStyle: { ...style, offsetX: v } })} />
+        <SettingRow label="Position Y" value={style.offsetY} defaultValue={0} min={-100} max={100} step={0.5} unit="px" onChange={(v) => onChange({ ...title, titleTextStyle: { ...style, offsetY: v } })} />
 
         {words.length > 1 && (
           <div className="word-size-list">
@@ -285,19 +249,16 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
               </button>
             </div>
             {words.map((word, i) => (
-              <div className="slider-labeled" key={i}>
-                <span className="word-label" title={word}>
-                  {word}
-                </span>
-                <input
-                  type="range"
-                  min={6}
-                  max={60}
-                  step={0.1}
-                  value={title.titleTextStyle.wordSizes?.[i] ?? title.titleTextStyle.fontSize}
-                  onChange={(e) => updateWordSize(i, Number(e.target.value))}
-                />
-              </div>
+              <SettingRow
+                key={i}
+                label={word}
+                value={style.wordSizes?.[i] ?? style.fontSize}
+                defaultValue={style.fontSize}
+                min={6}
+                max={60}
+                step={0.1}
+                onChange={(v) => updateWordSize(i, v)}
+              />
             ))}
           </div>
         )}
@@ -305,14 +266,8 @@ export function DetailsPanel({ title, onChange, onBack }: Props) {
 
       <div className="field-group">
         <label>Runtime &amp; rating opacity</label>
-        <div className="slider-labeled">
-          <span>Runtime</span>
-          <input type="range" min={0} max={1} step={0.05} value={title.runtimeOpacity} onChange={(e) => onChange({ ...title, runtimeOpacity: Number(e.target.value) })} />
-        </div>
-        <div className="slider-labeled">
-          <span>Rating</span>
-          <input type="range" min={0} max={1} step={0.05} value={title.ratingOpacity} onChange={(e) => onChange({ ...title, ratingOpacity: Number(e.target.value) })} />
-        </div>
+        <SettingRow label="Runtime" value={title.runtimeOpacity} defaultValue={0.85} min={0} max={1} step={0.05} onChange={(v) => onChange({ ...title, runtimeOpacity: v })} />
+        <SettingRow label="Rating" value={title.ratingOpacity} defaultValue={0.85} min={0} max={1} step={0.05} onChange={(v) => onChange({ ...title, ratingOpacity: v })} />
       </div>
 
       <div className="field-group">

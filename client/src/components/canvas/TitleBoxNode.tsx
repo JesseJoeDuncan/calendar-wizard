@@ -1,37 +1,39 @@
 import { Group, Image as KonvaImage, Rect, Text } from "react-konva";
+import type Konva from "konva";
 import useImage from "use-image";
 import type { BoxGeometry } from "../../lib/calendarGeometry";
 import { formatDateBadge, formatRuntime } from "../../lib/format";
 import type { BoxLayout, CornerWeight } from "../../lib/layoutEngine";
 import { placeholderGradient } from "../../lib/placeholderPalette";
 import { roundedRectPath } from "../../lib/roundedRectPath";
-import type { Title } from "../../types/calendar";
+import type { CalendarSpacing, Title } from "../../types/calendar";
 import { proxiedImageUrl } from "../../lib/imageProxy";
 import { BadgeNode } from "./BadgeNode";
 import { MpaBadge } from "./MpaBadge";
 import { RichWordText } from "./RichWordText";
 
-/** Corner radius as a fraction of box width, per adjacency weight. */
-const RADIUS_FRACTION: Record<CornerWeight, number> = { most: 0.13, some: 0.045, least: 0.01 };
-
 interface Props {
   geometry: BoxGeometry;
   boxLayout: BoxLayout;
   title: Title;
+  rowHeight: number;
+  radii: Pick<CalendarSpacing, "primaryRadius" | "secondaryRadius" | "tertiaryRadius">;
   selected: boolean;
   hovered: boolean;
   interactive: boolean;
   onSelect: () => void;
   onHover: (hovering: boolean) => void;
+  onImageOffsetChange?: (titleId: string, offsetX: number, offsetY: number) => void;
 }
 
-export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, interactive, onSelect, onHover }: Props) {
+export function TitleBoxNode({ geometry, boxLayout, title, rowHeight, radii, selected, hovered, interactive, onSelect, onHover, onImageOffsetChange }: Props) {
   const { x, y, w, h } = geometry;
-  const radii: [number, number, number, number] = [
-    RADIUS_FRACTION[boxLayout.rounding.tl] * w,
-    RADIUS_FRACTION[boxLayout.rounding.tr] * w,
-    RADIUS_FRACTION[boxLayout.rounding.br] * w,
-    RADIUS_FRACTION[boxLayout.rounding.bl] * w,
+  const RADIUS_PX: Record<CornerWeight, number> = { most: radii.primaryRadius, some: radii.secondaryRadius, least: radii.tertiaryRadius };
+  const cornerRadii: [number, number, number, number] = [
+    RADIUS_PX[boxLayout.rounding.tl],
+    RADIUS_PX[boxLayout.rounding.tr],
+    RADIUS_PX[boxLayout.rounding.br],
+    RADIUS_PX[boxLayout.rounding.bl],
   ];
   const [gradA, gradB] = placeholderGradient(title.id);
 
@@ -51,16 +53,29 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
     };
   }
 
+  function handleImageDragMove(e: Konva.KonvaEventObject<DragEvent>) {
+    if (!drawImg || !onImageOffsetChange) return;
+    const node = e.target;
+    const baseX = x + (w - drawImg.drawW) / 2;
+    const baseY = y + (h - drawImg.drawH) / 2;
+    onImageOffsetChange(title.id, node.x() - baseX, node.y() - baseY);
+  }
+
   const { mo, dy } = formatDateBadge(title.date);
   const runtimeLabel = formatRuntime(title.runtimeMinutes);
-  const nameSize = title.titleTextStyle.fontSize;
-  const titleBlockH = Math.max(nameSize * 2.6, h * 0.32);
+  const nameSize = title.titleTextStyle.fontSize || 15;
+  const lineSpacing = title.titleTextStyle.lineSpacing || 1.08;
+  const lineCount = (title.titleTextStyle.manualLineBreaks?.length ?? 0) + 1;
+  const titleBlockH = nameSize * lineSpacing * lineCount + nameSize * 0.3;
+  // Default position: text bottom sits 5% of row height above the card bottom, so every box in a
+  // row that shares the same height (series members together, non-members together) lines up.
+  const bottomGap = rowHeight * 0.05;
 
   return (
     <Group
       x={0}
       y={0}
-      clipFunc={(ctx) => roundedRectPath(ctx, x, y, w, h, radii)}
+      clipFunc={(ctx) => roundedRectPath(ctx, x, y, w, h, cornerRadii)}
       onClick={interactive ? onSelect : undefined}
       onTap={interactive ? onSelect : undefined}
       onMouseEnter={interactive ? () => onHover(true) : undefined}
@@ -68,7 +83,17 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
     >
       {/* Base layer: flat placeholder, then the selected image on top, covering the box */}
       <Rect x={x} y={y} width={w} height={h} fillLinearGradientStartPoint={{ x: 0, y: 0 }} fillLinearGradientEndPoint={{ x: w, y: h }} fillLinearGradientColorStops={[0, gradA, 1, gradB]} />
-      {drawImg && img && <KonvaImage image={img} x={drawImg.drawX} y={drawImg.drawY} width={drawImg.drawW} height={drawImg.drawH} />}
+      {drawImg && img && (
+        <KonvaImage
+          image={img}
+          x={drawImg.drawX}
+          y={drawImg.drawY}
+          width={drawImg.drawW}
+          height={drawImg.drawH}
+          draggable={selected && interactive}
+          onDragMove={handleImageDragMove}
+        />
+      )}
 
       <Text
         x={x + 8 + (title.dateOffsetX ?? 0)}
@@ -104,13 +129,15 @@ export function TitleBoxNode({ geometry, boxLayout, title, selected, hovered, in
         <RichWordText
           text={title.name}
           x={x + 8}
-          y={y + h - titleBlockH - 4}
+          y={y + h - titleBlockH - bottomGap}
           width={w - 16}
           height={titleBlockH}
           baseFontSize={nameSize}
           wordSizes={title.titleTextStyle.wordSizes}
+          manualLineBreaks={title.titleTextStyle.manualLineBreaks}
           fontFamily="Futura Wizard"
           kerning={title.titleTextStyle.kerning}
+          lineHeightMultiplier={lineSpacing}
           justify={title.titleTextStyle.justify}
           color="#ffffff"
           dropShadow={title.titleTextStyle.dropShadow}
