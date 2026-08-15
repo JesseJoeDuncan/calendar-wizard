@@ -1,7 +1,7 @@
 import { computeAutoFitTitleText } from "./autoFitText";
 import { computeGeometry, DEFAULT_DATE_STYLE, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE } from "./calendarGeometry";
 import { buildLayout } from "./layoutEngine";
-import type { Calendar, CalendarTheme, MpaRating, Series, Title } from "../types/calendar";
+import type { Calendar, CalendarTheme, MpaRating, Season, Series, Title } from "../types/calendar";
 
 const SAMPLE_NAMES = [
   "The Wandering Light",
@@ -25,7 +25,7 @@ const SAMPLE_RATINGS: MpaRating[] = ["G", "PG", "PG-13", "R", "NR"];
  * server round-trip, just enough real structure (a two-title series, varied ratings/runtimes) to
  * show every setting having a visible effect.
  */
-export function buildSampleCalendar(theme: CalendarTheme): Calendar {
+export function buildSampleCalendar(theme: CalendarTheme, season: Season = "Summer"): Calendar {
   const seriesId = "sample-series";
   const baseDate = new Date();
   baseDate.setDate(baseDate.getDate() - baseDate.getDay());
@@ -86,7 +86,7 @@ export function buildSampleCalendar(theme: CalendarTheme): Calendar {
   const now = new Date().toISOString();
   return {
     id: "sample-defaults-preview",
-    season: "Summer",
+    season,
     year: new Date().getFullYear(),
     titles: fittedTitles,
     series,

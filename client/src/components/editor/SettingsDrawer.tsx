@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SettingRow } from "../SettingRow";
-import type { Calendar } from "../../types/calendar";
+import { PaletteColorInput } from "../PaletteColorInput";
+import type { BackgroundTextureStyle, Calendar, ColorPalette, Season } from "../../types/calendar";
+import { applyPaletteToTheme } from "../../lib/colorPalette";
+import { TEXTURE_STYLE_OPTIONS } from "../../lib/textureTiles";
 import { DEFAULT_AUTOSAVE_MINUTES, getAutoSaveMinutes, getDefaultTheme, setAutoSaveMinutes } from "../../lib/userDefaults";
 import { CollapsibleSection } from "./CollapsibleSection";
+import { PaletteEditor } from "./PaletteEditor";
 import "./SettingsDrawer.css";
 
 interface Props {
@@ -15,14 +19,17 @@ interface Props {
    * "editor" (default): normal per-calendar settings, with auto-save and a footer linking to the
    * Default Settings page. "defaults": used from the Default Settings page itself, where
    * auto-save (a global preference, not a calendar default) and that footer don't apply — the
-   * page's own header provides the equivalent save/reset actions.
+   * page's own header provides the equivalent save/reset actions, and the simple background color
+   * field is replaced by the full Color Palettes editor (activeSeason/onSeasonChange, required here).
    */
   variant?: "editor" | "defaults";
+  activeSeason?: Season;
+  onSeasonChange?: (season: Season) => void;
 }
 
-export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesChange, variant = "editor" }: Props) {
+export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesChange, variant = "editor", activeSeason, onSeasonChange }: Props) {
   const { theme } = calendar;
-  const defaults = getDefaultTheme();
+  const defaults = getDefaultTheme(calendar.season);
   const navigate = useNavigate();
   const [autoSaveMinutes, setAutoSaveMinutesState] = useState(getAutoSaveMinutes());
 
@@ -32,6 +39,10 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
 
   function updateSpacing(patch: Partial<typeof theme.spacing>) {
     onChange({ theme: { ...theme, spacing: { ...theme.spacing, ...patch } } });
+  }
+
+  function updatePalette(palette: ColorPalette) {
+    onChange({ theme: applyPaletteToTheme(theme, palette) });
   }
 
   function resetAll() {
@@ -54,13 +65,52 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
         </button>
       </div>
 
-      <div className="drawer-section">
-        <h4>Colors</h4>
+      {variant === "defaults" ? (
+        <CollapsibleSection title="Color Palettes" defaultOpen>
+          <PaletteEditor
+            activeSeason={activeSeason ?? "Summer"}
+            onSeasonChange={(s) => onSeasonChange?.(s)}
+            palette={theme.palette}
+            onChange={updatePalette}
+          />
+        </CollapsibleSection>
+      ) : (
+        <div className="drawer-section">
+          <h4>Colors</h4>
+          <PaletteColorInput
+            label="Background"
+            value={theme.background.value}
+            onChange={(hex) => updateTheme({ background: { ...theme.background, type: "color", value: hex } })}
+            palette={theme.palette}
+          />
+        </div>
+      )}
+
+      <CollapsibleSection title="Background Texture">
         <label className="drawer-field">
-          <span>Background</span>
-          <input type="color" value={theme.background.value} onChange={(e) => updateTheme({ background: { type: "color", value: e.target.value } })} />
+          <span>Texture Style</span>
+          <select
+            value={theme.backgroundTexture.style}
+            onChange={(e) => updateTheme({ backgroundTexture: { ...theme.backgroundTexture, style: e.target.value as BackgroundTextureStyle } })}
+          >
+            {TEXTURE_STYLE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </label>
-      </div>
+        <SettingRow
+          label="Texture Opacity"
+          value={theme.backgroundTexture.opacity}
+          defaultValue={defaults.backgroundTexture.opacity}
+          min={0}
+          max={1}
+          step={0.02}
+          disabled={theme.backgroundTexture.style === "none"}
+          onChange={(v) => updateTheme({ backgroundTexture: { ...theme.backgroundTexture, opacity: v } })}
+        />
+      </CollapsibleSection>
 
         <CollapsibleSection title="Layout & spacing" defaultOpen>
           <SettingRow label="Outer margin" value={theme.spacing.outerMargin} defaultValue={defaults.spacing.outerMargin} min={0} max={80} unit="px" onChange={(v) => updateSpacing({ outerMargin: v })} />

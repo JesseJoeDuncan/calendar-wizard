@@ -6,35 +6,50 @@ import { SettingsDrawer } from "../components/editor/SettingsDrawer";
 import { computeGeometry } from "../lib/calendarGeometry";
 import { buildLayout } from "../lib/layoutEngine";
 import { buildSampleCalendar } from "../lib/sampleCalendar";
-import { HARDCODED_DEFAULT_THEME, getDefaultTheme, resetDefaultTheme, saveAsDefaultTheme } from "../lib/userDefaults";
-import type { Calendar, CalendarTheme } from "../types/calendar";
+import { getDefaultTheme, resetDefaultTheme, saveAsDefaultTheme } from "../lib/userDefaults";
+import type { Calendar, CalendarTheme, Season } from "../types/calendar";
 import "../components/editor/TopBar.css";
 import "./DefaultsPage.css";
 
 export function DefaultsPage() {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<CalendarTheme>(() => getDefaultTheme());
+  const [activeSeason, setActiveSeason] = useState<Season>("Summer");
+  const [theme, setTheme] = useState<CalendarTheme>(() => getDefaultTheme("Summer"));
+  const [dirty, setDirty] = useState(false);
   const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
   const [savedFlash, setSavedFlash] = useState(false);
 
-  const calendar: Calendar = useMemo(() => buildSampleCalendar(theme), [theme]);
+  const calendar: Calendar = useMemo(() => buildSampleCalendar(theme, activeSeason), [theme, activeSeason]);
   const layout = useMemo(() => buildLayout(calendar.titles, calendar.series), [calendar]);
   const geometry = useMemo(() => computeGeometry(layout, calendar.theme.spacing), [layout, calendar]);
 
   function updateCalendar(patch: Partial<Calendar>) {
-    if (patch.theme) setTheme(patch.theme);
+    if (patch.theme) {
+      setTheme(patch.theme);
+      setDirty(true);
+    }
+  }
+
+  function handleSeasonChange(season: Season) {
+    if (season === activeSeason) return;
+    if (dirty && !window.confirm(`Switch to ${season}? Unsaved changes to ${activeSeason}'s defaults will be lost unless you Save first.`)) return;
+    setActiveSeason(season);
+    setTheme(getDefaultTheme(season));
+    setDirty(false);
   }
 
   function handleSave() {
-    saveAsDefaultTheme(theme);
+    saveAsDefaultTheme(theme, activeSeason);
+    setDirty(false);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 2000);
   }
 
   function handleReset() {
-    if (!window.confirm("Reset default settings back to the built-in Onyx Downtown defaults? This replaces your saved defaults.")) return;
+    if (!window.confirm("Reset default settings back to the built-in Onyx Downtown defaults? This replaces your saved defaults for every season.")) return;
     resetDefaultTheme();
-    setTheme(HARDCODED_DEFAULT_THEME);
+    setTheme(getDefaultTheme(activeSeason));
+    setDirty(false);
   }
 
   return (
@@ -60,8 +75,15 @@ export function DefaultsPage() {
         <div className="defaults-canvas">
           <CalendarCanvas calendar={calendar} layout={layout} geometry={geometry} selectedTitleId={null} onSelectTitle={() => {}} onOpenHeaderFooter={() => setHeaderFooterOpen(true)} />
         </div>
-        <SettingsDrawer calendar={calendar} onChange={updateCalendar} onClose={() => navigate(-1)} variant="defaults" />
-        {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} />}
+        <SettingsDrawer
+          calendar={calendar}
+          onChange={updateCalendar}
+          onClose={() => navigate(-1)}
+          variant="defaults"
+          activeSeason={activeSeason}
+          onSeasonChange={handleSeasonChange}
+        />
+        {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} variant="defaults" />}
       </div>
     </div>
   );

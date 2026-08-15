@@ -3,6 +3,7 @@ import { Group } from "react-konva";
 import { CANVAS_H, CANVAS_W, type CalendarGeometry } from "../../lib/calendarGeometry";
 import type { CalendarLayout } from "../../lib/layoutEngine";
 import type { Calendar } from "../../types/calendar";
+import { BackgroundTextureNode } from "./BackgroundTextureNode";
 import { FillRect } from "./FillRect";
 import { HeaderFooterGroup } from "./HeaderFooterGroup";
 import { SeriesBandNode } from "./SeriesBandNode";
@@ -45,6 +46,7 @@ export function CalendarScene({
     // shape in particular) intentionally extend past the canvas edge and rely on this to crop.
     <Group clipFunc={(ctx) => ctx.rect(0, 0, CANVAS_W, CANVAS_H)}>
       <FillRect fill={calendar.theme.background} x={0} y={0} w={CANVAS_W} h={CANVAS_H} />
+      <BackgroundTextureNode texture={calendar.theme.backgroundTexture} width={CANVAS_W} height={CANVAS_H} />
 
       {layout.rows.map((row, ri) => {
         const rowGeo = geometry.rows[ri];

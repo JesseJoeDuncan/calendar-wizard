@@ -197,14 +197,74 @@ export interface SeasonTitleStyle {
   echo3Color: string;
 }
 
+/**
+ * Every non-card, non-band color in a calendar's theme — the header/footer decorations, the season
+ * title and its echoes, the QR code and its echoes, and the page background — identified so the
+ * Default Settings page can group them under a handful of named palette colors instead of setting
+ * each one individually. See lib/colorPalette.ts for the registry of these and colors' resolution.
+ */
+export type ColorableElementId =
+  | "seasonTitleFront"
+  | "seasonTitleEcho1"
+  | "seasonTitleEcho2"
+  | "seasonTitleEcho3"
+  | "footerShape"
+  | "sundayNightText"
+  | "onyxLogo"
+  | "doorsShowtimeText"
+  | "nevadaTheatreLogo"
+  | "nevadaTheatreText"
+  | "allAgesText"
+  | "ticketPriceText"
+  | "qrArrow"
+  | "domainText"
+  | "qrCodeFront"
+  | "qrCodeEcho1"
+  | "qrCodeEcho2"
+  | "qrCodeEcho3"
+  | "background";
+
+export interface ColorPaletteCategory {
+  /** Stable id — "primary"/"secondary"/"tertiary"/"quaternary" for the 4 built-in ones, a generated id for added ones. */
+  id: string;
+  name: string;
+  color: string;
+}
+
+/**
+ * A named set of colors (Primary/Secondary/Tertiary/Quaternary, plus any added ones) and which of
+ * them each colorable element currently uses. One of these exists per season (see SEASONS in
+ * lib/colorPalette.ts) plus one for "Custom" (calendars with no season title), edited from the
+ * Default Settings page's Color Palettes section.
+ */
+export interface ColorPalette {
+  categories: ColorPaletteCategory[];
+  assignments: Record<ColorableElementId, string>;
+}
+
+export type BackgroundTextureStyle = "none" | "paper" | "linen" | "dots" | "grid";
+
+export interface BackgroundTexture {
+  style: BackgroundTextureStyle;
+  opacity: number;
+}
+
 export interface CalendarTheme {
   /** Single fill spanning the whole canvas, showing through wherever header/footer elements don't cover it. */
   background: FillStyle;
+  backgroundTexture: BackgroundTexture;
   spacing: CalendarSpacing;
   headerFooter: CalendarHeaderFooter;
   seasonTitle: SeasonTitleStyle;
   /** Shared drop shadow applied to every movie card and every series band — not per-card/per-band. */
   cardShadow: DropShadowSettings;
+  /**
+   * The color palette baked into this calendar at creation time (a copy of that season's Default
+   * Settings palette) — kept around so this calendar's own color pickers can offer it as quick-pick
+   * swatches. Editing it here does NOT retroactively change any element's color; only the Default
+   * Settings page's Color Palettes editor does that, and only for future calendars.
+   */
+  palette: ColorPalette;
 }
 
 export interface Calendar {

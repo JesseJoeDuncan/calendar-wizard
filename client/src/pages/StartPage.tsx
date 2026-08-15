@@ -250,7 +250,7 @@ export function StartPage() {
         year,
         titles: fullTitles,
         series: fullSeries,
-        theme: getDefaultTheme(),
+        theme: getDefaultTheme(season),
       };
       await api.saveCalendar(finalCalendar);
       navigate(`/select-images/${id}`);

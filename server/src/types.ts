@@ -124,10 +124,12 @@ export interface CalendarTheme {
   background: { type: "color" | "gradient" | "image"; value: string; value2?: string };
   spacing: CalendarSpacing;
   cardShadow: DropShadowSettings;
-  // headerFooter/seasonTitle intentionally left loosely typed here — the server treats them as
-  // opaque JSON, just storing and returning whatever the client sends.
+  // headerFooter/seasonTitle/backgroundTexture/palette intentionally left loosely typed here — the
+  // server treats them as opaque JSON, just storing and returning whatever the client sends.
   headerFooter?: unknown;
   seasonTitle?: unknown;
+  backgroundTexture?: unknown;
+  palette?: unknown;
 }
 
 export interface Calendar {

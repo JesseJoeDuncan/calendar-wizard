@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { SettingRow } from "../SettingRow";
+import { PaletteColorInput } from "../PaletteColorInput";
 import { HEADER_FOOTER_ELEMENT_IDS, HEADER_FOOTER_ELEMENT_LABELS, defaultHeaderFooter, defaultSeasonTitleStyle } from "../../lib/headerFooterLayout";
 import { getDefaultTheme } from "../../lib/userDefaults";
 import type { Calendar, CalendarHeaderFooter, EchoLayerStyle, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../../types/calendar";
@@ -11,6 +12,13 @@ interface Props {
   calendar: Calendar;
   onChange: (patch: Partial<Calendar>) => void;
   onClose: () => void;
+  /**
+   * "editor" (default): normal per-calendar settings — every color here is a plain override with
+   * this calendar's own palette offered as quick-pick swatches. "defaults": used from the Default
+   * Settings page, where colors are governed entirely by the Color Palettes editor instead, so the
+   * color fields here are hidden (position/scale/echo-spread stay editable either way).
+   */
+  variant?: "editor" | "defaults";
 }
 
 const FOOTER_SHAPE_OPTIONS: { value: FooterShapeVariant; label: string }[] = [
@@ -19,10 +27,11 @@ const FOOTER_SHAPE_OPTIONS: { value: FooterShapeVariant; label: string }[] = [
   { value: "straightline", label: "Straight line" },
 ];
 
-export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
-  const { headerFooter, seasonTitle } = calendar.theme;
-  const defaults = getDefaultTheme();
+export function HeaderFooterDrawer({ calendar, onChange, onClose, variant = "editor" }: Props) {
+  const { headerFooter, seasonTitle, palette } = calendar.theme;
+  const defaults = getDefaultTheme(calendar.season);
   const navigate = useNavigate();
+  const showColors = variant === "editor";
 
   function updateHeaderFooter(patch: Partial<CalendarHeaderFooter>) {
     onChange({ theme: { ...calendar.theme, headerFooter: { ...headerFooter, ...patch } } });
@@ -81,34 +90,14 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
         <SettingRow label="Position Y" value={seasonTitle.offsetY} defaultValue={defaults.seasonTitle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateSeasonTitle({ offsetY: v })} />
         <SettingRow label="Scale" value={seasonTitle.scale} defaultValue={defaults.seasonTitle.scale} min={0.2} max={3} step={0.01} onChange={(v) => updateSeasonTitle({ scale: v })} />
         <SettingRow label="Echo spread" value={seasonTitle.echoSpread} defaultValue={defaults.seasonTitle.echoSpread} min={0} max={3} step={0.05} onChange={(v) => updateSeasonTitle({ echoSpread: v })} />
-        <label className="drawer-field">
-          <span>Front color</span>
-          <input type="color" value={seasonTitle.frontColor} onChange={(e) => updateSeasonTitle({ frontColor: e.target.value })} />
-          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ frontColor: defaults.seasonTitle.frontColor })}>
-            ⟲
-          </button>
-        </label>
-        <label className="drawer-field">
-          <span>Echo 1 color</span>
-          <input type="color" value={seasonTitle.echo1Color} onChange={(e) => updateSeasonTitle({ echo1Color: e.target.value })} />
-          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ echo1Color: defaults.seasonTitle.echo1Color })}>
-            ⟲
-          </button>
-        </label>
-        <label className="drawer-field">
-          <span>Echo 2 color</span>
-          <input type="color" value={seasonTitle.echo2Color} onChange={(e) => updateSeasonTitle({ echo2Color: e.target.value })} />
-          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ echo2Color: defaults.seasonTitle.echo2Color })}>
-            ⟲
-          </button>
-        </label>
-        <label className="drawer-field">
-          <span>Echo 3 color</span>
-          <input type="color" value={seasonTitle.echo3Color} onChange={(e) => updateSeasonTitle({ echo3Color: e.target.value })} />
-          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ echo3Color: defaults.seasonTitle.echo3Color })}>
-            ⟲
-          </button>
-        </label>
+        {showColors && (
+          <>
+            <PaletteColorInput label="Front color" value={seasonTitle.frontColor} defaultValue={defaults.seasonTitle.frontColor} palette={palette} onChange={(hex) => updateSeasonTitle({ frontColor: hex })} />
+            <PaletteColorInput label="Echo 1 color" value={seasonTitle.echo1Color} defaultValue={defaults.seasonTitle.echo1Color} palette={palette} onChange={(hex) => updateSeasonTitle({ echo1Color: hex })} />
+            <PaletteColorInput label="Echo 2 color" value={seasonTitle.echo2Color} defaultValue={defaults.seasonTitle.echo2Color} palette={palette} onChange={(hex) => updateSeasonTitle({ echo2Color: hex })} />
+            <PaletteColorInput label="Echo 3 color" value={seasonTitle.echo3Color} defaultValue={defaults.seasonTitle.echo3Color} palette={palette} onChange={(hex) => updateSeasonTitle({ echo3Color: hex })} />
+          </>
+        )}
       </CollapsibleSection>
 
       <div className="drawer-section">
@@ -122,13 +111,15 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
               title={HEADER_FOOTER_ELEMENT_LABELS[id]}
               headExtra={<input type="checkbox" checked={style.visible} onChange={(e) => updateElement(id, { visible: e.target.checked })} />}
             >
-              <label className="drawer-field">
-                <span>{style.echo ? "Front color" : "Color"}</span>
-                <input type="color" value={style.color} onChange={(e) => updateElement(id, { color: e.target.value })} />
-                <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElement(id, { color: defaultStyle.color })}>
-                  ⟲
-                </button>
-              </label>
+              {showColors && (
+                <PaletteColorInput
+                  label={style.echo ? "Front color" : "Color"}
+                  value={style.color}
+                  defaultValue={defaultStyle.color}
+                  palette={palette}
+                  onChange={(hex) => updateElement(id, { color: hex })}
+                />
+              )}
               <SettingRow label="Position X" value={style.offsetX} defaultValue={defaultStyle.offsetX} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetX: v })} />
               <SettingRow label="Position Y" value={style.offsetY} defaultValue={defaultStyle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetY: v })} />
               <SettingRow label="Scale" value={style.scale} defaultValue={defaultStyle.scale} min={0.1} max={4} step={0.01} onChange={(v) => updateElement(id, { scale: v })} />
@@ -143,27 +134,31 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
                     step={0.05}
                     onChange={(v) => updateElementEcho(id, { echoSpread: v })}
                   />
-                  <label className="drawer-field">
-                    <span>Echo 1 color</span>
-                    <input type="color" value={style.echo.echo1Color} onChange={(e) => updateElementEcho(id, { echo1Color: e.target.value })} />
-                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElementEcho(id, { echo1Color: defaultStyle.echo!.echo1Color })}>
-                      ⟲
-                    </button>
-                  </label>
-                  <label className="drawer-field">
-                    <span>Echo 2 color</span>
-                    <input type="color" value={style.echo.echo2Color} onChange={(e) => updateElementEcho(id, { echo2Color: e.target.value })} />
-                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElementEcho(id, { echo2Color: defaultStyle.echo!.echo2Color })}>
-                      ⟲
-                    </button>
-                  </label>
-                  <label className="drawer-field">
-                    <span>Echo 3 color</span>
-                    <input type="color" value={style.echo.echo3Color} onChange={(e) => updateElementEcho(id, { echo3Color: e.target.value })} />
-                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElementEcho(id, { echo3Color: defaultStyle.echo!.echo3Color })}>
-                      ⟲
-                    </button>
-                  </label>
+                  {showColors && (
+                    <>
+                      <PaletteColorInput
+                        label="Echo 1 color"
+                        value={style.echo.echo1Color}
+                        defaultValue={defaultStyle.echo.echo1Color}
+                        palette={palette}
+                        onChange={(hex) => updateElementEcho(id, { echo1Color: hex })}
+                      />
+                      <PaletteColorInput
+                        label="Echo 2 color"
+                        value={style.echo.echo2Color}
+                        defaultValue={defaultStyle.echo.echo2Color}
+                        palette={palette}
+                        onChange={(hex) => updateElementEcho(id, { echo2Color: hex })}
+                      />
+                      <PaletteColorInput
+                        label="Echo 3 color"
+                        value={style.echo.echo3Color}
+                        defaultValue={defaultStyle.echo.echo3Color}
+                        palette={palette}
+                        onChange={(hex) => updateElementEcho(id, { echo3Color: hex })}
+                      />
+                    </>
+                  )}
                 </>
               )}
             </CollapsibleSection>

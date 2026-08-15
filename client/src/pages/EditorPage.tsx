@@ -63,7 +63,7 @@ export function EditorPage() {
         // Older saved calendars may predate newly-added theme/title fields — backfill defaults.
         // deepMergeDefaults fills in anything missing from the current default theme's shape, so
         // this stays correct automatically as that shape grows, instead of needing hand-updates.
-        const defaults = getDefaultTheme();
+        const defaults = getDefaultTheme(fetched.season);
         // Titles saved before runtimeStyle/ratingStyle existed have flat runtimeOpacity/ratingOpacity
         // numbers instead — carry that opacity forward into the new style object.
         const legacyTitles = fetched.titles as unknown as Array<{ runtimeOpacity?: number; ratingOpacity?: number }>;
