@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { Group, Rect } from "react-konva";
 import type { CalendarGeometry } from "../../lib/calendarGeometry";
-import { HEADER_FOOTER_ELEMENT_IDS, getElementAnchor } from "../../lib/headerFooterLayout";
-import type { CalendarHeaderFooter } from "../../types/calendar";
+import { HEADER_FOOTER_ELEMENT_IDS, SEASON_TITLE_ANCHOR, getElementAnchor } from "../../lib/headerFooterLayout";
+import type { CalendarHeaderFooter, SeasonTitleStyle } from "../../types/calendar";
 import { HeaderFooterElementNode } from "./HeaderFooterElementNode";
+import { SeasonTitleNode } from "./SeasonTitleNode";
 
 interface Props {
   headerFooter: CalendarHeaderFooter;
+  seasonTitle: SeasonTitleStyle;
+  seasonLabel: string;
+  year: string;
   geometry: CalendarGeometry;
   interactive: boolean;
   onOpen?: () => void;
 }
 
 /** Renders every header/footer decoration plus hoverable/clickable hit-regions over the header and footer bands, matching how movie cards highlight on hover. */
-export function HeaderFooterGroup({ headerFooter, geometry, interactive, onOpen }: Props) {
+export function HeaderFooterGroup({ headerFooter, seasonTitle, seasonLabel, year, geometry, interactive, onOpen }: Props) {
   const [hoveredRegion, setHoveredRegion] = useState<"header" | "footer" | null>(null);
 
   // Footer shape first so the pill/text/logo elements composite on top of it; header/footer split
@@ -40,6 +44,7 @@ export function HeaderFooterGroup({ headerFooter, geometry, interactive, onOpen 
       >
         <Rect x={geometry.header.x} y={geometry.header.y} width={geometry.header.w} height={geometry.header.h} fill="#000000" opacity={0} listening={interactive} />
         {restIds.filter((id) => id === "sundayNightText" || id === "onyxLogo").map(renderElement)}
+        <SeasonTitleNode x={SEASON_TITLE_ANCHOR.x} y={SEASON_TITLE_ANCHOR.y} seasonLabel={seasonLabel} year={year} style={seasonTitle} />
         {hoveredRegion === "header" && <Rect x={geometry.header.x} y={geometry.header.y} width={geometry.header.w} height={geometry.header.h} fill="#ffffff" opacity={0.12} listening={false} />}
       </Group>
 

@@ -1,5 +1,5 @@
 import { CANVAS_H, CANVAS_W, FOOTER_H } from "./calendarGeometry";
-import type { CalendarHeaderFooter, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle } from "../types/calendar";
+import type { CalendarHeaderFooter, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../types/calendar";
 
 const ASSET_BASE = "/assets/header-footer";
 
@@ -48,6 +48,23 @@ export function getFooterShapeAnchor(variant: FooterShapeVariant): ElementAnchor
 
 export function getElementAnchor(id: HeaderFooterElementId, footerShapeVariant: FooterShapeVariant): ElementAnchor {
   return id === "footerShape" ? getFooterShapeAnchor(footerShapeVariant) : HEADER_FOOTER_ANCHORS[id];
+}
+
+// Top-left of the season title's bounding box (before the user's own offsetX/offsetY/scale) —
+// to the right of the Onyx Downtown logo, vertically centered against it.
+export const SEASON_TITLE_ANCHOR = { x: 258, y: 78 };
+
+export function defaultSeasonTitleStyle(): SeasonTitleStyle {
+  return {
+    visible: true,
+    offsetX: 0,
+    offsetY: 0,
+    scale: 1,
+    frontColor: "#1d6579",
+    echo1Color: "#dce2ea",
+    echo2Color: "#e8c14c",
+    echo3Color: "#dd7b6c",
+  };
 }
 
 export const HEADER_FOOTER_ELEMENT_IDS: HeaderFooterElementId[] = [

@@ -169,11 +169,28 @@ export type CalendarHeaderFooter = {
   footerShapeVariant: FooterShapeVariant;
 } & Record<HeaderFooterElementId, HeaderFooterElementStyle>;
 
+/**
+ * The big "SEASON YEAR" title lockup (e.g. "SUMMER 2026"), rendered as extruded 3D block letters:
+ * a front face plus 3 "echo" layers receding behind it. Font/size/kerning/echo-step are a fixed
+ * recipe, not user settings — position, scale, and each layer's color are.
+ */
+export interface SeasonTitleStyle {
+  visible: boolean;
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+  frontColor: string;
+  echo1Color: string;
+  echo2Color: string;
+  echo3Color: string;
+}
+
 export interface CalendarTheme {
   /** Single fill spanning the whole canvas, showing through wherever header/footer elements don't cover it. */
   background: FillStyle;
   spacing: CalendarSpacing;
   headerFooter: CalendarHeaderFooter;
+  seasonTitle: SeasonTitleStyle;
   /** Shared drop shadow applied to every movie card and every series band — not per-card/per-band. */
   cardShadow: DropShadowSettings;
 }

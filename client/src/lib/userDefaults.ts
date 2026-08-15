@@ -1,7 +1,7 @@
 import type { CalendarTheme } from "../types/calendar";
 import { DEFAULT_CARD_SHADOW, DEFAULT_SPACING } from "./calendarGeometry";
 import { deepMergeDefaults } from "./deepMerge";
-import { defaultHeaderFooter } from "./headerFooterLayout";
+import { defaultHeaderFooter, defaultSeasonTitleStyle } from "./headerFooterLayout";
 
 const THEME_KEY = "calendarWizard.defaultTheme";
 const AUTOSAVE_KEY = "calendarWizard.autoSaveMinutes";
@@ -10,6 +10,7 @@ export const HARDCODED_DEFAULT_THEME: CalendarTheme = {
   background: { type: "color", value: "#e8879a" },
   spacing: DEFAULT_SPACING,
   headerFooter: defaultHeaderFooter(),
+  seasonTitle: defaultSeasonTitleStyle(),
   cardShadow: DEFAULT_CARD_SHADOW,
 };
 

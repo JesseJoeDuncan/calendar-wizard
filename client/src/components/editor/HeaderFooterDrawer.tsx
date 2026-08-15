@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { SettingRow } from "../SettingRow";
-import { HEADER_FOOTER_ELEMENT_IDS, HEADER_FOOTER_ELEMENT_LABELS, defaultHeaderFooter } from "../../lib/headerFooterLayout";
+import { HEADER_FOOTER_ELEMENT_IDS, HEADER_FOOTER_ELEMENT_LABELS, defaultHeaderFooter, defaultSeasonTitleStyle } from "../../lib/headerFooterLayout";
 import { getDefaultTheme } from "../../lib/userDefaults";
-import type { Calendar, CalendarHeaderFooter, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle } from "../../types/calendar";
+import type { Calendar, CalendarHeaderFooter, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../../types/calendar";
 import { CollapsibleSection } from "./CollapsibleSection";
 import "./SettingsDrawer.css";
 import "./HeaderFooterDrawer.css";
@@ -20,8 +20,8 @@ const FOOTER_SHAPE_OPTIONS: { value: FooterShapeVariant; label: string }[] = [
 ];
 
 export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
-  const { headerFooter } = calendar.theme;
-  const defaults = getDefaultTheme().headerFooter;
+  const { headerFooter, seasonTitle } = calendar.theme;
+  const defaults = getDefaultTheme();
   const navigate = useNavigate();
 
   function updateHeaderFooter(patch: Partial<CalendarHeaderFooter>) {
@@ -32,9 +32,13 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
     updateHeaderFooter({ [id]: { ...headerFooter[id], ...patch } });
   }
 
+  function updateSeasonTitle(patch: Partial<SeasonTitleStyle>) {
+    onChange({ theme: { ...calendar.theme, seasonTitle: { ...seasonTitle, ...patch } } });
+  }
+
   function resetAll() {
     if (!window.confirm("Reset all header/footer settings on this calendar back to the default values?")) return;
-    onChange({ theme: { ...calendar.theme, headerFooter: defaultHeaderFooter() } });
+    onChange({ theme: { ...calendar.theme, headerFooter: defaultHeaderFooter(), seasonTitle: defaultSeasonTitleStyle() } });
   }
 
   return (
@@ -62,11 +66,49 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
         </div>
       </div>
 
+      <CollapsibleSection
+        title="Season title"
+        defaultOpen
+        headExtra={<input type="checkbox" checked={seasonTitle.visible} onChange={(e) => updateSeasonTitle({ visible: e.target.checked })} />}
+      >
+        <SettingRow label="Position X" value={seasonTitle.offsetX} defaultValue={defaults.seasonTitle.offsetX} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateSeasonTitle({ offsetX: v })} />
+        <SettingRow label="Position Y" value={seasonTitle.offsetY} defaultValue={defaults.seasonTitle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateSeasonTitle({ offsetY: v })} />
+        <SettingRow label="Scale" value={seasonTitle.scale} defaultValue={defaults.seasonTitle.scale} min={0.2} max={3} step={0.01} onChange={(v) => updateSeasonTitle({ scale: v })} />
+        <label className="drawer-field">
+          <span>Front color</span>
+          <input type="color" value={seasonTitle.frontColor} onChange={(e) => updateSeasonTitle({ frontColor: e.target.value })} />
+          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ frontColor: defaults.seasonTitle.frontColor })}>
+            ⟲
+          </button>
+        </label>
+        <label className="drawer-field">
+          <span>Echo 1 color</span>
+          <input type="color" value={seasonTitle.echo1Color} onChange={(e) => updateSeasonTitle({ echo1Color: e.target.value })} />
+          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ echo1Color: defaults.seasonTitle.echo1Color })}>
+            ⟲
+          </button>
+        </label>
+        <label className="drawer-field">
+          <span>Echo 2 color</span>
+          <input type="color" value={seasonTitle.echo2Color} onChange={(e) => updateSeasonTitle({ echo2Color: e.target.value })} />
+          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ echo2Color: defaults.seasonTitle.echo2Color })}>
+            ⟲
+          </button>
+        </label>
+        <label className="drawer-field">
+          <span>Echo 3 color</span>
+          <input type="color" value={seasonTitle.echo3Color} onChange={(e) => updateSeasonTitle({ echo3Color: e.target.value })} />
+          <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateSeasonTitle({ echo3Color: defaults.seasonTitle.echo3Color })}>
+            ⟲
+          </button>
+        </label>
+      </CollapsibleSection>
+
       <div className="drawer-section">
         <h4>Elements</h4>
         {HEADER_FOOTER_ELEMENT_IDS.map((id) => {
           const style = headerFooter[id];
-          const defaultStyle = defaults[id];
+          const defaultStyle = defaults.headerFooter[id];
           return (
             <CollapsibleSection
               key={id}

@@ -38,6 +38,7 @@ export function CalendarScene({
 }: Props) {
   const titleById = new Map(calendar.titles.map((t) => [t.id, t]));
   const seriesById = new Map(calendar.series.map((s) => [s.id, s]));
+  const seasonLabel = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;
 
   return (
     // Clips everything to the true 8.5x11 page bounds — some header/footer elements (the footer
@@ -84,7 +85,15 @@ export function CalendarScene({
         );
       })}
 
-      <HeaderFooterGroup headerFooter={calendar.theme.headerFooter} geometry={geometry} interactive={interactive} onOpen={onOpenHeaderFooter} />
+      <HeaderFooterGroup
+        headerFooter={calendar.theme.headerFooter}
+        seasonTitle={calendar.theme.seasonTitle}
+        seasonLabel={seasonLabel}
+        year={String(calendar.year)}
+        geometry={geometry}
+        interactive={interactive}
+        onOpen={onOpenHeaderFooter}
+      />
     </Group>
   );
 }
