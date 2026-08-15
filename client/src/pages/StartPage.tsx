@@ -4,7 +4,7 @@ import { TopBar } from "../components/editor/TopBar";
 import { SeriesEditor } from "../components/SeriesEditor";
 import { TitleRow } from "../components/TitleRow";
 import { api } from "../lib/api";
-import { DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE } from "../lib/calendarGeometry";
+import { DEFAULT_DATE_STYLE, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE } from "../lib/calendarGeometry";
 import { nextId, type DraftSeries, type DraftTitle } from "../lib/draftTypes";
 import { MAX_TITLES, MIN_TITLES, validateTitleCount } from "../lib/layoutEngine";
 import { computeSmartStartDefaults } from "../lib/smartDefaults";
@@ -150,6 +150,7 @@ export function StartPage() {
         titleTextStyle: { fontSize: 0, kerning: 0, lineSpacing: 1.08, justify: "left" as const, dropShadow: true, offsetX: 0, offsetY: 0 },
         runtimeStyle: { ...DEFAULT_RUNTIME_STYLE },
         ratingStyle: { ...DEFAULT_RATING_STYLE },
+        dateStyle: { ...DEFAULT_DATE_STYLE },
         dateOffsetX: 0,
         dateOffsetY: 0,
         badges: [],

@@ -12,9 +12,9 @@ import { TopBar } from "../components/editor/TopBar";
 import { api } from "../lib/api";
 import { computeAutoFitTitleText } from "../lib/autoFitText";
 import { calendarLabel } from "../lib/calendarLabel";
-import { DEFAULT_CARD_SHADOW, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE, DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
+import { DEFAULT_DATE_STYLE, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE, computeGeometry } from "../lib/calendarGeometry";
+import { deepMergeDefaults } from "../lib/deepMerge";
 import { exportCalendarPdf } from "../lib/exportPdf";
-import { HEADER_FOOTER_ELEMENT_IDS } from "../lib/headerFooterLayout";
 import { buildLayout, validateTitleCount } from "../lib/layoutEngine";
 import { getAutoSaveMinutes, getDefaultTheme } from "../lib/userDefaults";
 import type { Calendar, CalendarSummary } from "../types/calendar";
@@ -61,6 +61,8 @@ export function EditorPage() {
         const fetched = await api.getCalendar(id);
         if (cancelled) return;
         // Older saved calendars may predate newly-added theme/title fields — backfill defaults.
+        // deepMergeDefaults fills in anything missing from the current default theme's shape, so
+        // this stays correct automatically as that shape grows, instead of needing hand-updates.
         const defaults = getDefaultTheme();
         // Titles saved before runtimeStyle/ratingStyle existed have flat runtimeOpacity/ratingOpacity
         // numbers instead — carry that opacity forward into the new style object.
@@ -69,23 +71,15 @@ export function EditorPage() {
           ...fetched,
           titles: fetched.titles.map((t, i) => ({
             ...t,
-            runtimeStyle: t.runtimeStyle ?? { ...DEFAULT_RUNTIME_STYLE, opacity: legacyTitles[i]?.runtimeOpacity ?? DEFAULT_RUNTIME_STYLE.opacity },
-            ratingStyle: t.ratingStyle ?? { ...DEFAULT_RATING_STYLE, opacity: legacyTitles[i]?.ratingOpacity ?? DEFAULT_RATING_STYLE.opacity },
+            runtimeStyle: t.runtimeStyle
+              ? deepMergeDefaults(DEFAULT_RUNTIME_STYLE, t.runtimeStyle)
+              : { ...DEFAULT_RUNTIME_STYLE, opacity: legacyTitles[i]?.runtimeOpacity ?? DEFAULT_RUNTIME_STYLE.opacity },
+            ratingStyle: t.ratingStyle
+              ? deepMergeDefaults(DEFAULT_RATING_STYLE, t.ratingStyle)
+              : { ...DEFAULT_RATING_STYLE, opacity: legacyTitles[i]?.ratingOpacity ?? DEFAULT_RATING_STYLE.opacity },
+            dateStyle: deepMergeDefaults(DEFAULT_DATE_STYLE, t.dateStyle),
           })),
-          theme: {
-            background: fetched.theme.background ?? defaults.background,
-            spacing: { ...DEFAULT_SPACING, ...fetched.theme.spacing },
-            cardShadow: fetched.theme.cardShadow ?? DEFAULT_CARD_SHADOW,
-            headerFooter: fetched.theme.headerFooter
-              ? {
-                  ...defaults.headerFooter,
-                  ...fetched.theme.headerFooter,
-                  ...Object.fromEntries(
-                    HEADER_FOOTER_ELEMENT_IDS.map((elId) => [elId, { ...defaults.headerFooter[elId], ...fetched.theme.headerFooter[elId] }])
-                  ),
-                }
-              : defaults.headerFooter,
-          },
+          theme: deepMergeDefaults(defaults, fetched.theme),
         };
         setCalendar(loaded);
         lastSavedAtRef.current = Date.now();
@@ -355,13 +349,12 @@ export function EditorPage() {
         </div>
 
         {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} />}
+        {settingsOpen && (
+          <SettingsDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setSettingsOpen(false)} onAutoSaveMinutesChange={setAutoSaveMinutesState} />
+        )}
       </div>
 
       <ExportStage ref={exportStageRef} calendar={calendar} layout={layout} geometry={geometry} />
-
-      {settingsOpen && (
-        <SettingsDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setSettingsOpen(false)} onAutoSaveMinutesChange={setAutoSaveMinutesState} />
-      )}
     </div>
   );
 }

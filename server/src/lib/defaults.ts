@@ -1,4 +1,4 @@
-import type { Calendar, CalendarTheme, RuntimeRatingStyle, SeriesBandStyle, Title, TitleTextStyle } from "../types.js";
+import type { Calendar, CalendarTheme, DateTextStyle, RuntimeRatingStyle, SeriesBandStyle, Title, TitleTextStyle } from "../types.js";
 
 // Row height is derived from the fixed canvas layout (CANVAS_H 1100, HEADER_H 150, FOOTER_H 125,
 // 3 rows): (1100-150-125)/3 = 275px. rowGap/boxGutter/seriesBoxGutter below were set as that
@@ -16,6 +16,8 @@ export const DEFAULT_THEME: CalendarTheme = {
     tertiaryRadius: 2,
     dateNumberSizePct: 0.35,
     dateMonthSizePct: 0.1,
+    dateMonthGap: -4,
+    rowsHeightScale: 0.96,
   },
   cardShadow: {
     enabled: true,
@@ -28,6 +30,7 @@ export const DEFAULT_THEME: CalendarTheme = {
 };
 
 export const DEFAULT_RUNTIME_RATING_STYLE: RuntimeRatingStyle = { offsetX: 0, offsetY: 0, scale: 1, opacity: 0.85, dropShadow: true, dropShadowOpacity: 0.5 };
+export const DEFAULT_DATE_STYLE: DateTextStyle = { opacity: 1, dropShadowOpacity: 0.6, numberKerning: 0 };
 
 export const DEFAULT_TITLE_TEXT_STYLE: TitleTextStyle = {
   // 0 is a sentinel meaning "never auto-fit yet" — the editor computes a real value the first
@@ -63,6 +66,7 @@ export function makeEmptyTitle(id: string, date: string): Title {
     titleTextStyle: { ...DEFAULT_TITLE_TEXT_STYLE },
     runtimeStyle: { ...DEFAULT_RUNTIME_RATING_STYLE },
     ratingStyle: { ...DEFAULT_RUNTIME_RATING_STYLE },
+    dateStyle: { ...DEFAULT_DATE_STYLE },
     dateOffsetX: 0,
     dateOffsetY: 0,
     badges: [],

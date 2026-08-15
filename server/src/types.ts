@@ -50,6 +50,12 @@ export interface RuntimeRatingStyle {
   dropShadowOpacity: number;
 }
 
+export interface DateTextStyle {
+  opacity: number;
+  dropShadowOpacity: number;
+  numberKerning: number;
+}
+
 export interface Title {
   id: string;
   tmdbId?: number;
@@ -63,6 +69,7 @@ export interface Title {
   titleTextStyle: TitleTextStyle;
   runtimeStyle: RuntimeRatingStyle;
   ratingStyle: RuntimeRatingStyle;
+  dateStyle: DateTextStyle;
   dateOffsetX: number;
   dateOffsetY: number;
   badges: Badge[];
@@ -100,6 +107,8 @@ export interface CalendarSpacing {
   tertiaryRadius: number;
   dateNumberSizePct: number;
   dateMonthSizePct: number;
+  dateMonthGap: number;
+  rowsHeightScale: number;
 }
 
 export interface DropShadowSettings {

@@ -1,0 +1,50 @@
+.cs-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+
+.cs-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface-2);
+  border: none;
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cs-head-extra {
+  display: flex;
+  align-items: center;
+}
+
+.cs-title {
+  flex: 1;
+}
+
+.cs-caret {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.cs-body {
+  padding: 0.7rem 0.7rem 0.75rem;
+}
+
+.cs-body .field-group,
+.cs-body .drawer-section {
+  margin-bottom: 0;
+}
+
+.cs-body .drawer-field:last-child,
+.cs-body .setting-row:last-child {
+  margin-bottom: 0;
+}

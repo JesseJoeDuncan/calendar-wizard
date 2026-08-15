@@ -1,4 +1,4 @@
-import type { CalendarSpacing, DropShadowSettings, RuntimeRatingStyle } from "../types/calendar";
+import type { CalendarSpacing, DateTextStyle, DropShadowSettings, RuntimeRatingStyle } from "../types/calendar";
 import type { CalendarLayout } from "./layoutEngine";
 
 export const CANVAS_W = 850;
@@ -24,10 +24,15 @@ export const DEFAULT_SPACING: CalendarSpacing = {
   tertiaryRadius: 2,
   dateNumberSizePct: 0.35,
   dateMonthSizePct: 0.1,
+  dateMonthGap: -4,
+  // Rows collectively fill 96% of the header-to-footer gap, leaving a little breathing room
+  // above and below them.
+  rowsHeightScale: 0.96,
 };
 
 export const DEFAULT_RUNTIME_STYLE: RuntimeRatingStyle = { offsetX: 0, offsetY: 0, scale: 1, opacity: 0.85, dropShadow: true, dropShadowOpacity: 0.5 };
 export const DEFAULT_RATING_STYLE: RuntimeRatingStyle = { offsetX: 0, offsetY: 0, scale: 1, opacity: 0.85, dropShadow: true, dropShadowOpacity: 0.5 };
+export const DEFAULT_DATE_STYLE: DateTextStyle = { opacity: 1, dropShadowOpacity: 0.6, numberKerning: 0 };
 
 export const DEFAULT_CARD_SHADOW: DropShadowSettings = {
   enabled: true,
@@ -71,7 +76,7 @@ export interface CalendarGeometry {
 }
 
 export function computeGeometry(layout: CalendarLayout, spacing: Partial<CalendarSpacing> | undefined): CalendarGeometry {
-  const { outerMargin, boxGutter, seriesBoxGutter, rowGap, bandHeightRatio } = { ...DEFAULT_SPACING, ...spacing };
+  const { outerMargin, boxGutter, seriesBoxGutter, rowGap, bandHeightRatio, rowsHeightScale } = { ...DEFAULT_SPACING, ...spacing };
 
   const header = { x: 0, y: 0, w: CANVAS_W, h: HEADER_H };
   const footer = { x: 0, y: CANVAS_H - FOOTER_H, w: CANVAS_W, h: FOOTER_H };
@@ -79,14 +84,20 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
   const bodyHeight = CANVAS_H - HEADER_H - FOOTER_H;
   const body = { x: 0, y: bodyTop, w: CANVAS_W, h: bodyHeight };
 
+  // The three rows collectively occupy only rowsHeightScale of the header-to-footer gap, leaving
+  // the remainder as breathing room split evenly above (below the header) and below (above the
+  // footer) them.
+  const rowsHeight = bodyHeight * rowsHeightScale;
+  const rowsTop = bodyTop + (bodyHeight - rowsHeight) / 2;
+
   const rowCount = layout.rows.length;
-  const rowHeight = bodyHeight / rowCount;
+  const rowHeight = rowsHeight / rowCount;
   // Every row reserves the same bottom gap before the next row, whether or not it has a band —
   // so this (and therefore date/month text sizing) is identical across all rows.
   const standardBoxH = rowHeight - rowGap;
 
   const rows: RowGeometry[] = layout.rows.map((row, i) => {
-    const rowTop = bodyTop + i * rowHeight;
+    const rowTop = rowsTop + i * rowHeight;
     const bandH = rowHeight * bandHeightRatio;
     const fullBoxH = standardBoxH;
     // A box that belongs to a series band is shorter by the band's height plus the gutter between

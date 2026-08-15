@@ -21,7 +21,7 @@ interface Props {
   /** Reference height for date/month text sizing — constant across every card, regardless of that card's own height. */
   standardBoxH: number;
   radii: Pick<CalendarSpacing, "primaryRadius" | "secondaryRadius" | "tertiaryRadius">;
-  dateSizing: Pick<CalendarSpacing, "dateNumberSizePct" | "dateMonthSizePct">;
+  dateSizing: Pick<CalendarSpacing, "dateNumberSizePct" | "dateMonthSizePct" | "dateMonthGap">;
   cardShadow: DropShadowSettings;
   selected: boolean;
   hovered: boolean;
@@ -119,16 +119,17 @@ export function TitleBoxNode({
   const dayX = x + dateMarginX + (title.dateOffsetX ?? 0);
   const monthX = dayX + (dayWidth - monthWidth) / 2;
   const monthY = y + dateMarginY + (title.dateOffsetY ?? 0);
-  const dayY = monthY + monthFontSize - 4;
+  const dayY = monthY + monthFontSize + dateSizing.dateMonthGap;
 
   // Runtime and rating both sit near the bottom-right corner, rotated a quarter turn so they read
   // bottom-to-top; the rating badge anchors closest to the corner and the runtime text stacks
-  // just above it along the same edge.
+  // just above it along the same edge. Base sizes (10.2/17.6) are tuned so the two read at a
+  // similar line-height by default: runtime +20% and rating -20% off their original 8.5/22.
   const cornerMargin = 10;
-  const ratingSize = 22 * title.ratingStyle.scale;
+  const ratingSize = 17.6 * title.ratingStyle.scale;
   const ratingCenterX = x + w - cornerMargin - ratingSize / 2 + title.ratingStyle.offsetX;
   const ratingCenterY = y + h - cornerMargin - ratingSize / 2 + title.ratingStyle.offsetY;
-  const runtimeFontSize = 8.5 * title.runtimeStyle.scale;
+  const runtimeFontSize = 10.2 * title.runtimeStyle.scale;
   const runtimeX = x + w - cornerMargin + title.runtimeStyle.offsetX;
   const runtimeY = y + h - cornerMargin - ratingSize - 6 + title.runtimeStyle.offsetY;
 
@@ -184,11 +185,25 @@ export function TitleBoxNode({
           fontSize={monthFontSize}
           fill="#ffffff"
           letterSpacing={1.2}
+          opacity={title.dateStyle.opacity}
           shadowColor="black"
           shadowBlur={4}
-          shadowOpacity={0.6}
+          shadowOpacity={title.dateStyle.dropShadowOpacity}
         />
-        <Text x={dayX} y={dayY} text={dy} fontFamily="Market Deco" fontStyle="bold" fontSize={dayFontSize} fill="#ffffff" shadowColor="black" shadowBlur={6} shadowOpacity={0.65} />
+        <Text
+          x={dayX}
+          y={dayY}
+          text={dy}
+          fontFamily="Market Deco"
+          fontStyle="bold"
+          fontSize={dayFontSize}
+          fill="#ffffff"
+          letterSpacing={title.dateStyle.numberKerning}
+          opacity={title.dateStyle.opacity}
+          shadowColor="black"
+          shadowBlur={6}
+          shadowOpacity={title.dateStyle.dropShadowOpacity}
+        />
 
         {hovered && interactive && !selected && <Rect x={x} y={y} width={w} height={h} fill="#ffffff" opacity={0.12} />}
 

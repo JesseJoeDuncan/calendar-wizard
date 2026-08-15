@@ -1,5 +1,6 @@
 import type { CalendarTheme } from "../types/calendar";
 import { DEFAULT_CARD_SHADOW, DEFAULT_SPACING } from "./calendarGeometry";
+import { deepMergeDefaults } from "./deepMerge";
 import { defaultHeaderFooter } from "./headerFooterLayout";
 
 const THEME_KEY = "calendarWizard.defaultTheme";
@@ -12,28 +13,15 @@ export const HARDCODED_DEFAULT_THEME: CalendarTheme = {
   cardShadow: DEFAULT_CARD_SHADOW,
 };
 
-/** The user's saved default theme (via "Save as default"), falling back to the hardcoded one. */
+/**
+ * The user's saved default theme (set from the dedicated Default Settings page), falling back to
+ * the hardcoded one. Uses a generic deep-merge keyed off the hardcoded shape, so a field added to
+ * that shape later automatically appears here for old saved defaults instead of silently vanishing.
+ */
 export function getDefaultTheme(): CalendarTheme {
   try {
     const raw = localStorage.getItem(THEME_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as CalendarTheme;
-      return {
-        ...HARDCODED_DEFAULT_THEME,
-        ...parsed,
-        spacing: { ...HARDCODED_DEFAULT_THEME.spacing, ...parsed.spacing },
-        cardShadow: { ...HARDCODED_DEFAULT_THEME.cardShadow, ...parsed.cardShadow },
-        headerFooter: {
-          ...HARDCODED_DEFAULT_THEME.headerFooter,
-          ...parsed.headerFooter,
-          ...Object.fromEntries(
-            Object.entries(HARDCODED_DEFAULT_THEME.headerFooter).map(([id, style]) =>
-              typeof style === "object" ? [id, { ...style, ...(parsed.headerFooter as Record<string, object>)?.[id] }] : [id, style]
-            )
-          ),
-        },
-      };
-    }
+    if (raw) return deepMergeDefaults(HARDCODED_DEFAULT_THEME, JSON.parse(raw));
   } catch {
     // ignore malformed storage
   }
@@ -42,6 +30,10 @@ export function getDefaultTheme(): CalendarTheme {
 
 export function saveAsDefaultTheme(theme: CalendarTheme) {
   localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+}
+
+export function resetDefaultTheme() {
+  localStorage.removeItem(THEME_KEY);
 }
 
 export const DEFAULT_AUTOSAVE_MINUTES = 5;

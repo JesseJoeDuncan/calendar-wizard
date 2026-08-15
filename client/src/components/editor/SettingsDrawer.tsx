@@ -1,21 +1,30 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { SettingRow } from "../SettingRow";
 import type { Calendar } from "../../types/calendar";
-import { DEFAULT_AUTOSAVE_MINUTES, getAutoSaveMinutes, getDefaultTheme, saveAsDefaultTheme, setAutoSaveMinutes } from "../../lib/userDefaults";
+import { DEFAULT_AUTOSAVE_MINUTES, getAutoSaveMinutes, getDefaultTheme, setAutoSaveMinutes } from "../../lib/userDefaults";
+import { CollapsibleSection } from "./CollapsibleSection";
 import "./SettingsDrawer.css";
 
 interface Props {
   calendar: Calendar;
   onChange: (patch: Partial<Calendar>) => void;
   onClose: () => void;
-  onAutoSaveMinutesChange: (minutes: number) => void;
+  onAutoSaveMinutesChange?: (minutes: number) => void;
+  /**
+   * "editor" (default): normal per-calendar settings, with auto-save and a footer linking to the
+   * Default Settings page. "defaults": used from the Default Settings page itself, where
+   * auto-save (a global preference, not a calendar default) and that footer don't apply — the
+   * page's own header provides the equivalent save/reset actions.
+   */
+  variant?: "editor" | "defaults";
 }
 
-export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesChange }: Props) {
+export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesChange, variant = "editor" }: Props) {
   const { theme } = calendar;
   const defaults = getDefaultTheme();
+  const navigate = useNavigate();
   const [autoSaveMinutes, setAutoSaveMinutesState] = useState(getAutoSaveMinutes());
-  const [savedFlash, setSavedFlash] = useState(false);
 
   function updateTheme(patch: Partial<typeof theme>) {
     onChange({ theme: { ...theme, ...patch } });
@@ -30,39 +39,30 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
     onChange({ theme: defaults });
   }
 
-  function saveAsDefault() {
-    if (!window.confirm("Save this calendar's current settings as the default for new calendars? This replaces your existing saved default.")) return;
-    saveAsDefaultTheme(theme);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 2000);
-  }
-
   function changeAutoSave(minutes: number) {
     setAutoSaveMinutesState(minutes);
     setAutoSaveMinutes(minutes);
-    onAutoSaveMinutesChange(minutes);
+    onAutoSaveMinutesChange?.(minutes);
   }
 
   return (
-    <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer" onClick={(e) => e.stopPropagation()}>
-        <div className="drawer-head">
-          <h3>Settings</h3>
-          <button className="del-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+    <div className="side-panel">
+      <div className="drawer-head">
+        <h3>Settings</h3>
+        <button className="del-btn" onClick={onClose}>
+          ✕
+        </button>
+      </div>
 
-        <div className="drawer-section">
-          <h4>Colors</h4>
-          <label className="drawer-field">
-            <span>Background</span>
-            <input type="color" value={theme.background.value} onChange={(e) => updateTheme({ background: { type: "color", value: e.target.value } })} />
-          </label>
-        </div>
+      <div className="drawer-section">
+        <h4>Colors</h4>
+        <label className="drawer-field">
+          <span>Background</span>
+          <input type="color" value={theme.background.value} onChange={(e) => updateTheme({ background: { type: "color", value: e.target.value } })} />
+        </label>
+      </div>
 
-        <div className="drawer-section">
-          <h4>Layout &amp; spacing</h4>
+        <CollapsibleSection title="Layout & spacing" defaultOpen>
           <SettingRow label="Outer margin" value={theme.spacing.outerMargin} defaultValue={defaults.spacing.outerMargin} min={0} max={80} unit="px" onChange={(v) => updateSpacing({ outerMargin: v })} />
           <SettingRow label="Box gutter" value={theme.spacing.boxGutter} defaultValue={defaults.spacing.boxGutter} min={0} max={40} unit="px" onChange={(v) => updateSpacing({ boxGutter: v })} />
           <SettingRow
@@ -76,6 +76,15 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
           />
           <SettingRow label="Row gap" value={theme.spacing.rowGap} defaultValue={defaults.spacing.rowGap} min={0} max={60} unit="px" onChange={(v) => updateSpacing({ rowGap: v })} />
           <SettingRow
+            label="Rows height"
+            value={theme.spacing.rowsHeightScale}
+            defaultValue={defaults.spacing.rowsHeightScale}
+            min={0.8}
+            max={1}
+            step={0.01}
+            onChange={(v) => updateSpacing({ rowsHeightScale: v })}
+          />
+          <SettingRow
             label="Band height"
             value={theme.spacing.bandHeightRatio}
             defaultValue={defaults.spacing.bandHeightRatio}
@@ -84,12 +93,11 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             step={0.01}
             onChange={(v) => updateSpacing({ bandHeightRatio: v })}
           />
-        </div>
+        </CollapsibleSection>
 
-        <div className="drawer-section">
-          <h4>Date text</h4>
+        <CollapsibleSection title="Date text">
           <SettingRow
-            label="Date number size"
+            label="Number size"
             value={theme.spacing.dateNumberSizePct}
             defaultValue={defaults.spacing.dateNumberSizePct}
             min={0.15}
@@ -98,7 +106,7 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             onChange={(v) => updateSpacing({ dateNumberSizePct: v })}
           />
           <SettingRow
-            label="Date month size"
+            label="Month size"
             value={theme.spacing.dateMonthSizePct}
             defaultValue={defaults.spacing.dateMonthSizePct}
             min={0.03}
@@ -106,10 +114,18 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             step={0.01}
             onChange={(v) => updateSpacing({ dateMonthSizePct: v })}
           />
-        </div>
+          <SettingRow
+            label="Month/number gap"
+            value={theme.spacing.dateMonthGap}
+            defaultValue={defaults.spacing.dateMonthGap}
+            min={-20}
+            max={20}
+            unit="px"
+            onChange={(v) => updateSpacing({ dateMonthGap: v })}
+          />
+        </CollapsibleSection>
 
-        <div className="drawer-section">
-          <h4>Corner rounding</h4>
+        <CollapsibleSection title="Corner rounding">
           <SettingRow
             label="Primary (free corners)"
             value={theme.spacing.primaryRadius}
@@ -137,14 +153,12 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             unit="px"
             onChange={(v) => updateSpacing({ tertiaryRadius: v })}
           />
-        </div>
+        </CollapsibleSection>
 
-        <div className="drawer-section">
-          <h4>Card &amp; band shadow</h4>
-          <label className="drawer-field">
-            <span>Enabled</span>
-            <input type="checkbox" checked={theme.cardShadow.enabled} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, enabled: e.target.checked } })} />
-          </label>
+        <CollapsibleSection
+          title="Card & band shadow"
+          headExtra={<input type="checkbox" checked={theme.cardShadow.enabled} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, enabled: e.target.checked } })} />}
+        >
           <label className="drawer-field">
             <span>Color</span>
             <input type="color" value={theme.cardShadow.color} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, color: e.target.value } })} />
@@ -189,22 +203,25 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             disabled={!theme.cardShadow.enabled}
             onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, offsetY: v } })}
           />
-        </div>
+        </CollapsibleSection>
 
-        <div className="drawer-section">
-          <h4>Auto-save</h4>
-          <SettingRow label="Interval" value={autoSaveMinutes} defaultValue={DEFAULT_AUTOSAVE_MINUTES} min={1} max={30} unit="min" onChange={changeAutoSave} />
-        </div>
+        {variant === "editor" && (
+          <>
+            <div className="drawer-section">
+              <h4>Auto-save</h4>
+              <SettingRow label="Interval" value={autoSaveMinutes} defaultValue={DEFAULT_AUTOSAVE_MINUTES} min={1} max={30} unit="min" onChange={changeAutoSave} />
+            </div>
 
-        <div className="drawer-footer">
-          <button type="button" className="drawer-reset-all" onClick={resetAll}>
-            Reset all settings to default
-          </button>
-          <button type="button" className="drawer-save-default" onClick={saveAsDefault}>
-            {savedFlash ? "Saved ✓" : "Save as default"}
-          </button>
-        </div>
-      </div>
+            <div className="drawer-footer">
+              <button type="button" className="drawer-reset-all" onClick={resetAll}>
+                Reset all settings to default
+              </button>
+              <button type="button" className="drawer-save-default" onClick={() => navigate("/defaults")}>
+                Edit default settings →
+              </button>
+            </div>
+          </>
+        )}
     </div>
   );
 }

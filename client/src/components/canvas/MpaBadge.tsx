@@ -26,12 +26,9 @@ export function MpaBadge({ rating, centerX, centerY, size, rotation, opacity, dr
   return (
     <KonvaImg
       src={`/assets/mpaa-white/${FILES[rating]}`}
-      x={centerX}
-      y={centerY}
-      width={size}
-      height={size}
-      offsetX={size / 2}
-      offsetY={size / 2}
+      centerX={centerX}
+      centerY={centerY}
+      maxSize={size}
       rotation={rotation}
       opacity={opacity}
       shadowEnabled={dropShadow}

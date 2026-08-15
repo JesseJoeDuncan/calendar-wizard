@@ -53,6 +53,13 @@ export interface RuntimeRatingStyle {
   dropShadowOpacity: number;
 }
 
+export interface DateTextStyle {
+  opacity: number;
+  dropShadowOpacity: number;
+  /** Letter-spacing for the day number only — the month line has its own fixed kerning. */
+  numberKerning: number;
+}
+
 export interface Title {
   id: string;
   tmdbId?: number;
@@ -66,6 +73,7 @@ export interface Title {
   titleTextStyle: TitleTextStyle;
   runtimeStyle: RuntimeRatingStyle;
   ratingStyle: RuntimeRatingStyle;
+  dateStyle: DateTextStyle;
   dateOffsetX: number;
   dateOffsetY: number;
   badges: Badge[];
@@ -117,6 +125,10 @@ export interface CalendarSpacing {
   dateNumberSizePct: number;
   /** Date-month text height, as a fraction of a standard (non-series) card's height. */
   dateMonthSizePct: number;
+  /** Pixel gap between the bottom of the month line and the top of the day number (can be negative to overlap them slightly). */
+  dateMonthGap: number;
+  /** Fraction of the space between header and footer that the three rows collectively occupy — the remainder becomes breathing room, split evenly above and below the rows. */
+  rowsHeightScale: number;
 }
 
 export interface DropShadowSettings {
