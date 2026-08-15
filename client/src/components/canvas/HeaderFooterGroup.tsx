@@ -31,7 +31,19 @@ export function HeaderFooterGroup({ headerFooter, seasonTitle, seasonLabel, year
     const anchor = getElementAnchor(id, headerFooter.footerShapeVariant);
     const w = anchor.w * style.scale;
     const h = anchor.h * style.scale;
-    return <HeaderFooterElementNode key={id} src={anchor.asset} x={anchor.x + style.offsetX} y={anchor.y + style.offsetY} width={w} height={h} color={style.color} />;
+    return (
+      <HeaderFooterElementNode
+        key={id}
+        src={anchor.asset}
+        x={anchor.x + style.offsetX}
+        y={anchor.y + style.offsetY}
+        width={w}
+        height={h}
+        color={style.color}
+        scale={style.scale}
+        echo={style.echo}
+      />
+    );
   }
 
   return (

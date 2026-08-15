@@ -1,5 +1,5 @@
 import { CANVAS_H, CANVAS_W, FOOTER_H } from "./calendarGeometry";
-import type { CalendarHeaderFooter, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../types/calendar";
+import type { CalendarHeaderFooter, EchoLayerStyle, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../types/calendar";
 
 const ASSET_BASE = "/assets/header-footer";
 
@@ -60,6 +60,7 @@ export function defaultSeasonTitleStyle(): SeasonTitleStyle {
     offsetX: 0,
     offsetY: 0,
     scale: 1,
+    echoSpread: 1,
     frontColor: "#1d6579",
     echo1Color: "#dce2ea",
     echo2Color: "#e8c14c",
@@ -95,8 +96,12 @@ export const HEADER_FOOTER_ELEMENT_LABELS: Record<HeaderFooterElementId, string>
   domainText: "TheOnyxTheatre.com text",
 };
 
-function defaultElementStyle(color: string): HeaderFooterElementStyle {
-  return { visible: true, color, offsetX: 0, offsetY: 0, scale: 1 };
+function defaultElementStyle(color: string, echo?: EchoLayerStyle): HeaderFooterElementStyle {
+  return { visible: true, color, offsetX: 0, offsetY: 0, scale: 1, ...(echo ? { echo } : {}) };
+}
+
+export function defaultQrCodeEcho(): EchoLayerStyle {
+  return { echoSpread: 1, echo1Color: "#dce2ea", echo2Color: "#e8c14c", echo3Color: "#dd7b6c" };
 }
 
 // Every element but the footer shape is ink sitting on top of it (or on the page background), so
@@ -105,7 +110,10 @@ function defaultElementStyle(color: string): HeaderFooterElementStyle {
 // revealing whatever's directly behind — stays visible instead of black-on-black.
 export function defaultHeaderFooter(): CalendarHeaderFooter {
   const elements = Object.fromEntries(
-    HEADER_FOOTER_ELEMENT_IDS.map((id) => [id, defaultElementStyle(id === "footerShape" ? "#8a8a8a" : "#000000")])
+    HEADER_FOOTER_ELEMENT_IDS.map((id) => [
+      id,
+      defaultElementStyle(id === "footerShape" ? "#8a8a8a" : "#000000", id === "qrCode" ? defaultQrCodeEcho() : undefined),
+    ])
   ) as Record<HeaderFooterElementId, HeaderFooterElementStyle>;
   return { footerShapeVariant: "bumps", ...elements };
 }

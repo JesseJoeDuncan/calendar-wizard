@@ -142,6 +142,14 @@ export interface DropShadowSettings {
 
 export type FooterShapeVariant = "bumps" | "zigzags" | "straightline";
 
+/** Optional extruded/echoed look for an element (see echoEffect.ts) — the element's own `color` is the front layer. */
+export interface EchoLayerStyle {
+  echoSpread: number;
+  echo1Color: string;
+  echo2Color: string;
+  echo3Color: string;
+}
+
 export interface HeaderFooterElementStyle {
   visible: boolean;
   color: string;
@@ -150,6 +158,8 @@ export interface HeaderFooterElementStyle {
   offsetY: number;
   /** Uniform multiplier on the element's default (guide-matched) width; height follows its aspect ratio. */
   scale: number;
+  /** Present only for elements that render with the echo effect (currently just the QR code). */
+  echo?: EchoLayerStyle;
 }
 
 export type HeaderFooterElementId =
@@ -179,6 +189,8 @@ export interface SeasonTitleStyle {
   offsetX: number;
   offsetY: number;
   scale: number;
+  /** Multiplier on the per-copy offset distance within each echo layer — 1 is the tuned default; lower packs the echoes tighter, higher spreads them further back. */
+  echoSpread: number;
   frontColor: string;
   echo1Color: string;
   echo2Color: string;

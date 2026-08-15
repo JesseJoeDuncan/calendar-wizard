@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { SettingRow } from "../SettingRow";
 import { HEADER_FOOTER_ELEMENT_IDS, HEADER_FOOTER_ELEMENT_LABELS, defaultHeaderFooter, defaultSeasonTitleStyle } from "../../lib/headerFooterLayout";
 import { getDefaultTheme } from "../../lib/userDefaults";
-import type { Calendar, CalendarHeaderFooter, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../../types/calendar";
+import type { Calendar, CalendarHeaderFooter, EchoLayerStyle, FooterShapeVariant, HeaderFooterElementId, HeaderFooterElementStyle, SeasonTitleStyle } from "../../types/calendar";
 import { CollapsibleSection } from "./CollapsibleSection";
 import "./SettingsDrawer.css";
 import "./HeaderFooterDrawer.css";
@@ -30,6 +30,12 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
 
   function updateElement(id: HeaderFooterElementId, patch: Partial<HeaderFooterElementStyle>) {
     updateHeaderFooter({ [id]: { ...headerFooter[id], ...patch } });
+  }
+
+  function updateElementEcho(id: HeaderFooterElementId, patch: Partial<EchoLayerStyle>) {
+    const current = headerFooter[id].echo;
+    if (!current) return;
+    updateElement(id, { echo: { ...current, ...patch } });
   }
 
   function updateSeasonTitle(patch: Partial<SeasonTitleStyle>) {
@@ -74,6 +80,7 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
         <SettingRow label="Position X" value={seasonTitle.offsetX} defaultValue={defaults.seasonTitle.offsetX} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateSeasonTitle({ offsetX: v })} />
         <SettingRow label="Position Y" value={seasonTitle.offsetY} defaultValue={defaults.seasonTitle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateSeasonTitle({ offsetY: v })} />
         <SettingRow label="Scale" value={seasonTitle.scale} defaultValue={defaults.seasonTitle.scale} min={0.2} max={3} step={0.01} onChange={(v) => updateSeasonTitle({ scale: v })} />
+        <SettingRow label="Echo spread" value={seasonTitle.echoSpread} defaultValue={defaults.seasonTitle.echoSpread} min={0} max={3} step={0.05} onChange={(v) => updateSeasonTitle({ echoSpread: v })} />
         <label className="drawer-field">
           <span>Front color</span>
           <input type="color" value={seasonTitle.frontColor} onChange={(e) => updateSeasonTitle({ frontColor: e.target.value })} />
@@ -116,7 +123,7 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
               headExtra={<input type="checkbox" checked={style.visible} onChange={(e) => updateElement(id, { visible: e.target.checked })} />}
             >
               <label className="drawer-field">
-                <span>Color</span>
+                <span>{style.echo ? "Front color" : "Color"}</span>
                 <input type="color" value={style.color} onChange={(e) => updateElement(id, { color: e.target.value })} />
                 <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElement(id, { color: defaultStyle.color })}>
                   ⟲
@@ -125,6 +132,40 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
               <SettingRow label="Position X" value={style.offsetX} defaultValue={defaultStyle.offsetX} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetX: v })} />
               <SettingRow label="Position Y" value={style.offsetY} defaultValue={defaultStyle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetY: v })} />
               <SettingRow label="Scale" value={style.scale} defaultValue={defaultStyle.scale} min={0.1} max={4} step={0.01} onChange={(v) => updateElement(id, { scale: v })} />
+              {style.echo && defaultStyle.echo && (
+                <>
+                  <SettingRow
+                    label="Echo spread"
+                    value={style.echo.echoSpread}
+                    defaultValue={defaultStyle.echo.echoSpread}
+                    min={0}
+                    max={3}
+                    step={0.05}
+                    onChange={(v) => updateElementEcho(id, { echoSpread: v })}
+                  />
+                  <label className="drawer-field">
+                    <span>Echo 1 color</span>
+                    <input type="color" value={style.echo.echo1Color} onChange={(e) => updateElementEcho(id, { echo1Color: e.target.value })} />
+                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElementEcho(id, { echo1Color: defaultStyle.echo!.echo1Color })}>
+                      ⟲
+                    </button>
+                  </label>
+                  <label className="drawer-field">
+                    <span>Echo 2 color</span>
+                    <input type="color" value={style.echo.echo2Color} onChange={(e) => updateElementEcho(id, { echo2Color: e.target.value })} />
+                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElementEcho(id, { echo2Color: defaultStyle.echo!.echo2Color })}>
+                      ⟲
+                    </button>
+                  </label>
+                  <label className="drawer-field">
+                    <span>Echo 3 color</span>
+                    <input type="color" value={style.echo.echo3Color} onChange={(e) => updateElementEcho(id, { echo3Color: e.target.value })} />
+                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElementEcho(id, { echo3Color: defaultStyle.echo!.echo3Color })}>
+                      ⟲
+                    </button>
+                  </label>
+                </>
+              )}
             </CollapsibleSection>
           );
         })}
