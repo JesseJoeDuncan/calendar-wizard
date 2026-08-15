@@ -91,6 +91,8 @@ export interface SeriesBandStyle {
   fontFamily: string;
   fontSize: number;
   textColor: string;
+  /** Opacity of the series name text (not the tag background). */
+  opacity: number;
   kerning: number;
   lineSpacing: number;
   justify: "left" | "center" | "right";
@@ -249,6 +251,75 @@ export interface BackgroundTexture {
   opacity: number;
 }
 
+/** Shared look for a block of card text — the specific fields each text element also needs (margins, kerning...) extend this. */
+export interface TextLookDefaults {
+  fontFamily: string;
+  color: string;
+  dropShadowColor: string;
+  dropShadowBlur: number;
+}
+
+/** Applied to every card's date/month text uniformly (like cardShadow) — not a per-title override. */
+export interface DateTextDefaults extends TextLookDefaults {
+  /** Pixel inset from the card's left edge. */
+  marginX: number;
+  /** Pixel inset from the card's top edge. */
+  marginY: number;
+  /** Letter-spacing for the month line only — the day number's kerning is a per-title setting (DateTextStyle.numberKerning). */
+  monthKerning: number;
+}
+
+/** Applied to every card's title text uniformly. */
+export interface TitleTextDefaults extends TextLookDefaults {
+  /** Pixel inset from the card's left AND right edges. */
+  marginX: number;
+  /** Default gap above the card's bottom edge, as a fraction of row height. */
+  bottomGapPct: number;
+}
+
+/** Applied to every card's runtime text uniformly. */
+export interface RuntimeTextDefaults extends TextLookDefaults {
+  baseSize: number;
+  /** Pixel inset from the card's right edge. */
+  marginX: number;
+  /** Pixel inset from the card's bottom edge. */
+  marginY: number;
+  kerning: number;
+}
+
+/** Applied to every card's rating badge uniformly — ratingVisible itself stays a per-title toggle, seeded from visibleByRating at creation time. */
+export interface RatingDefaults {
+  baseSize: number;
+  /** Tint applied to the (white) badge artwork. */
+  color: string;
+  dropShadowColor: string;
+  dropShadowBlur: number;
+  /** Multiplier on baseSize per rating, e.g. so PG-13 can render slightly larger than R. */
+  sizeByRating: Record<MpaRating, number>;
+  /** Whether a newly-rated title defaults to showing its badge, per rating. */
+  visibleByRating: Record<MpaRating, boolean>;
+  /** When true, the badge's horizontal center locks to the runtime text's anchor line instead of using its own corner margin. */
+  snapToRuntimeX: boolean;
+}
+
+/** Seeds a newly-created series' own (independently editable) bandStyle — not re-applied to existing series. */
+export interface SeriesTagDefaults {
+  fontFamily: string;
+  fontSize: number;
+  textColor: string;
+  tagColor: string;
+  opacity: number;
+  kerning: number;
+}
+
+export interface CardTextDefaults {
+  date: DateTextDefaults;
+  title: TitleTextDefaults;
+  runtime: RuntimeTextDefaults;
+  rating: RatingDefaults;
+  seriesTag: SeriesTagDefaults;
+}
+
 export interface CalendarTheme {
   /** Single fill spanning the whole canvas, showing through wherever header/footer elements don't cover it. */
   background: FillStyle;
@@ -258,6 +329,7 @@ export interface CalendarTheme {
   seasonTitle: SeasonTitleStyle;
   /** Shared drop shadow applied to every movie card and every series band — not per-card/per-band. */
   cardShadow: DropShadowSettings;
+  cardText: CardTextDefaults;
   /**
    * The color palette baked into this calendar at creation time (a copy of that season's Default
    * Settings palette) — kept around so this calendar's own color pickers can offer it as quick-pick

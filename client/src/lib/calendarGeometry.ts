@@ -1,4 +1,4 @@
-import type { CalendarSpacing, DateTextStyle, DropShadowSettings, RuntimeRatingStyle } from "../types/calendar";
+import type { CalendarSpacing, CardTextDefaults, DateTextStyle, DropShadowSettings, RuntimeRatingStyle } from "../types/calendar";
 import type { CalendarLayout } from "./layoutEngine";
 
 export const CANVAS_W = 850;
@@ -41,6 +41,55 @@ export const DEFAULT_CARD_SHADOW: DropShadowSettings = {
   opacity: 0.28,
   offsetX: 0,
   offsetY: 3,
+};
+
+// Matches the previously-hardcoded render constants exactly, so migrating existing calendars to
+// this theme-level structure changes nothing about how they already looked.
+export const DEFAULT_CARD_TEXT: CardTextDefaults = {
+  date: {
+    fontFamily: "Market Deco",
+    color: "#ffffff",
+    dropShadowColor: "#000000",
+    dropShadowBlur: 5,
+    marginX: 8,
+    marginY: 6,
+    monthKerning: 1.2,
+  },
+  title: {
+    fontFamily: "Futura Wizard Condensed",
+    color: "#ffffff",
+    dropShadowColor: "#000000",
+    dropShadowBlur: 5,
+    marginX: 8,
+    bottomGapPct: 0.05,
+  },
+  runtime: {
+    fontFamily: "Futura Wizard",
+    color: "#ffffff",
+    dropShadowColor: "#000000",
+    dropShadowBlur: 3,
+    baseSize: 10.2,
+    marginX: 10,
+    marginY: 10,
+    kerning: 0,
+  },
+  rating: {
+    baseSize: 17.6,
+    color: "#ffffff",
+    dropShadowColor: "#000000",
+    dropShadowBlur: 3,
+    sizeByRating: { G: 1, PG: 1, "PG-13": 1, R: 1, "NC-17": 1, NR: 1 },
+    visibleByRating: { G: true, PG: true, "PG-13": true, R: true, "NC-17": true, NR: false },
+    snapToRuntimeX: false,
+  },
+  seriesTag: {
+    fontFamily: "Futura Wizard",
+    fontSize: 13,
+    textColor: "#fce9c7",
+    tagColor: "#2f6f7a",
+    opacity: 1,
+    kerning: 1.5,
+  },
 };
 
 export interface BoxGeometry {

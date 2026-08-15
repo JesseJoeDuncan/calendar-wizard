@@ -7,7 +7,7 @@ import type { BoxLayout, CornerWeight } from "../../lib/layoutEngine";
 import { placeholderGradient } from "../../lib/placeholderPalette";
 import { roundedRectPath } from "../../lib/roundedRectPath";
 import { measureTextWidth } from "../../lib/textMeasure";
-import type { CalendarSpacing, DropShadowSettings, Title } from "../../types/calendar";
+import type { CalendarSpacing, CardTextDefaults, DropShadowSettings, Title } from "../../types/calendar";
 import { proxiedImageUrl } from "../../lib/imageProxy";
 import { BadgeNode } from "./BadgeNode";
 import { MpaBadge } from "./MpaBadge";
@@ -23,6 +23,7 @@ interface Props {
   radii: Pick<CalendarSpacing, "primaryRadius" | "secondaryRadius" | "tertiaryRadius">;
   dateSizing: Pick<CalendarSpacing, "dateNumberSizePct" | "dateMonthSizePct" | "dateMonthGap">;
   cardShadow: DropShadowSettings;
+  cardText: CardTextDefaults;
   selected: boolean;
   hovered: boolean;
   interactive: boolean;
@@ -44,6 +45,7 @@ export function TitleBoxNode({
   radii,
   dateSizing,
   cardShadow,
+  cardText,
   selected,
   hovered,
   interactive,
@@ -104,34 +106,35 @@ export function TitleBoxNode({
   const lineSpacing = title.titleTextStyle.lineSpacing || 1.08;
   const lineCount = (title.titleTextStyle.manualLineBreaks?.length ?? 0) + 1;
   const titleBlockH = nameSize * lineSpacing * lineCount + nameSize * 0.3;
-  // Default position: text bottom sits 5% of row height above the card bottom, so every box in a
-  // row that shares the same height (series members together, non-members together) lines up.
-  const bottomGap = rowHeight * 0.05;
+  // Default position: text bottom sits bottomGapPct of row height above the card bottom, so every
+  // box in a row that shares the same height (series members together, non-members together) lines up.
+  const bottomGap = rowHeight * cardText.title.bottomGapPct;
 
   // Date/month sizing is fixed to a percentage of the standard card height (not this card's own
   // width or height), so it's identical everywhere; the month is centered over the day number.
   const dayFontSize = standardBoxH * dateSizing.dateNumberSizePct;
   const monthFontSize = standardBoxH * dateSizing.dateMonthSizePct;
-  const dateMarginX = 8;
-  const dateMarginY = 6;
-  const dayWidth = measureTextWidth(dy, dayFontSize, "Market Deco", "bold");
-  const monthWidth = measureTextWidth(mo, monthFontSize, "Market Deco", "bold");
+  const dateMarginX = cardText.date.marginX;
+  const dateMarginY = cardText.date.marginY;
+  const dayWidth = measureTextWidth(dy, dayFontSize, cardText.date.fontFamily, "bold");
+  const monthWidth = measureTextWidth(mo, monthFontSize, cardText.date.fontFamily, "bold");
   const dayX = x + dateMarginX + (title.dateOffsetX ?? 0);
   const monthX = dayX + (dayWidth - monthWidth) / 2;
   const monthY = y + dateMarginY + (title.dateOffsetY ?? 0);
   const dayY = monthY + monthFontSize + dateSizing.dateMonthGap;
 
   // Runtime and rating both sit near the bottom-right corner, rotated a quarter turn so they read
-  // bottom-to-top; the rating badge anchors closest to the corner and the runtime text stacks
-  // just above it along the same edge. Base sizes (10.2/17.6) are tuned so the two read at a
-  // similar line-height by default: runtime +20% and rating -20% off their original 8.5/22.
-  const cornerMargin = 10;
-  const ratingSize = 17.6 * title.ratingStyle.scale;
-  const ratingCenterX = x + w - cornerMargin - ratingSize / 2 + title.ratingStyle.offsetX;
-  const ratingCenterY = y + h - cornerMargin - ratingSize / 2 + title.ratingStyle.offsetY;
-  const runtimeFontSize = 10.2 * title.runtimeStyle.scale;
-  const runtimeX = x + w - cornerMargin + title.runtimeStyle.offsetX;
-  const runtimeY = y + h - cornerMargin - ratingSize - 6 + title.runtimeStyle.offsetY;
+  // bottom-to-top; the rating badge anchors closest to the corner and the runtime text stacks just
+  // above it along the same edge. Base sizes are tuned so the two read at a similar line-height by
+  // default. Rating additionally supports a per-rating size multiplier and can lock its horizontal
+  // center to the runtime text's anchor line instead of using its own corner margin.
+  const ratingMultiplier = cardText.rating.sizeByRating[title.mpaRating] ?? 1;
+  const ratingSize = cardText.rating.baseSize * ratingMultiplier * title.ratingStyle.scale;
+  const runtimeFontSize = cardText.runtime.baseSize * title.runtimeStyle.scale;
+  const runtimeX = x + w - cardText.runtime.marginX + title.runtimeStyle.offsetX;
+  const runtimeY = y + h - cardText.runtime.marginY - ratingSize - 6 + title.runtimeStyle.offsetY;
+  const ratingCenterX = (cardText.rating.snapToRuntimeX ? runtimeX : x + w - cardText.runtime.marginX) - ratingSize / 2 + title.ratingStyle.offsetX;
+  const ratingCenterY = y + h - cardText.runtime.marginY - ratingSize / 2 + title.ratingStyle.offsetY;
 
   return (
     <>
@@ -180,28 +183,28 @@ export function TitleBoxNode({
           x={monthX}
           y={monthY}
           text={mo}
-          fontFamily="Market Deco"
+          fontFamily={cardText.date.fontFamily}
           fontStyle="bold"
           fontSize={monthFontSize}
-          fill="#ffffff"
-          letterSpacing={1.2}
+          fill={cardText.date.color}
+          letterSpacing={cardText.date.monthKerning}
           opacity={title.dateStyle.opacity}
-          shadowColor="black"
-          shadowBlur={4}
+          shadowColor={cardText.date.dropShadowColor}
+          shadowBlur={cardText.date.dropShadowBlur}
           shadowOpacity={title.dateStyle.dropShadowOpacity}
         />
         <Text
           x={dayX}
           y={dayY}
           text={dy}
-          fontFamily="Market Deco"
+          fontFamily={cardText.date.fontFamily}
           fontStyle="bold"
           fontSize={dayFontSize}
-          fill="#ffffff"
+          fill={cardText.date.color}
           letterSpacing={title.dateStyle.numberKerning}
           opacity={title.dateStyle.opacity}
-          shadowColor="black"
-          shadowBlur={6}
+          shadowColor={cardText.date.dropShadowColor}
+          shadowBlur={cardText.date.dropShadowBlur}
           shadowOpacity={title.dateStyle.dropShadowOpacity}
         />
 
@@ -215,7 +218,10 @@ export function TitleBoxNode({
             size={ratingSize}
             rotation={-90}
             opacity={title.ratingStyle.opacity}
+            color={cardText.rating.color}
             dropShadow={title.ratingStyle.dropShadow}
+            dropShadowColor={cardText.rating.dropShadowColor}
+            dropShadowBlur={cardText.rating.dropShadowBlur}
             dropShadowOpacity={title.ratingStyle.dropShadowOpacity}
           />
         )}
@@ -223,19 +229,21 @@ export function TitleBoxNode({
         {title.name && (
           <RichWordText
             text={title.name}
-            x={x + 8}
+            x={x + cardText.title.marginX}
             y={y + h - titleBlockH - bottomGap}
-            width={w - 16}
+            width={w - cardText.title.marginX * 2}
             height={titleBlockH}
             baseFontSize={nameSize}
             wordSizes={title.titleTextStyle.wordSizes}
             manualLineBreaks={title.titleTextStyle.manualLineBreaks}
-            fontFamily="Futura Wizard Condensed"
+            fontFamily={cardText.title.fontFamily}
             kerning={title.titleTextStyle.kerning}
             lineHeightMultiplier={lineSpacing}
             justify={title.titleTextStyle.justify}
-            color="#ffffff"
+            color={cardText.title.color}
             dropShadow={title.titleTextStyle.dropShadow}
+            dropShadowColor={cardText.title.dropShadowColor}
+            dropShadowBlur={cardText.title.dropShadowBlur}
             verticalAlign="bottom"
             uppercase
             offsetX={title.titleTextStyle.offsetX}
@@ -249,13 +257,14 @@ export function TitleBoxNode({
             y={runtimeY}
             text={runtimeLabel}
             rotation={-90}
-            fontFamily="Futura Wizard"
+            fontFamily={cardText.runtime.fontFamily}
             fontSize={runtimeFontSize}
-            fill="#ffffff"
+            fill={cardText.runtime.color}
+            letterSpacing={cardText.runtime.kerning}
             opacity={title.runtimeStyle.opacity}
             shadowEnabled={title.runtimeStyle.dropShadow}
-            shadowColor="black"
-            shadowBlur={3}
+            shadowColor={cardText.runtime.dropShadowColor}
+            shadowBlur={cardText.runtime.dropShadowBlur}
             shadowOpacity={title.runtimeStyle.dropShadowOpacity}
           />
         )}

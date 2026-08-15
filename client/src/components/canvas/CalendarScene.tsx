@@ -67,6 +67,7 @@ export function CalendarScene({
                   radii={calendar.theme.spacing}
                   dateSizing={calendar.theme.spacing}
                   cardShadow={calendar.theme.cardShadow}
+                  cardText={calendar.theme.cardText}
                   selected={selectedTitleId === title.id}
                   hovered={hoveredTitleId === title.id}
                   interactive={interactive}

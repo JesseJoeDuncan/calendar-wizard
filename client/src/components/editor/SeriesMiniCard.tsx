@@ -67,6 +67,10 @@ export function SeriesMiniCard({ series, calendar, onChange }: Props) {
             </div>
           </label>
           <label className="sm-field">
+            <span>Text opacity</span>
+            <input type="range" min={0} max={1} step={0.02} value={series.bandStyle.opacity} onChange={(e) => updateStyle({ opacity: Number(e.target.value) })} />
+          </label>
+          <label className="sm-field">
             <span>Kerning</span>
             <input type="range" min={-4} max={12} step={0.1} value={series.bandStyle.kerning} onChange={(e) => updateStyle({ kerning: Number(e.target.value) })} />
           </label>

@@ -165,7 +165,7 @@ export function ImageSelectionPage() {
           ...t,
           runtimeMinutes: s.runtimeMinutes ?? t.runtimeMinutes,
           mpaRating: t.tmdbId ? s.mpaRating : t.mpaRating,
-          ratingVisible: t.tmdbId ? s.mpaRating !== "NR" : t.ratingVisible,
+          ratingVisible: t.tmdbId ? calendar.theme.cardText.rating.visibleByRating[s.mpaRating] : t.ratingVisible,
           imageCandidates: candidates.length > 0 ? candidates : t.imageCandidates,
           image,
         };

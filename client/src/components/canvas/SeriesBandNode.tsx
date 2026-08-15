@@ -48,6 +48,7 @@ export function SeriesBandNode({ geometry, series, radii, shadow }: Props) {
           lineHeightMultiplier={style.lineSpacing || 1.08}
           justify={style.justify}
           color={style.textColor}
+          opacity={style.opacity}
           verticalAlign="middle"
           uppercase
           offsetX={style.offsetX}

@@ -13,5 +13,7 @@ interface Props {
 export function BackgroundTextureNode({ texture, width, height }: Props) {
   const tile = useMemo(() => (texture.style === "none" ? null : getTextureTile(texture.style)), [texture.style]);
   if (!tile || texture.opacity <= 0) return null;
-  return <Rect x={0} y={0} width={width} height={height} fillPatternImage={tile} fillPatternRepeat="repeat" opacity={texture.opacity} listening={false} />;
+  // Konva's own type defs only list HTMLImageElement here, but at runtime it just forwards to
+  // CanvasRenderingContext2D.createPattern, which accepts any CanvasImageSource including a canvas.
+  return <Rect x={0} y={0} width={width} height={height} fillPatternImage={tile as unknown as HTMLImageElement} fillPatternRepeat="repeat" opacity={texture.opacity} listening={false} />;
 }

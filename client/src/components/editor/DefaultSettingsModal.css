@@ -1,0 +1,277 @@
+/* Deliberately its own distinct navy/blue palette (overriding the shared tokens locally) so this
+   modal is never mistaken for editing the calendar open behind it — every reused control
+   (SettingRow, PaletteColorInput, HexColorInput, CollapsibleSection, PaletteEditor,
+   HeaderFooterDrawer's embedded content) already styles itself off these same CSS variables. */
+.dsm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 9, 18, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 3vh 3vw;
+}
+
+.dsm-panel {
+  --bg: #0f1420;
+  --surface: #1a2236;
+  --surface-2: #232d47;
+  --surface-3: #2c3855;
+  --text: #eef2fb;
+  --text-muted: #9aa8c7;
+  --border: #303d5c;
+  --border-strong: #44557c;
+  --accent: #5b8cff;
+  --accent-ink: #ffffff;
+  --accent-soft: #24345c;
+  --focus: #5b8cff;
+  --chip-bg: #5b8cff;
+  --chip-ink: #0b1020;
+  --danger: #ff6b6b;
+
+  width: 100%;
+  max-width: 1440px;
+  height: 92vh;
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dsm-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex: none;
+}
+
+.dsm-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.dsm-title-badge {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent-ink);
+  background: var(--accent);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+}
+
+.dsm-title-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.dsm-close {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: 8px;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  flex: none;
+}
+
+.dsm-close:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dsm-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.dsm-nav {
+  flex: none;
+  width: 220px;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.8rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dsm-nav-item {
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dsm-nav-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.dsm-nav-item.sel {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.dsm-nav-child {
+  padding-left: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.dsm-nav-caret {
+  font-size: 0.7rem;
+}
+
+.dsm-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 1.4rem 1.6rem;
+}
+
+.dsm-pane h3 {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.dsm-pane-hf .drawer-section h4,
+.dsm-pane-hf .cs-section {
+  color: var(--text);
+}
+
+.dsm-subhead {
+  margin: 1.2rem 0 0.6rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.dsm-hint {
+  margin-top: 1rem;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.dsm-checkbox-field {
+  align-items: center;
+}
+
+.dsm-rating-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.dsm-rating-row {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+
+.dsm-rating-head {
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 0.5rem;
+}
+
+.dsm-rating-label {
+  font-weight: 700;
+}
+
+.dsm-rating-num {
+  width: 4rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 0.2rem 0.4rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.dsm-preview {
+  flex: none;
+  width: 42%;
+  min-width: 340px;
+  max-width: 520px;
+  border-left: 1px solid var(--border);
+  background: var(--surface-3);
+  padding: 1rem;
+  overflow: hidden;
+  display: flex;
+}
+
+.dsm-preview > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.dsm-bottom {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.4rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.dsm-apply-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.dsm-spacer {
+  flex: 1;
+}
+
+.dsm-save {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.4rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.dsm-save:hover {
+  filter: brightness(1.08);
+}

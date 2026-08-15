@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CalendarCanvas } from "../components/canvas/CalendarCanvas";
 import { ExportStage } from "../components/canvas/ExportStage";
+import { DefaultSettingsModal } from "../components/editor/DefaultSettingsModal";
 import { DetailsPanel } from "../components/editor/DetailsPanel";
 import { HeaderFooterDrawer } from "../components/editor/HeaderFooterDrawer";
 import { SettingsDrawer } from "../components/editor/SettingsDrawer";
@@ -33,6 +34,7 @@ export function EditorPage() {
   const [saving, setSaving] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
+  const [defaultSettingsOpen, setDefaultSettingsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [past, setPast] = useState<Calendar[]>([]);
   const [future, setFuture] = useState<Calendar[]>([]);
@@ -348,11 +350,23 @@ export function EditorPage() {
           />
         </div>
 
-        {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} />}
+        {headerFooterOpen && (
+          <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} onOpenDefaultSettings={() => setDefaultSettingsOpen(true)} />
+        )}
         {settingsOpen && (
-          <SettingsDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setSettingsOpen(false)} onAutoSaveMinutesChange={setAutoSaveMinutesState} />
+          <SettingsDrawer
+            calendar={calendar}
+            onChange={updateCalendar}
+            onClose={() => setSettingsOpen(false)}
+            onAutoSaveMinutesChange={setAutoSaveMinutesState}
+            onOpenDefaultSettings={() => setDefaultSettingsOpen(true)}
+          />
         )}
       </div>
+
+      {defaultSettingsOpen && (
+        <DefaultSettingsModal calendar={calendar} onClose={() => setDefaultSettingsOpen(false)} onApplyToCalendar={(theme) => updateCalendar({ theme })} />
+      )}
 
       <ExportStage ref={exportStageRef} calendar={calendar} layout={layout} geometry={geometry} />
     </div>

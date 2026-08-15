@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 import { buildEchoLayers } from "../../lib/echoEffect";
+import { hexToRgb } from "../../lib/colorUtil";
 import type { EchoLayerStyle } from "../../types/calendar";
 
 interface Props {
@@ -17,13 +18,6 @@ interface Props {
   /** When set, renders with the same extruded/echoed look as the season title (see echoEffect.ts). */
   echo?: EchoLayerStyle;
   listening?: boolean;
-}
-
-function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace("#", "");
-  const full = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean;
-  const n = parseInt(full, 16) || 0;
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
 interface TintedCopyProps {

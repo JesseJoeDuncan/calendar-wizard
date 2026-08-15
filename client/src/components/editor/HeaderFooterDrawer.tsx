@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { SettingRow } from "../SettingRow";
 import { PaletteColorInput } from "../PaletteColorInput";
 import { HEADER_FOOTER_ELEMENT_IDS, HEADER_FOOTER_ELEMENT_LABELS, defaultHeaderFooter, defaultSeasonTitleStyle } from "../../lib/headerFooterLayout";
@@ -11,14 +10,17 @@ import "./HeaderFooterDrawer.css";
 interface Props {
   calendar: Calendar;
   onChange: (patch: Partial<Calendar>) => void;
-  onClose: () => void;
+  onClose?: () => void;
   /**
    * "editor" (default): normal per-calendar settings — every color here is a plain override with
    * this calendar's own palette offered as quick-pick swatches. "defaults": used from the Default
-   * Settings page, where colors are governed entirely by the Color Palettes editor instead, so the
+   * Settings modal, where colors are governed entirely by the Color Palettes editor instead, so the
    * color fields here are hidden (position/scale/echo-spread stay editable either way).
    */
   variant?: "editor" | "defaults";
+  /** True when embedded inside the Default Settings modal's own panel chrome — skips this component's own title bar/close button/footer. */
+  embedded?: boolean;
+  onOpenDefaultSettings?: () => void;
 }
 
 const FOOTER_SHAPE_OPTIONS: { value: FooterShapeVariant; label: string }[] = [
@@ -27,10 +29,9 @@ const FOOTER_SHAPE_OPTIONS: { value: FooterShapeVariant; label: string }[] = [
   { value: "straightline", label: "Straight line" },
 ];
 
-export function HeaderFooterDrawer({ calendar, onChange, onClose, variant = "editor" }: Props) {
+export function HeaderFooterDrawer({ calendar, onChange, onClose, variant = "editor", embedded = false, onOpenDefaultSettings }: Props) {
   const { headerFooter, seasonTitle, palette } = calendar.theme;
   const defaults = getDefaultTheme(calendar.season);
-  const navigate = useNavigate();
   const showColors = variant === "editor";
 
   function updateHeaderFooter(patch: Partial<CalendarHeaderFooter>) {
@@ -56,15 +57,8 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose, variant = "edi
     onChange({ theme: { ...calendar.theme, headerFooter: defaultHeaderFooter(), seasonTitle: defaultSeasonTitleStyle() } });
   }
 
-  return (
-    <div className="side-panel">
-      <div className="drawer-head">
-        <h3>Header &amp; Footer</h3>
-        <button className="del-btn" onClick={onClose}>
-          ✕
-        </button>
-      </div>
-
+  const body = (
+    <>
       <div className="drawer-section">
         <h4>Footer shape</h4>
         <div className="hf-shape-row">
@@ -166,14 +160,30 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose, variant = "edi
         })}
       </div>
 
-      <div className="drawer-footer">
-        <button type="button" className="drawer-reset-all" onClick={resetAll}>
-          Reset all settings to default
-        </button>
-        <button type="button" className="drawer-save-default" onClick={() => navigate("/defaults")}>
-          Edit default settings →
+      {!embedded && (
+        <div className="drawer-footer">
+          <button type="button" className="drawer-reset-all" onClick={resetAll}>
+            Reset all settings to default
+          </button>
+          <button type="button" className="drawer-save-default" onClick={onOpenDefaultSettings}>
+            Edit default settings →
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  if (embedded) return body;
+
+  return (
+    <div className="side-panel">
+      <div className="drawer-head">
+        <h3>Header &amp; Footer</h3>
+        <button className="del-btn" onClick={onClose}>
+          ✕
         </button>
       </div>
+      {body}
     </div>
   );
 }

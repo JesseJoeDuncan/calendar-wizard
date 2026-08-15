@@ -203,6 +203,7 @@ export function StartPage() {
 
     setCreating(true);
     try {
+      const defaultTheme = getDefaultTheme(season);
       const seriesIds = new Set(series.filter((s) => s.name.trim()).map((s) => s.id));
 
       const fullTitles = usable.map((t) => ({
@@ -231,11 +232,12 @@ export function StartPage() {
           name: s.name.trim(),
           titleIds: s.titleIds.filter((tid) => usable.some((t) => t.id === tid)),
           bandStyle: {
-            background: { type: "color" as const, value: "#2f6f7a" },
-            fontFamily: "Futura Wizard",
-            fontSize: 13,
-            textColor: "#fce9c7",
-            kerning: 1.5,
+            background: { type: "color" as const, value: defaultTheme.cardText.seriesTag.tagColor },
+            fontFamily: defaultTheme.cardText.seriesTag.fontFamily,
+            fontSize: defaultTheme.cardText.seriesTag.fontSize,
+            textColor: defaultTheme.cardText.seriesTag.textColor,
+            opacity: defaultTheme.cardText.seriesTag.opacity,
+            kerning: defaultTheme.cardText.seriesTag.kerning,
             lineSpacing: 1.08,
             justify: "center" as const,
             offsetX: 0,
@@ -250,7 +252,7 @@ export function StartPage() {
         year,
         titles: fullTitles,
         series: fullSeries,
-        theme: getDefaultTheme(season),
+        theme: defaultTheme,
       };
       await api.saveCalendar(finalCalendar);
       navigate(`/select-images/${id}`);

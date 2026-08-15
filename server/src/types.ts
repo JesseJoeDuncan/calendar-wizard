@@ -81,6 +81,7 @@ export interface SeriesBandStyle {
   fontFamily: string;
   fontSize: number;
   textColor: string;
+  opacity: number;
   kerning: number;
   lineSpacing: number;
   justify: "left" | "center" | "right";
@@ -124,12 +125,13 @@ export interface CalendarTheme {
   background: { type: "color" | "gradient" | "image"; value: string; value2?: string };
   spacing: CalendarSpacing;
   cardShadow: DropShadowSettings;
-  // headerFooter/seasonTitle/backgroundTexture/palette intentionally left loosely typed here — the
-  // server treats them as opaque JSON, just storing and returning whatever the client sends.
+  // headerFooter/seasonTitle/backgroundTexture/palette/cardText intentionally left loosely typed
+  // here — the server treats them as opaque JSON, just storing and returning whatever the client sends.
   headerFooter?: unknown;
   seasonTitle?: unknown;
   backgroundTexture?: unknown;
   palette?: unknown;
+  cardText?: unknown;
 }
 
 export interface Calendar {

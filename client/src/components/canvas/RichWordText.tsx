@@ -17,7 +17,11 @@ export interface RichWordTextProps {
   kerning: number;
   justify: "left" | "center" | "right";
   color: string;
+  opacity?: number;
   dropShadow?: boolean;
+  dropShadowColor?: string;
+  dropShadowBlur?: number;
+  dropShadowOpacity?: number;
   verticalAlign?: "top" | "middle" | "bottom";
   uppercase?: boolean;
   offsetX?: number;
@@ -54,7 +58,11 @@ export function RichWordText({
   kerning,
   justify,
   color,
+  opacity = 1,
   dropShadow = false,
+  dropShadowColor = "black",
+  dropShadowBlur = 5,
+  dropShadowOpacity = 0.7,
   verticalAlign = "bottom",
   uppercase = false,
   offsetX = 0,
@@ -138,10 +146,11 @@ export function RichWordText({
           fontSize={w.fontSize}
           letterSpacing={kerning}
           fill={color}
+          opacity={opacity}
           listening={listening}
-          shadowColor="black"
-          shadowBlur={dropShadow ? 5 : 0}
-          shadowOpacity={dropShadow ? 0.7 : 0}
+          shadowColor={dropShadowColor}
+          shadowBlur={dropShadow ? dropShadowBlur : 0}
+          shadowOpacity={dropShadow ? dropShadowOpacity : 0}
         />
       ))}
     </>

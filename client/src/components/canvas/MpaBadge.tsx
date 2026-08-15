@@ -18,11 +18,14 @@ interface Props {
   size: number;
   rotation: number;
   opacity: number;
+  color: string;
   dropShadow: boolean;
+  dropShadowColor: string;
+  dropShadowBlur: number;
   dropShadowOpacity: number;
 }
 
-export function MpaBadge({ rating, centerX, centerY, size, rotation, opacity, dropShadow, dropShadowOpacity }: Props) {
+export function MpaBadge({ rating, centerX, centerY, size, rotation, opacity, color, dropShadow, dropShadowColor, dropShadowBlur, dropShadowOpacity }: Props) {
   return (
     <KonvaImg
       src={`/assets/mpaa-white/${FILES[rating]}`}
@@ -31,9 +34,10 @@ export function MpaBadge({ rating, centerX, centerY, size, rotation, opacity, dr
       maxSize={size}
       rotation={rotation}
       opacity={opacity}
+      tintColor={color}
       shadowEnabled={dropShadow}
-      shadowColor="black"
-      shadowBlur={3}
+      shadowColor={dropShadowColor}
+      shadowBlur={dropShadowBlur}
       shadowOpacity={dropShadowOpacity}
     />
   );

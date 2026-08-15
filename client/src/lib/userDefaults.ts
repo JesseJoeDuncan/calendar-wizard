@@ -1,6 +1,6 @@
 import type { CalendarTheme, ColorPalette, Season } from "../types/calendar";
-import { DEFAULT_CARD_SHADOW, DEFAULT_SPACING } from "./calendarGeometry";
-import { applyPaletteToTheme, defaultPaletteForSeason, PALETTE_SEASONS } from "./colorPalette";
+import { DEFAULT_CARD_SHADOW, DEFAULT_CARD_TEXT, DEFAULT_SPACING } from "./calendarGeometry";
+import { applyPaletteToTheme, defaultPaletteForSeason } from "./colorPalette";
 import { deepMergeDefaults } from "./deepMerge";
 import { defaultHeaderFooter, defaultSeasonTitleStyle } from "./headerFooterLayout";
 
@@ -21,6 +21,7 @@ export const HARDCODED_DEFAULT_THEME: CalendarTheme = {
   headerFooter: defaultHeaderFooter(),
   seasonTitle: defaultSeasonTitleStyle(),
   cardShadow: DEFAULT_CARD_SHADOW,
+  cardText: DEFAULT_CARD_TEXT,
   palette: defaultPaletteForSeason("Custom"),
 };
 
@@ -61,13 +62,6 @@ export function saveAsDefaultTheme(theme: CalendarTheme, season: Season) {
   all[season] = theme.palette;
   localStorage.setItem(PALETTES_KEY, JSON.stringify(all));
 }
-
-export function resetDefaultTheme() {
-  localStorage.removeItem(THEME_KEY);
-  localStorage.removeItem(PALETTES_KEY);
-}
-
-export { PALETTE_SEASONS };
 
 export const DEFAULT_AUTOSAVE_MINUTES = 5;
 

@@ -61,6 +61,7 @@ export function buildSampleCalendar(theme: CalendarTheme, season: Season = "Summ
         fontFamily: "Futura Wizard",
         fontSize: 13,
         textColor: "#fce9c7",
+        opacity: 1,
         kerning: 1.5,
         lineSpacing: 1.08,
         justify: "center",
