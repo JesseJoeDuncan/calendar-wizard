@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DraftTitle } from "../lib/draftTypes";
 import { useDebouncedTmdbSearch } from "../lib/useDebouncedTmdbSearch";
 import "./TitleRow.css";
@@ -13,6 +13,12 @@ interface Props {
 export function TitleRow({ title, index, onChange, onDelete }: Props) {
   const [query, setQuery] = useState(title.name);
   const [open, setOpen] = useState(false);
+
+  // Keeps the input in sync when the name is set from outside this row (e.g. auto-generate) —
+  // otherwise this row's own typed-echo round trip is the only thing that ever updates `query`.
+  useEffect(() => {
+    setQuery(title.name);
+  }, [title.name]);
   const [highlight, setHighlight] = useState(0);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const { results } = useDebouncedTmdbSearch(open ? query : "", 300);

@@ -25,6 +25,8 @@ export interface TmdbMovieDetail {
 export const api = {
   searchMovies: (query: string, signal?: AbortSignal) => json<{ results: TmdbSearchResult[] }>(fetch(`/api/tmdb/search?q=${encodeURIComponent(query)}`, { signal })),
 
+  randomMovies: (count: number) => json<{ results: TmdbSearchResult[] }>(fetch(`/api/tmdb/random?count=${count}`)),
+
   getMovieDetail: (id: number) => json<TmdbMovieDetail>(fetch(`/api/tmdb/movie/${id}`)),
 
   listCalendars: () => json<{ calendars: CalendarSummary[] }>(fetch("/api/calendars")),

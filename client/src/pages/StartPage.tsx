@@ -14,6 +14,25 @@ import "./StartPage.css";
 
 const SEASONS: Season[] = ["Spring", "Summer", "Fall", "Winter", "Custom"];
 
+// Testing-only flavor text for auto-generated series — there's no real thematic grouping behind
+// these, just a plausible-looking label over a random contiguous run of titles.
+const RANDOM_SERIES_NAMES = [
+  "Midnight Madness",
+  "Director's Cut",
+  "Cult Classics",
+  "Hidden Gems",
+  "Genre Bender",
+  "Popcorn Classics",
+  "Late Night Double Feature",
+  "Weekend Marathon",
+  "Deep Cuts",
+  "Something Wild",
+];
+
+function shuffled<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
 function makeDefaultTitles(dates: string[]): DraftTitle[] {
   const rows = dates.length > 0 ? dates : Array.from({ length: 12 }, () => "");
   return rows.map((date) => ({ id: nextId("title"), date, name: "" }));
@@ -32,6 +51,9 @@ export function StartPage() {
   const [series, setSeries] = useState<DraftSeries[]>([]);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
 
   useEffect(() => {
     api.listCalendars().then((r) => setSummaries(r.calendars)).catch(() => {});
@@ -77,6 +99,51 @@ export function StartPage() {
   function addTitle() {
     if (titles.length >= MAX_TITLES) return;
     setTitles((prev) => [...prev, { id: nextId("title"), date: "", name: "" }]);
+  }
+
+  // Testing shortcut: fills every title slot with a random well-known movie from TMDB (keeping
+  // each slot's existing date) and groups 1-2 random contiguous runs into series with placeholder
+  // names, so a whole calendar can be built without typing anything.
+  async function handleAutoGenerate() {
+    setMenuOpen(false);
+    setGenerating(true);
+    setGenError(null);
+    try {
+      const { results } = await api.randomMovies(titles.length);
+      const movies = shuffled(results);
+      const nextTitles = titles.map((t, i) => {
+        const m = movies[i];
+        if (!m) return t;
+        return { ...t, name: m.title, tmdbId: m.id, posterUrl: m.posterUrl, seriesId: undefined };
+      });
+
+      const filledIdx = nextTitles.map((t, i) => (t.name.trim() ? i : -1)).filter((i) => i >= 0);
+      const seriesNames = shuffled(RANDOM_SERIES_NAMES);
+      const seriesCount = filledIdx.length >= 8 && Math.random() < 0.5 ? 2 : 1;
+      const usedIdx = new Set<number>();
+      const nextSeries: DraftSeries[] = [];
+      for (let s = 0; s < seriesCount; s++) {
+        const span = 2 + Math.floor(Math.random() * 2); // 2-3 consecutive titles
+        const available = filledIdx.filter((i) => !usedIdx.has(i));
+        if (available.length < span) break;
+        const startPos = Math.floor(Math.random() * (available.length - span + 1));
+        const chosen = available.slice(startPos, startPos + span);
+        chosen.forEach((i) => usedIdx.add(i));
+        const seriesId = nextId("series");
+        nextSeries.push({ id: seriesId, name: seriesNames[s] ?? "Series", titleIds: chosen.map((i) => nextTitles[i].id) });
+        chosen.forEach((i) => {
+          nextTitles[i] = { ...nextTitles[i], seriesId };
+        });
+      }
+
+      setTitles(nextTitles);
+      setSeries(nextSeries);
+    } catch (err) {
+      console.error(err);
+      setGenError("Auto-generate failed. Check that the server is running.");
+    } finally {
+      setGenerating(false);
+    }
   }
 
   // Discards this blank/in-progress draft: quietly if nothing's been typed in yet, with a
@@ -233,9 +300,27 @@ export function StartPage() {
             <TitleRow key={title.id} title={title} index={i} onChange={(next) => updateTitle(title.id, next)} onDelete={() => deleteTitle(title.id)} />
           ))}
         </div>
-        <button type="button" className="add-row-btn" onClick={addTitle} disabled={titles.length >= MAX_TITLES}>
-          + Add title
-        </button>
+        <div className="title-list-actions">
+          <button type="button" className="add-row-btn" onClick={addTitle} disabled={titles.length >= MAX_TITLES}>
+            + Add title
+          </button>
+          <div className="more-menu-wrap">
+            <button type="button" className="more-menu-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="More options" title="More options">
+              ⋯
+            </button>
+            {menuOpen && (
+              <>
+                <div className="menu-backdrop" onClick={() => setMenuOpen(false)} />
+                <div className="more-menu">
+                  <button type="button" className="more-menu-item" onClick={handleAutoGenerate} disabled={generating}>
+                    {generating ? "Generating…" : "Auto-generate"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        {genError && <div className="form-error">{genError}</div>}
         <div className="count-note">
           {filledCount} of {MIN_TITLES}–{MAX_TITLES} titles filled in
         </div>

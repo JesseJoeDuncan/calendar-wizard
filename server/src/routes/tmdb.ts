@@ -1,7 +1,18 @@
 import { Router } from "express";
-import { getMovieDetail, searchMovies } from "../lib/tmdb.js";
+import { getMovieDetail, getRandomMovies, searchMovies } from "../lib/tmdb.js";
 
 export const tmdbRouter = Router();
+
+tmdbRouter.get("/random", async (req, res) => {
+  const count = Math.min(20, Math.max(1, Number(req.query.count) || 12));
+  try {
+    const results = await getRandomMovies(count);
+    res.json({ results });
+  } catch (err) {
+    console.error(err);
+    res.status(502).json({ error: "TMDB random fetch failed" });
+  }
+});
 
 tmdbRouter.get("/search", async (req, res) => {
   const query = String(req.query.q || "").trim();
