@@ -12,7 +12,7 @@ import { TopBar } from "../components/editor/TopBar";
 import { api } from "../lib/api";
 import { computeAutoFitTitleText } from "../lib/autoFitText";
 import { calendarLabel } from "../lib/calendarLabel";
-import { DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
+import { DEFAULT_CARD_SHADOW, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE, DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
 import { exportCalendarPdf } from "../lib/exportPdf";
 import { HEADER_FOOTER_ELEMENT_IDS } from "../lib/headerFooterLayout";
 import { buildLayout, validateTitleCount } from "../lib/layoutEngine";
@@ -60,13 +60,22 @@ export function EditorPage() {
       try {
         const fetched = await api.getCalendar(id);
         if (cancelled) return;
-        // Older saved calendars may predate newly-added theme fields — backfill defaults.
+        // Older saved calendars may predate newly-added theme/title fields — backfill defaults.
         const defaults = getDefaultTheme();
+        // Titles saved before runtimeStyle/ratingStyle existed have flat runtimeOpacity/ratingOpacity
+        // numbers instead — carry that opacity forward into the new style object.
+        const legacyTitles = fetched.titles as unknown as Array<{ runtimeOpacity?: number; ratingOpacity?: number }>;
         const loaded: Calendar = {
           ...fetched,
+          titles: fetched.titles.map((t, i) => ({
+            ...t,
+            runtimeStyle: t.runtimeStyle ?? { ...DEFAULT_RUNTIME_STYLE, opacity: legacyTitles[i]?.runtimeOpacity ?? DEFAULT_RUNTIME_STYLE.opacity },
+            ratingStyle: t.ratingStyle ?? { ...DEFAULT_RATING_STYLE, opacity: legacyTitles[i]?.ratingOpacity ?? DEFAULT_RATING_STYLE.opacity },
+          })),
           theme: {
             background: fetched.theme.background ?? defaults.background,
             spacing: { ...DEFAULT_SPACING, ...fetched.theme.spacing },
+            cardShadow: fetched.theme.cardShadow ?? DEFAULT_CARD_SHADOW,
             headerFooter: fetched.theme.headerFooter
               ? {
                   ...defaults.headerFooter,
@@ -110,7 +119,7 @@ export function EditorPage() {
         titles: prev.titles.map((t) => {
           const w = widthByTitleId.get(t.id);
           if (!t.name || t.titleTextStyle.fontSize || !w) return t;
-          const fit = computeAutoFitTitleText(t.name, w, "Futura Wizard");
+          const fit = computeAutoFitTitleText(t.name, w, "Futura Wizard Condensed");
           return { ...t, titleTextStyle: { ...t.titleTextStyle, fontSize: fit.fontSize, manualLineBreaks: fit.manualLineBreaks } };
         }),
       };
@@ -118,7 +127,7 @@ export function EditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calendar?.id, geometry]);
 
-  function updateCalendar(patch: Partial<Calendar>) {
+  function updateCalendar(patch: Partial<Calendar> | ((prev: Calendar) => Partial<Calendar>)) {
     setCalendar((prev) => {
       if (!prev) return prev;
       if (!historyBaseRef.current) historyBaseRef.current = prev;
@@ -130,7 +139,7 @@ export function EditorPage() {
       }, HISTORY_DEBOUNCE_MS);
       setFuture([]);
       isDirtyRef.current = true;
-      return { ...prev, ...patch };
+      return { ...prev, ...(typeof patch === "function" ? patch(prev) : patch) };
     });
   }
 
@@ -168,6 +177,45 @@ export function EditorPage() {
       titles: calendar.titles.map((t) => (t.id === titleId && t.image ? { ...t, image: { ...t.image, offsetX, offsetY } } : t)),
     });
   }
+
+  function handleImageScaleChange(titleId: string, scale: number) {
+    if (!calendar) return;
+    updateCalendar({
+      titles: calendar.titles.map((t) => (t.id === titleId && t.image ? { ...t, image: { ...t.image, scale } } : t)),
+    });
+  }
+
+  // Arrow-key micro-adjustments for the selected title's image position, while details mode is
+  // open. Ignored while typing in a form field so normal text/number editing still works.
+  useEffect(() => {
+    if (!selectedTitleId) return;
+    function isFormField(el: EventTarget | null) {
+      const tag = (el as HTMLElement | null)?.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (isFormField(e.target)) return;
+      const deltas: Record<string, [number, number]> = {
+        ArrowLeft: [-1, 0],
+        ArrowRight: [1, 0],
+        ArrowUp: [0, -1],
+        ArrowDown: [0, 1],
+      };
+      const delta = deltas[e.key];
+      if (!delta) return;
+      e.preventDefault();
+      const step = e.shiftKey ? 8 : 1;
+      updateCalendar((prev) => {
+        const title = prev.titles.find((t) => t.id === selectedTitleId);
+        if (!title?.image) return {};
+        const offsetX = title.image.offsetX + delta[0] * step;
+        const offsetY = title.image.offsetY + delta[1] * step;
+        return { titles: prev.titles.map((t) => (t.id === selectedTitleId && t.image ? { ...t, image: { ...t.image, offsetX, offsetY } } : t)) };
+      });
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedTitleId]);
 
   async function handleSave(silent = false) {
     if (!calendar) return;
@@ -301,9 +349,12 @@ export function EditorPage() {
             selectedTitleId={selectedTitleId}
             onSelectTitle={setSelectedTitleId}
             onImageOffsetChange={handleImageOffsetChange}
+            onImageScaleChange={handleImageScaleChange}
             onOpenHeaderFooter={() => setHeaderFooterOpen(true)}
           />
         </div>
+
+        {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} />}
       </div>
 
       <ExportStage ref={exportStageRef} calendar={calendar} layout={layout} geometry={geometry} />
@@ -311,7 +362,6 @@ export function EditorPage() {
       {settingsOpen && (
         <SettingsDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setSettingsOpen(false)} onAutoSaveMinutesChange={setAutoSaveMinutesState} />
       )}
-      {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} />}
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import type { Calendar, CalendarTheme, SeriesBandStyle, Title, TitleTextStyle } from "../types.js";
+import type { Calendar, CalendarTheme, RuntimeRatingStyle, SeriesBandStyle, Title, TitleTextStyle } from "../types.js";
 
-// Row height is derived from the fixed canvas layout (CANVAS_H 1100, HEADER_H 150, FOOTER_H 92,
-// 3 rows): (1100-150-92)/3 = 286px. These defaults are that value's 7% / 4% / 2%, matching the
-// requested row-gap / box-gutter / intra-series-gutter proportions.
+// Row height is derived from the fixed canvas layout (CANVAS_H 1100, HEADER_H 150, FOOTER_H 125,
+// 3 rows): (1100-150-125)/3 = 275px. rowGap/boxGutter/seriesBoxGutter below were set as that
+// value's 7% / 4% / 2% back when rowHeight was 286px and are left as literal px values.
 export const DEFAULT_THEME: CalendarTheme = {
   background: { type: "color", value: "#e8879a" },
   spacing: {
@@ -10,13 +10,24 @@ export const DEFAULT_THEME: CalendarTheme = {
     boxGutter: 11,
     seriesBoxGutter: 6,
     rowGap: 20,
-    bandInset: 14,
     bandHeightRatio: 0.15,
     primaryRadius: 25,
     secondaryRadius: 9,
     tertiaryRadius: 2,
+    dateNumberSizePct: 0.35,
+    dateMonthSizePct: 0.1,
+  },
+  cardShadow: {
+    enabled: true,
+    color: "#000000",
+    blur: 10,
+    opacity: 0.28,
+    offsetX: 0,
+    offsetY: 3,
   },
 };
+
+export const DEFAULT_RUNTIME_RATING_STYLE: RuntimeRatingStyle = { offsetX: 0, offsetY: 0, scale: 1, opacity: 0.85, dropShadow: true, dropShadowOpacity: 0.5 };
 
 export const DEFAULT_TITLE_TEXT_STYLE: TitleTextStyle = {
   // 0 is a sentinel meaning "never auto-fit yet" — the editor computes a real value the first
@@ -50,8 +61,8 @@ export function makeEmptyTitle(id: string, date: string): Title {
     mpaRating: "NR",
     ratingVisible: false,
     titleTextStyle: { ...DEFAULT_TITLE_TEXT_STYLE },
-    runtimeOpacity: 0.85,
-    ratingOpacity: 0.85,
+    runtimeStyle: { ...DEFAULT_RUNTIME_RATING_STYLE },
+    ratingStyle: { ...DEFAULT_RUNTIME_RATING_STYLE },
     dateOffsetX: 0,
     dateOffsetY: 0,
     badges: [],

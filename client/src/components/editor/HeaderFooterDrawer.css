@@ -1,5 +1,12 @@
-.hf-drawer {
+/* Inline panel (like .details-left), not a modal overlay — stays docked alongside the canvas
+   until its own close button is pressed, and never dims the rest of the app. */
+.hf-panel {
+  flex: none;
   width: 380px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  padding: 1.2rem;
+  overflow-y: auto;
 }
 
 .hf-shape-row {

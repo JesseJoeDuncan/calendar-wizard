@@ -69,7 +69,7 @@ export function DetailsPanel({ title, boxWidth, onChange, onBack }: Props) {
   const currentUrl = title.image?.url;
   const words = title.name.split(/\s+/).filter(Boolean);
   const style = title.titleTextStyle;
-  const defaultFit = boxWidth ? computeAutoFitTitleText(title.name, boxWidth, "Futura Wizard") : null;
+  const defaultFit = boxWidth ? computeAutoFitTitleText(title.name, boxWidth, "Futura Wizard Condensed") : null;
 
   return (
     <div className="details-left">
@@ -265,9 +265,47 @@ export function DetailsPanel({ title, boxWidth, onChange, onBack }: Props) {
       </div>
 
       <div className="field-group">
-        <label>Runtime &amp; rating opacity</label>
-        <SettingRow label="Runtime" value={title.runtimeOpacity} defaultValue={0.85} min={0} max={1} step={0.05} onChange={(v) => onChange({ ...title, runtimeOpacity: v })} />
-        <SettingRow label="Rating" value={title.ratingOpacity} defaultValue={0.85} min={0} max={1} step={0.05} onChange={(v) => onChange({ ...title, ratingOpacity: v })} />
+        <label>Runtime</label>
+        <SettingRow label="Position X" value={title.runtimeStyle.offsetX} defaultValue={0} min={-100} max={100} step={0.5} unit="px" onChange={(v) => onChange({ ...title, runtimeStyle: { ...title.runtimeStyle, offsetX: v } })} />
+        <SettingRow label="Position Y" value={title.runtimeStyle.offsetY} defaultValue={0} min={-100} max={100} step={0.5} unit="px" onChange={(v) => onChange({ ...title, runtimeStyle: { ...title.runtimeStyle, offsetY: v } })} />
+        <SettingRow label="Scale" value={title.runtimeStyle.scale} defaultValue={1} min={0.2} max={4} step={0.05} onChange={(v) => onChange({ ...title, runtimeStyle: { ...title.runtimeStyle, scale: v } })} />
+        <SettingRow label="Opacity" value={title.runtimeStyle.opacity} defaultValue={0.85} min={0} max={1} step={0.05} onChange={(v) => onChange({ ...title, runtimeStyle: { ...title.runtimeStyle, opacity: v } })} />
+        <label className="toggle-row">
+          <input type="checkbox" checked={title.runtimeStyle.dropShadow} onChange={(e) => onChange({ ...title, runtimeStyle: { ...title.runtimeStyle, dropShadow: e.target.checked } })} />
+          Drop shadow
+        </label>
+        <SettingRow
+          label="Shadow opacity"
+          value={title.runtimeStyle.dropShadowOpacity}
+          defaultValue={0.5}
+          min={0}
+          max={1}
+          step={0.05}
+          disabled={!title.runtimeStyle.dropShadow}
+          onChange={(v) => onChange({ ...title, runtimeStyle: { ...title.runtimeStyle, dropShadowOpacity: v } })}
+        />
+      </div>
+
+      <div className="field-group">
+        <label>Rating</label>
+        <SettingRow label="Position X" value={title.ratingStyle.offsetX} defaultValue={0} min={-100} max={100} step={0.5} unit="px" onChange={(v) => onChange({ ...title, ratingStyle: { ...title.ratingStyle, offsetX: v } })} />
+        <SettingRow label="Position Y" value={title.ratingStyle.offsetY} defaultValue={0} min={-100} max={100} step={0.5} unit="px" onChange={(v) => onChange({ ...title, ratingStyle: { ...title.ratingStyle, offsetY: v } })} />
+        <SettingRow label="Scale" value={title.ratingStyle.scale} defaultValue={1} min={0.2} max={4} step={0.05} onChange={(v) => onChange({ ...title, ratingStyle: { ...title.ratingStyle, scale: v } })} />
+        <SettingRow label="Opacity" value={title.ratingStyle.opacity} defaultValue={0.85} min={0} max={1} step={0.05} onChange={(v) => onChange({ ...title, ratingStyle: { ...title.ratingStyle, opacity: v } })} />
+        <label className="toggle-row">
+          <input type="checkbox" checked={title.ratingStyle.dropShadow} onChange={(e) => onChange({ ...title, ratingStyle: { ...title.ratingStyle, dropShadow: e.target.checked } })} />
+          Drop shadow
+        </label>
+        <SettingRow
+          label="Shadow opacity"
+          value={title.ratingStyle.dropShadowOpacity}
+          defaultValue={0.5}
+          min={0}
+          max={1}
+          step={0.05}
+          disabled={!title.ratingStyle.dropShadow}
+          onChange={(v) => onChange({ ...title, ratingStyle: { ...title.ratingStyle, dropShadowOpacity: v } })}
+        />
       </div>
 
       <div className="field-group">

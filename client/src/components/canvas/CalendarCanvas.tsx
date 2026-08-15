@@ -17,6 +17,7 @@ interface Props {
   selectedTitleId: string | null;
   onSelectTitle: (id: string | null) => void;
   onImageOffsetChange?: (titleId: string, offsetX: number, offsetY: number) => void;
+  onImageScaleChange?: (titleId: string, scale: number) => void;
   onOpenHeaderFooter?: () => void;
   stageRef?: React.RefObject<Konva.Stage | null>;
 }
@@ -24,7 +25,7 @@ interface Props {
 const MIN_ZOOM = 0.4;
 const MAX_ZOOM = 4;
 
-export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, onOpenHeaderFooter, stageRef }: Props) {
+export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, onImageScaleChange, onOpenHeaderFooter, stageRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const internalStageRef = useRef<Konva.Stage>(null);
   const actualStageRef = stageRef ?? internalStageRef;
@@ -101,6 +102,15 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
     if (e.target === e.target.getStage()) onSelectTitle(null);
   }
 
+  // Konva drag events bubble from the originating node up through its ancestors, same as click —
+  // so dragging the selected title's image (a child several levels down) also fires this handler
+  // with e.target still pointing at that image, not the Stage. Without this guard, stagePos was
+  // being overwritten with the dragged image's own local x/y, snapping the camera to a bogus pan.
+  function handleStageDragEnd(e: Konva.KonvaEventObject<DragEvent>) {
+    if (e.target !== e.target.getStage()) return;
+    setStagePos({ x: e.target.x(), y: e.target.y() });
+  }
+
   return (
     <div className="canvas-viewport" ref={containerRef}>
       <div className="canvas-toolbar">
@@ -132,7 +142,7 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
           x={stagePos.x}
           y={stagePos.y}
           draggable={mode === "pan"}
-          onDragEnd={(e) => setStagePos({ x: e.target.x(), y: e.target.y() })}
+          onDragEnd={handleStageDragEnd}
           onWheel={handleWheel}
           onClick={handleStageClick}
           onTap={handleStageClick}
@@ -148,6 +158,7 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
               onSelectTitle={onSelectTitle}
               onHoverTitle={setHoveredTitleId}
               onImageOffsetChange={onImageOffsetChange}
+              onImageScaleChange={onImageScaleChange}
               onOpenHeaderFooter={onOpenHeaderFooter}
             />
           </Layer>

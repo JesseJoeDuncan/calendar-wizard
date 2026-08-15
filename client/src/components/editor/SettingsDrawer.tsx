@@ -75,7 +75,6 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             onChange={(v) => updateSpacing({ seriesBoxGutter: v })}
           />
           <SettingRow label="Row gap" value={theme.spacing.rowGap} defaultValue={defaults.spacing.rowGap} min={0} max={60} unit="px" onChange={(v) => updateSpacing({ rowGap: v })} />
-          <SettingRow label="Band inset" value={theme.spacing.bandInset} defaultValue={defaults.spacing.bandInset} min={0} max={40} unit="px" onChange={(v) => updateSpacing({ bandInset: v })} />
           <SettingRow
             label="Band height"
             value={theme.spacing.bandHeightRatio}
@@ -84,6 +83,28 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             max={0.28}
             step={0.01}
             onChange={(v) => updateSpacing({ bandHeightRatio: v })}
+          />
+        </div>
+
+        <div className="drawer-section">
+          <h4>Date text</h4>
+          <SettingRow
+            label="Date number size"
+            value={theme.spacing.dateNumberSizePct}
+            defaultValue={defaults.spacing.dateNumberSizePct}
+            min={0.15}
+            max={0.6}
+            step={0.01}
+            onChange={(v) => updateSpacing({ dateNumberSizePct: v })}
+          />
+          <SettingRow
+            label="Date month size"
+            value={theme.spacing.dateMonthSizePct}
+            defaultValue={defaults.spacing.dateMonthSizePct}
+            min={0.03}
+            max={0.2}
+            step={0.01}
+            onChange={(v) => updateSpacing({ dateMonthSizePct: v })}
           />
         </div>
 
@@ -115,6 +136,58 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
             max={60}
             unit="px"
             onChange={(v) => updateSpacing({ tertiaryRadius: v })}
+          />
+        </div>
+
+        <div className="drawer-section">
+          <h4>Card &amp; band shadow</h4>
+          <label className="drawer-field">
+            <span>Enabled</span>
+            <input type="checkbox" checked={theme.cardShadow.enabled} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, enabled: e.target.checked } })} />
+          </label>
+          <label className="drawer-field">
+            <span>Color</span>
+            <input type="color" value={theme.cardShadow.color} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, color: e.target.value } })} />
+          </label>
+          <SettingRow
+            label="Blur"
+            value={theme.cardShadow.blur}
+            defaultValue={defaults.cardShadow.blur}
+            min={0}
+            max={40}
+            unit="px"
+            disabled={!theme.cardShadow.enabled}
+            onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, blur: v } })}
+          />
+          <SettingRow
+            label="Opacity"
+            value={theme.cardShadow.opacity}
+            defaultValue={defaults.cardShadow.opacity}
+            min={0}
+            max={1}
+            step={0.02}
+            disabled={!theme.cardShadow.enabled}
+            onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, opacity: v } })}
+          />
+          <SettingRow
+            label="Offset X"
+            value={theme.cardShadow.offsetX}
+            defaultValue={defaults.cardShadow.offsetX}
+            min={-20}
+            max={20}
+            unit="px"
+            disabled={!theme.cardShadow.enabled}
+            onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, offsetX: v } })}
+          />
+          <SettingRow
+            label="Offset Y"
+            value={theme.cardShadow.offsetY}
+            defaultValue={defaults.cardShadow.offsetY}
+            min={-20}
+            max={20}
+            unit="px"
+            disabled={!theme.cardShadow.enabled}
+            onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, offsetY: v } })}
           />
         </div>
 

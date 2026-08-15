@@ -1,5 +1,5 @@
 import type { CalendarTheme } from "../types/calendar";
-import { DEFAULT_SPACING } from "./calendarGeometry";
+import { DEFAULT_CARD_SHADOW, DEFAULT_SPACING } from "./calendarGeometry";
 import { defaultHeaderFooter } from "./headerFooterLayout";
 
 const THEME_KEY = "calendarWizard.defaultTheme";
@@ -9,6 +9,7 @@ export const HARDCODED_DEFAULT_THEME: CalendarTheme = {
   background: { type: "color", value: "#e8879a" },
   spacing: DEFAULT_SPACING,
   headerFooter: defaultHeaderFooter(),
+  cardShadow: DEFAULT_CARD_SHADOW,
 };
 
 /** The user's saved default theme (via "Save as default"), falling back to the hardcoded one. */
@@ -21,6 +22,7 @@ export function getDefaultTheme(): CalendarTheme {
         ...HARDCODED_DEFAULT_THEME,
         ...parsed,
         spacing: { ...HARDCODED_DEFAULT_THEME.spacing, ...parsed.spacing },
+        cardShadow: { ...HARDCODED_DEFAULT_THEME.cardShadow, ...parsed.cardShadow },
         headerFooter: {
           ...HARDCODED_DEFAULT_THEME.headerFooter,
           ...parsed.headerFooter,

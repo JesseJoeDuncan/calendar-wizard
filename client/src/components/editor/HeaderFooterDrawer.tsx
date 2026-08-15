@@ -45,73 +45,71 @@ export function HeaderFooterDrawer({ calendar, onChange, onClose }: Props) {
   }
 
   return (
-    <div className="drawer-overlay" onClick={onClose}>
-      <div className="drawer hf-drawer" onClick={(e) => e.stopPropagation()}>
-        <div className="drawer-head">
-          <h3>Header &amp; Footer</h3>
-          <button className="del-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+    <div className="hf-panel">
+      <div className="drawer-head">
+        <h3>Header &amp; Footer</h3>
+        <button className="del-btn" onClick={onClose}>
+          ✕
+        </button>
+      </div>
 
-        <div className="drawer-section">
-          <h4>Footer shape</h4>
-          <div className="hf-shape-row">
-            {FOOTER_SHAPE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={`hf-shape-btn ${headerFooter.footerShapeVariant === opt.value ? "sel" : ""}`}
-                onClick={() => updateHeaderFooter({ footerShapeVariant: opt.value })}
-              >
-                {opt.label}
+      <div className="drawer-section">
+        <h4>Footer shape</h4>
+        <div className="hf-shape-row">
+          {FOOTER_SHAPE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`hf-shape-btn ${headerFooter.footerShapeVariant === opt.value ? "sel" : ""}`}
+              onClick={() => updateHeaderFooter({ footerShapeVariant: opt.value })}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="drawer-section">
+        <h4>Elements</h4>
+        {HEADER_FOOTER_ELEMENT_IDS.map((id) => {
+          const style = headerFooter[id];
+          const defaultStyle = defaults[id];
+          const open = openId === id;
+          return (
+            <div className="hf-element" key={id}>
+              <button type="button" className="hf-element-head" onClick={() => setOpenId(open ? null : id)}>
+                <label className="hf-visible" onClick={(e) => e.stopPropagation()}>
+                  <input type="checkbox" checked={style.visible} onChange={(e) => updateElement(id, { visible: e.target.checked })} />
+                </label>
+                <span className="hf-element-label">{HEADER_FOOTER_ELEMENT_LABELS[id]}</span>
+                <span className="hf-caret">{open ? "▾" : "▸"}</span>
               </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="drawer-section">
-          <h4>Elements</h4>
-          {HEADER_FOOTER_ELEMENT_IDS.map((id) => {
-            const style = headerFooter[id];
-            const defaultStyle = defaults[id];
-            const open = openId === id;
-            return (
-              <div className="hf-element" key={id}>
-                <button type="button" className="hf-element-head" onClick={() => setOpenId(open ? null : id)}>
-                  <label className="hf-visible" onClick={(e) => e.stopPropagation()}>
-                    <input type="checkbox" checked={style.visible} onChange={(e) => updateElement(id, { visible: e.target.checked })} />
+              {open && (
+                <div className="hf-element-body">
+                  <label className="drawer-field">
+                    <span>Color</span>
+                    <input type="color" value={style.color} onChange={(e) => updateElement(id, { color: e.target.value })} />
+                    <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElement(id, { color: defaultStyle.color })}>
+                      ⟲
+                    </button>
                   </label>
-                  <span className="hf-element-label">{HEADER_FOOTER_ELEMENT_LABELS[id]}</span>
-                  <span className="hf-caret">{open ? "▾" : "▸"}</span>
-                </button>
-                {open && (
-                  <div className="hf-element-body">
-                    <label className="drawer-field">
-                      <span>Color</span>
-                      <input type="color" value={style.color} onChange={(e) => updateElement(id, { color: e.target.value })} />
-                      <button type="button" className="setting-reset" title="Reset to default" onClick={() => updateElement(id, { color: defaultStyle.color })}>
-                        ⟲
-                      </button>
-                    </label>
-                    <SettingRow label="Position X" value={style.offsetX} defaultValue={defaultStyle.offsetX} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetX: v })} />
-                    <SettingRow label="Position Y" value={style.offsetY} defaultValue={defaultStyle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetY: v })} />
-                    <SettingRow label="Scale" value={style.scale} defaultValue={defaultStyle.scale} min={0.1} max={4} step={0.01} onChange={(v) => updateElement(id, { scale: v })} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  <SettingRow label="Position X" value={style.offsetX} defaultValue={defaultStyle.offsetX} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetX: v })} />
+                  <SettingRow label="Position Y" value={style.offsetY} defaultValue={defaultStyle.offsetY} min={-400} max={400} step={0.5} unit="px" onChange={(v) => updateElement(id, { offsetY: v })} />
+                  <SettingRow label="Scale" value={style.scale} defaultValue={defaultStyle.scale} min={0.1} max={4} step={0.01} onChange={(v) => updateElement(id, { scale: v })} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-        <div className="drawer-footer">
-          <button type="button" className="drawer-reset-all" onClick={resetAll}>
-            Reset all settings to default
-          </button>
-          <button type="button" className="drawer-save-default" onClick={saveAsDefault}>
-            {savedFlash ? "Saved ✓" : "Save as default"}
-          </button>
-        </div>
+      <div className="drawer-footer">
+        <button type="button" className="drawer-reset-all" onClick={resetAll}>
+          Reset all settings to default
+        </button>
+        <button type="button" className="drawer-save-default" onClick={saveAsDefault}>
+          {savedFlash ? "Saved ✓" : "Save as default"}
+        </button>
       </div>
     </div>
   );

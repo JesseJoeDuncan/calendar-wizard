@@ -1,4 +1,4 @@
-import type { CalendarSpacing } from "../types/calendar";
+import type { CalendarSpacing, DropShadowSettings, RuntimeRatingStyle } from "../types/calendar";
 import type { CalendarLayout } from "./layoutEngine";
 
 export const CANVAS_W = 850;
@@ -18,11 +18,24 @@ export const DEFAULT_SPACING: CalendarSpacing = {
   boxGutter: 11,
   seriesBoxGutter: 6,
   rowGap: 20,
-  bandInset: 14,
   bandHeightRatio: 0.15,
   primaryRadius: 25,
   secondaryRadius: 9,
   tertiaryRadius: 2,
+  dateNumberSizePct: 0.35,
+  dateMonthSizePct: 0.1,
+};
+
+export const DEFAULT_RUNTIME_STYLE: RuntimeRatingStyle = { offsetX: 0, offsetY: 0, scale: 1, opacity: 0.85, dropShadow: true, dropShadowOpacity: 0.5 };
+export const DEFAULT_RATING_STYLE: RuntimeRatingStyle = { offsetX: 0, offsetY: 0, scale: 1, opacity: 0.85, dropShadow: true, dropShadowOpacity: 0.5 };
+
+export const DEFAULT_CARD_SHADOW: DropShadowSettings = {
+  enabled: true,
+  color: "#000000",
+  blur: 10,
+  opacity: 0.28,
+  offsetX: 0,
+  offsetY: 3,
 };
 
 export interface BoxGeometry {
@@ -53,10 +66,12 @@ export interface CalendarGeometry {
   footer: { x: number; y: number; w: number; h: number };
   body: { x: number; y: number; w: number; h: number };
   rows: RowGeometry[];
+  /** Height of a standard (non-series) card — constant across every row — used as the reference for date/month text sizing so it never varies card-to-card. */
+  standardBoxH: number;
 }
 
 export function computeGeometry(layout: CalendarLayout, spacing: Partial<CalendarSpacing> | undefined): CalendarGeometry {
-  const { outerMargin, boxGutter, seriesBoxGutter, rowGap, bandInset, bandHeightRatio } = { ...DEFAULT_SPACING, ...spacing };
+  const { outerMargin, boxGutter, seriesBoxGutter, rowGap, bandHeightRatio } = { ...DEFAULT_SPACING, ...spacing };
 
   const header = { x: 0, y: 0, w: CANVAS_W, h: HEADER_H };
   const footer = { x: 0, y: CANVAS_H - FOOTER_H, w: CANVAS_W, h: FOOTER_H };
@@ -66,15 +81,18 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
 
   const rowCount = layout.rows.length;
   const rowHeight = bodyHeight / rowCount;
+  // Every row reserves the same bottom gap before the next row, whether or not it has a band —
+  // so this (and therefore date/month text sizing) is identical across all rows.
+  const standardBoxH = rowHeight - rowGap;
 
   const rows: RowGeometry[] = layout.rows.map((row, i) => {
     const rowTop = bodyTop + i * rowHeight;
     const bandH = rowHeight * bandHeightRatio;
-    // Every row reserves the same bottom gap before the next row, whether or not it has a band.
-    const fullBoxH = rowHeight - rowGap;
-    // A box that belongs to a series band is shorter by exactly the band's height, so the band's
-    // own bottom edge lines up with the bottom of the row's full-height (non-series) boxes.
-    const bandedBoxH = fullBoxH - bandH;
+    const fullBoxH = standardBoxH;
+    // A box that belongs to a series band is shorter by the band's height plus the gutter between
+    // the band and the cards above it, so the band's own bottom edge lines up with the bottom of
+    // the row's full-height (non-series) boxes.
+    const bandedBoxH = fullBoxH - bandH - seriesBoxGutter;
 
     const n = row.boxes.length;
     // Gap between box k and k+1 is the tighter intra-series gutter when both share a series,
@@ -101,14 +119,16 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
       cursorX += boxW + (gaps[k] ?? 0);
     });
 
+    // The band spans the full width of its constituent cards (no inset) and sits exactly
+    // seriesBoxGutter below them.
     const bands: BandGeometry[] = row.seriesBands.map((band) => {
       const startBox = boxes[band.startBoxIndex];
       const endBox = boxes[band.endBoxIndex];
       return {
         seriesId: band.seriesId,
-        x: startBox.x + bandInset,
-        y: rowTop + bandedBoxH,
-        w: endBox.x + endBox.w - startBox.x - bandInset * 2,
+        x: startBox.x,
+        y: rowTop + bandedBoxH + seriesBoxGutter,
+        w: endBox.x + endBox.w - startBox.x,
         h: bandH,
       };
     });
@@ -116,5 +136,5 @@ export function computeGeometry(layout: CalendarLayout, spacing: Partial<Calenda
     return { boxes, bands, top: rowTop, height: rowHeight };
   });
 
-  return { header, footer, body, rows };
+  return { header, footer, body, rows, standardBoxH };
 }

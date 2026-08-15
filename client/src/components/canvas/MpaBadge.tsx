@@ -2,21 +2,42 @@ import type { MpaRating } from "../../types/calendar";
 import { KonvaImg } from "./KonvaImg";
 
 const FILES: Record<MpaRating, string> = {
-  G: "Rated_G.svg",
-  PG: "Rated_PG.svg",
-  "PG-13": "Rated_PG-13.svg",
-  R: "Rated_R.svg",
-  "NC-17": "Rated_NC-17.svg",
-  NR: "Not_Rated.svg",
+  G: "Rated_G.png",
+  PG: "Rated_PG.png",
+  "PG-13": "Rated_PG-13.png",
+  R: "Rated_R.png",
+  "NC-17": "Rated_NC-17.png",
+  NR: "Not_Rated.png",
 };
 
 interface Props {
   rating: MpaRating;
-  x: number;
-  y: number;
+  /** Center position — the badge rotates in place around its own center, not a corner. */
+  centerX: number;
+  centerY: number;
+  size: number;
+  rotation: number;
   opacity: number;
+  dropShadow: boolean;
+  dropShadowOpacity: number;
 }
 
-export function MpaBadge({ rating, x, y, opacity }: Props) {
-  return <KonvaImg src={`/assets/mpaa/${FILES[rating]}`} x={x} y={y} width={22} height={22} opacity={opacity} />;
+export function MpaBadge({ rating, centerX, centerY, size, rotation, opacity, dropShadow, dropShadowOpacity }: Props) {
+  return (
+    <KonvaImg
+      src={`/assets/mpaa-white/${FILES[rating]}`}
+      x={centerX}
+      y={centerY}
+      width={size}
+      height={size}
+      offsetX={size / 2}
+      offsetY={size / 2}
+      rotation={rotation}
+      opacity={opacity}
+      shadowEnabled={dropShadow}
+      shadowColor="black"
+      shadowBlur={3}
+      shadowOpacity={dropShadowOpacity}
+    />
+  );
 }

@@ -4,6 +4,7 @@ import { TopBar } from "../components/editor/TopBar";
 import { SeriesEditor } from "../components/SeriesEditor";
 import { TitleRow } from "../components/TitleRow";
 import { api } from "../lib/api";
+import { DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE } from "../lib/calendarGeometry";
 import { nextId, type DraftSeries, type DraftTitle } from "../lib/draftTypes";
 import { MAX_TITLES, MIN_TITLES, validateTitleCount } from "../lib/layoutEngine";
 import { computeSmartStartDefaults } from "../lib/smartDefaults";
@@ -147,8 +148,8 @@ export function StartPage() {
         // fontSize 0 is the "not yet auto-fit" sentinel — the editor computes a real size once it
         // knows this title's actual box width.
         titleTextStyle: { fontSize: 0, kerning: 0, lineSpacing: 1.08, justify: "left" as const, dropShadow: true, offsetX: 0, offsetY: 0 },
-        runtimeOpacity: 0.85,
-        ratingOpacity: 0.85,
+        runtimeStyle: { ...DEFAULT_RUNTIME_STYLE },
+        ratingStyle: { ...DEFAULT_RATING_STYLE },
         dateOffsetX: 0,
         dateOffsetY: 0,
         badges: [],

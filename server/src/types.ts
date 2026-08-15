@@ -41,6 +41,15 @@ export interface TitleTextStyle {
   manualLineBreaks?: number[];
 }
 
+export interface RuntimeRatingStyle {
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+  opacity: number;
+  dropShadow: boolean;
+  dropShadowOpacity: number;
+}
+
 export interface Title {
   id: string;
   tmdbId?: number;
@@ -52,8 +61,8 @@ export interface Title {
   image?: ImageState;
   imageCandidates?: ImageCandidate[];
   titleTextStyle: TitleTextStyle;
-  runtimeOpacity: number;
-  ratingOpacity: number;
+  runtimeStyle: RuntimeRatingStyle;
+  ratingStyle: RuntimeRatingStyle;
   dateOffsetX: number;
   dateOffsetY: number;
   badges: Badge[];
@@ -85,16 +94,29 @@ export interface CalendarSpacing {
   boxGutter: number;
   seriesBoxGutter: number;
   rowGap: number;
-  bandInset: number;
   bandHeightRatio: number;
   primaryRadius: number;
   secondaryRadius: number;
   tertiaryRadius: number;
+  dateNumberSizePct: number;
+  dateMonthSizePct: number;
+}
+
+export interface DropShadowSettings {
+  enabled: boolean;
+  color: string;
+  blur: number;
+  opacity: number;
+  offsetX: number;
+  offsetY: number;
 }
 
 export interface CalendarTheme {
   background: { type: "color" | "gradient" | "image"; value: string; value2?: string };
   spacing: CalendarSpacing;
+  cardShadow: DropShadowSettings;
+  // headerFooter intentionally left loosely typed here — the server treats it as opaque JSON.
+  headerFooter?: unknown;
 }
 
 export interface Calendar {

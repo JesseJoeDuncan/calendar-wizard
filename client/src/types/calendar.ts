@@ -44,6 +44,15 @@ export interface TitleTextStyle {
   manualLineBreaks?: number[];
 }
 
+export interface RuntimeRatingStyle {
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+  opacity: number;
+  dropShadow: boolean;
+  dropShadowOpacity: number;
+}
+
 export interface Title {
   id: string;
   tmdbId?: number;
@@ -55,8 +64,8 @@ export interface Title {
   image?: ImageState;
   imageCandidates?: ImageCandidate[];
   titleTextStyle: TitleTextStyle;
-  runtimeOpacity: number;
-  ratingOpacity: number;
+  runtimeStyle: RuntimeRatingStyle;
+  ratingStyle: RuntimeRatingStyle;
   dateOffsetX: number;
   dateOffsetY: number;
   badges: Badge[];
@@ -94,10 +103,9 @@ export interface CalendarSpacing {
   outerMargin: number;
   /** Gap between two adjacent boxes that are NOT in the same series. */
   boxGutter: number;
-  /** Gap between two adjacent boxes that ARE in the same series. */
+  /** Gap between two adjacent boxes that ARE in the same series; also the gutter between a series band and its cards. */
   seriesBoxGutter: number;
   rowGap: number;
-  bandInset: number;
   bandHeightRatio: number;
   /** Corner radius, px, for free corners (touch neither a band nor a same-series neighbor). */
   primaryRadius: number;
@@ -105,6 +113,19 @@ export interface CalendarSpacing {
   secondaryRadius: number;
   /** Corner radius, px, for corners where a box meets its series band. */
   tertiaryRadius: number;
+  /** Date-number text height, as a fraction of a standard (non-series) card's height — constant across every card. */
+  dateNumberSizePct: number;
+  /** Date-month text height, as a fraction of a standard (non-series) card's height. */
+  dateMonthSizePct: number;
+}
+
+export interface DropShadowSettings {
+  enabled: boolean;
+  color: string;
+  blur: number;
+  opacity: number;
+  offsetX: number;
+  offsetY: number;
 }
 
 export type FooterShapeVariant = "bumps" | "zigzags" | "straightline";
@@ -141,6 +162,8 @@ export interface CalendarTheme {
   background: FillStyle;
   spacing: CalendarSpacing;
   headerFooter: CalendarHeaderFooter;
+  /** Shared drop shadow applied to every movie card and every series band — not per-card/per-band. */
+  cardShadow: DropShadowSettings;
 }
 
 export interface Calendar {

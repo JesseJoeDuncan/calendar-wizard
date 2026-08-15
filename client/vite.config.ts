@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:4310",
       "/cache-images": "http://localhost:4310",
+      "/uploads": "http://localhost:4310",
     },
   },
 });
