@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { HScrollStrip } from "../components/HScrollStrip";
+import { TopBar } from "../components/editor/TopBar";
 import { api } from "../lib/api";
 import { DEFAULT_SPACING } from "../lib/calendarGeometry";
-import type { Calendar, ImageCandidate, MpaRating, Title } from "../types/calendar";
+import { calendarLabel } from "../lib/calendarLabel";
+import type { Calendar, CalendarSummary, ImageCandidate, MpaRating, Title } from "../types/calendar";
 import "./ImageSelectionPage.css";
 
 const STRIP_HEIGHT = 180;
@@ -47,10 +49,15 @@ export function ImageSelectionPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [calendar, setCalendar] = useState<Calendar | null>(null);
+  const [summaries, setSummaries] = useState<CalendarSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [states, setStates] = useState<Record<string, TitleImageState>>({});
   const [advancing, setAdvancing] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  useEffect(() => {
+    api.listCalendars().then((r) => setSummaries(r.calendars)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -179,18 +186,41 @@ export function ImageSelectionPage() {
 
   const label = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;
 
+  async function handleDeleteCalendar() {
+    if (!calendar) return;
+    if (!window.confirm(`Delete "${calendarLabel(calendar)}"? This can't be undone.`)) return;
+    try {
+      await api.deleteCalendar(calendar.id);
+      const remaining = summaries.filter((s) => s.id !== calendar.id);
+      navigate(remaining.length > 0 ? `/edit/${remaining[0].id}` : "/");
+    } catch (err) {
+      console.error(err);
+      setError("Delete failed. Check that the server is running.");
+    }
+  }
+
   return (
     <div className="isel-page">
-      <div className="isel-top">
-        <div>
-          <h1>Choose an image for each title</h1>
-          <p className="isel-sub">
-            {label} {calendar.year} · {selectedCount} of {sortedTitles.length} selected
-          </p>
+      <div className="isel-sticky-top">
+        <TopBar
+          currentId={calendar.id}
+          currentLabel={`${label} ${calendar.year}`}
+          summaries={summaries}
+          onSwitch={(targetId) => navigate(`/edit/${targetId}`)}
+          onNew={() => navigate("/")}
+          onDelete={handleDeleteCalendar}
+        />
+        <div className="isel-top">
+          <div>
+            <h1>Choose an image for each title</h1>
+            <p className="isel-sub">
+              {label} {calendar.year} · {selectedCount} of {sortedTitles.length} selected
+            </p>
+          </div>
+          <button className="isel-continue" onClick={handleContinue} disabled={!allSelected || advancing}>
+            {advancing ? "Building calendar…" : "Continue →"}
+          </button>
         </div>
-        <button className="isel-continue" onClick={handleContinue} disabled={!allSelected || advancing}>
-          {advancing ? "Building calendar…" : "Continue →"}
-        </button>
       </div>
 
       <div className="isel-list">

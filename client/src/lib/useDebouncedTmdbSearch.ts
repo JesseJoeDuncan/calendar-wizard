@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { api, type TmdbSearchResult } from "./api";
 
 export function useDebouncedTmdbSearch(query: string, delayMs = 300) {
   const [results, setResults] = useState<TmdbSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const requestIdRef = useRef(0);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -14,18 +13,21 @@ export function useDebouncedTmdbSearch(query: string, delayMs = 300) {
       return;
     }
     setLoading(true);
-    const myId = ++requestIdRef.current;
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const { results: r } = await api.searchMovies(trimmed);
-        if (requestIdRef.current === myId) setResults(r);
-      } catch {
-        if (requestIdRef.current === myId) setResults([]);
+        const { results: r } = await api.searchMovies(trimmed, controller.signal);
+        setResults(r);
+      } catch (err) {
+        if ((err as { name?: string }).name !== "AbortError") setResults([]);
       } finally {
-        if (requestIdRef.current === myId) setLoading(false);
+        setLoading(false);
       }
     }, delayMs);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, delayMs]);
 
   return { results, loading };

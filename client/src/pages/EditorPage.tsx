@@ -7,8 +7,10 @@ import { DetailsPanel } from "../components/editor/DetailsPanel";
 import { SettingsDrawer } from "../components/editor/SettingsDrawer";
 import { SeriesMiniCard } from "../components/editor/SeriesMiniCard";
 import { TitleCard } from "../components/editor/TitleCard";
+import { TopBar } from "../components/editor/TopBar";
 import { api } from "../lib/api";
 import { computeAutoFitTitleText } from "../lib/autoFitText";
+import { calendarLabel } from "../lib/calendarLabel";
 import { DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
 import { exportCalendarPdf } from "../lib/exportPdf";
 import { buildLayout, validateTitleCount } from "../lib/layoutEngine";
@@ -18,18 +20,6 @@ import "./EditorPage.css";
 
 const HISTORY_DEBOUNCE_MS = 800;
 const MAX_HISTORY = 50;
-
-function calendarLabel(s: Pick<CalendarSummary, "season" | "customSeasonLabel" | "year">): string {
-  return `${s.season === "Custom" ? s.customSeasonLabel || "Custom" : s.season} ${s.year}`;
-}
-
-function dropdownLabel(s: CalendarSummary, all: CalendarSummary[]): string {
-  const label = calendarLabel(s);
-  const siblings = all.filter((x) => calendarLabel(x) === label).sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
-  if (siblings.length <= 1) return label;
-  const idx = siblings.findIndex((x) => x.id === s.id);
-  return `${label} (#${idx + 1})`;
-}
 
 export function EditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -232,45 +222,29 @@ export function EditorPage() {
 
   return (
     <div className="editor-page">
-      <div className="editor-top">
-        <button className="icon-btn" onClick={() => setSettingsOpen(true)} title="Settings">
-          ⚙
-        </button>
-        <button className="icon-btn" onClick={() => navigate("/")} title="New calendar">
-          +
-        </button>
-        <select className="cal-select" value={calendar.id} onChange={(e) => navigate(`/edit/${e.target.value}`)}>
-          <option value={calendar.id}>{dropdownLabel(calendar, allSummaries)}</option>
-          {summaries
-            .filter((s) => s.id !== calendar.id)
-            .map((s) => (
-              <option key={s.id} value={s.id}>
-                {dropdownLabel(s, allSummaries)}
-              </option>
-            ))}
-        </select>
-        <button className="icon-btn" onClick={handleDelete} title="Delete this calendar">
-          🗑
-        </button>
-        <div className="spacer" />
-        {countError && (
-          <div className="count-warning">
-            {countError.reason === "too-few" ? `Needs at least 9 titles (has ${countError.count})` : `Max 15 titles (has ${countError.count})`}
-          </div>
-        )}
-        <button className="icon-btn" onClick={undo} disabled={past.length === 0} title="Undo">
-          ↶
-        </button>
-        <button className="icon-btn" onClick={redo} disabled={future.length === 0} title="Redo">
-          ↷
-        </button>
-        <button className="btn-ghost" onClick={() => handleSave(false)} disabled={saving}>
-          💾 {saving ? "Saving…" : "Save"}
-        </button>
-        <button className="btn-dl" onClick={handleDownload}>
-          ⬇ Download PDF
-        </button>
-      </div>
+      <TopBar
+        currentId={calendar.id}
+        currentLabel={calendarLabel(calendar)}
+        summaries={allSummaries}
+        onSwitch={(targetId) => navigate(`/edit/${targetId}`)}
+        onNew={() => navigate("/")}
+        onDelete={handleDelete}
+        editor={{
+          countWarning: countError
+            ? countError.reason === "too-few"
+              ? `Needs at least 9 titles (has ${countError.count})`
+              : `Max 15 titles (has ${countError.count})`
+            : null,
+          onSettings: () => setSettingsOpen(true),
+          onSave: () => handleSave(false),
+          saving,
+          onDownload: handleDownload,
+          onUndo: undo,
+          onRedo: redo,
+          canUndo: past.length > 0,
+          canRedo: future.length > 0,
+        }}
+      />
 
       <div className="editor-body">
         <div className="editor-left">

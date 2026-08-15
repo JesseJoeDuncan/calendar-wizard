@@ -23,7 +23,7 @@ export interface TmdbMovieDetail {
 }
 
 export const api = {
-  searchMovies: (query: string) => json<{ results: TmdbSearchResult[] }>(fetch(`/api/tmdb/search?q=${encodeURIComponent(query)}`)),
+  searchMovies: (query: string, signal?: AbortSignal) => json<{ results: TmdbSearchResult[] }>(fetch(`/api/tmdb/search?q=${encodeURIComponent(query)}`, { signal })),
 
   getMovieDetail: (id: number) => json<TmdbMovieDetail>(fetch(`/api/tmdb/movie/${id}`)),
 

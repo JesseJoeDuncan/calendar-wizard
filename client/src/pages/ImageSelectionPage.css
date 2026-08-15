@@ -5,10 +5,13 @@
   padding-bottom: 3rem;
 }
 
-.isel-top {
+.isel-sticky-top {
   position: sticky;
   top: 0;
   z-index: 5;
+}
+
+.isel-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
