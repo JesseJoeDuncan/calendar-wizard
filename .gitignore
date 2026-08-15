@@ -4,6 +4,7 @@ dist/
 server/.env
 server/data/calendars/*.json
 server/data/cache/
+server/data/uploads/
 client/dist/
 *.log
 .claude/settings.local.json
