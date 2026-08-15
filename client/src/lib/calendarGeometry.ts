@@ -5,10 +5,14 @@ export const CANVAS_W = 850;
 export const CANVAS_H = 1100;
 
 export const HEADER_H = 150;
-export const FOOTER_H = 92;
+// Matches the footer graphics' real height in the header/footer placement guide (measured at
+// canvas scale), not an arbitrary choice — growing it from the earlier placeholder value of 92
+// shrinks rowHeight by a few px, which is expected.
+export const FOOTER_H = 125;
 
-// Row height is (CANVAS_H - HEADER_H - FOOTER_H) / 3 = 286px. rowGap/boxGutter/seriesBoxGutter
-// defaults below are that value's 7% / 4% / 2%.
+// Row height is (CANVAS_H - HEADER_H - FOOTER_H) / 3 = 275px. rowGap/boxGutter/seriesBoxGutter
+// defaults below were set as that value's 7% / 4% / 2% back when rowHeight was 286px and are
+// left as literal px values, not recomputed off the new rowHeight.
 export const DEFAULT_SPACING: CalendarSpacing = {
   outerMargin: 34,
   boxGutter: 11,

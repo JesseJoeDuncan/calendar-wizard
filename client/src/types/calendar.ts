@@ -107,10 +107,40 @@ export interface CalendarSpacing {
   tertiaryRadius: number;
 }
 
+export type FooterShapeVariant = "bumps" | "zigzags" | "straightline";
+
+export interface HeaderFooterElementStyle {
+  visible: boolean;
+  color: string;
+  /** Pixel delta from the element's default guide-matched anchor position. */
+  offsetX: number;
+  offsetY: number;
+  /** Uniform multiplier on the element's default (guide-matched) width; height follows its aspect ratio. */
+  scale: number;
+}
+
+export type HeaderFooterElementId =
+  | "sundayNightText"
+  | "onyxLogo"
+  | "footerShape"
+  | "nevadaTheatreText"
+  | "nevadaTheatreLogo"
+  | "doorsShowtimeText"
+  | "allAgesText"
+  | "ticketPriceText"
+  | "qrArrow"
+  | "qrCode"
+  | "domainText";
+
+export type CalendarHeaderFooter = {
+  footerShapeVariant: FooterShapeVariant;
+} & Record<HeaderFooterElementId, HeaderFooterElementStyle>;
+
 export interface CalendarTheme {
-  /** Single fill spanning the whole canvas — header/footer are blank space on this background for now. */
+  /** Single fill spanning the whole canvas, showing through wherever header/footer elements don't cover it. */
   background: FillStyle;
   spacing: CalendarSpacing;
+  headerFooter: CalendarHeaderFooter;
 }
 
 export interface Calendar {

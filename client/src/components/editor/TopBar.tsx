@@ -5,6 +5,7 @@ import "./TopBar.css";
 export interface TopBarEditorControls {
   countWarning?: string | null;
   onSettings: () => void;
+  onHeaderFooter: () => void;
   onSave: () => void;
   saving: boolean;
   onDownload: () => void;
@@ -36,6 +37,11 @@ export function TopBar({ currentId, currentLabel, summaries, onSwitch, onNew, on
       {editor && (
         <button className="icon-btn" onClick={editor.onSettings} title="Settings">
           ⚙
+        </button>
+      )}
+      {editor && (
+        <button className="icon-btn" onClick={editor.onHeaderFooter} title="Header & footer">
+          🖼
         </button>
       )}
       <button className="icon-btn" onClick={onNew} title="New calendar">

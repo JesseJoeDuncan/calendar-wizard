@@ -3,6 +3,7 @@ import { CANVAS_H, CANVAS_W, type CalendarGeometry } from "../../lib/calendarGeo
 import type { CalendarLayout } from "../../lib/layoutEngine";
 import type { Calendar } from "../../types/calendar";
 import { FillRect } from "./FillRect";
+import { HeaderFooterGroup } from "./HeaderFooterGroup";
 import { SeriesBandNode } from "./SeriesBandNode";
 import { TitleBoxNode } from "./TitleBoxNode";
 
@@ -16,6 +17,8 @@ interface Props {
   onSelectTitle: (id: string) => void;
   onHoverTitle: (id: string | null) => void;
   onImageOffsetChange?: (titleId: string, offsetX: number, offsetY: number) => void;
+  /** Header/footer content always renders; this is only the click-to-open handler, absent for the export stage. */
+  onOpenHeaderFooter?: () => void;
 }
 
 export function CalendarScene({
@@ -28,13 +31,13 @@ export function CalendarScene({
   onSelectTitle,
   onHoverTitle,
   onImageOffsetChange,
+  onOpenHeaderFooter,
 }: Props) {
   const titleById = new Map(calendar.titles.map((t) => [t.id, t]));
   const seriesById = new Map(calendar.series.map((s) => [s.id, s]));
 
   return (
     <>
-      {/* Header/footer are blank space on this same background for now — content comes later. */}
       <FillRect fill={calendar.theme.background} x={0} y={0} w={CANVAS_W} h={CANVAS_H} />
 
       {layout.rows.map((row, ri) => {
@@ -71,6 +74,8 @@ export function CalendarScene({
           </Fragment>
         );
       })}
+
+      <HeaderFooterGroup headerFooter={calendar.theme.headerFooter} geometry={geometry} interactive={interactive} onOpen={onOpenHeaderFooter} />
     </>
   );
 }

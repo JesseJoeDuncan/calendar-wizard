@@ -17,13 +17,14 @@ interface Props {
   selectedTitleId: string | null;
   onSelectTitle: (id: string | null) => void;
   onImageOffsetChange?: (titleId: string, offsetX: number, offsetY: number) => void;
+  onOpenHeaderFooter?: () => void;
   stageRef?: React.RefObject<Konva.Stage | null>;
 }
 
 const MIN_ZOOM = 0.4;
 const MAX_ZOOM = 4;
 
-export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, stageRef }: Props) {
+export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, onOpenHeaderFooter, stageRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const internalStageRef = useRef<Konva.Stage>(null);
   const actualStageRef = stageRef ?? internalStageRef;
@@ -147,6 +148,7 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
               onSelectTitle={onSelectTitle}
               onHoverTitle={setHoveredTitleId}
               onImageOffsetChange={onImageOffsetChange}
+              onOpenHeaderFooter={onOpenHeaderFooter}
             />
           </Layer>
         </Stage>

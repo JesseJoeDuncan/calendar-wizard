@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { CalendarCanvas } from "../components/canvas/CalendarCanvas";
 import { ExportStage } from "../components/canvas/ExportStage";
 import { DetailsPanel } from "../components/editor/DetailsPanel";
+import { HeaderFooterDrawer } from "../components/editor/HeaderFooterDrawer";
 import { SettingsDrawer } from "../components/editor/SettingsDrawer";
 import { SeriesMiniCard } from "../components/editor/SeriesMiniCard";
 import { TitleCard } from "../components/editor/TitleCard";
@@ -13,6 +14,7 @@ import { computeAutoFitTitleText } from "../lib/autoFitText";
 import { calendarLabel } from "../lib/calendarLabel";
 import { DEFAULT_SPACING, computeGeometry } from "../lib/calendarGeometry";
 import { exportCalendarPdf } from "../lib/exportPdf";
+import { HEADER_FOOTER_ELEMENT_IDS } from "../lib/headerFooterLayout";
 import { buildLayout, validateTitleCount } from "../lib/layoutEngine";
 import { getAutoSaveMinutes, getDefaultTheme } from "../lib/userDefaults";
 import type { Calendar, CalendarSummary } from "../types/calendar";
@@ -30,6 +32,7 @@ export function EditorPage() {
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [past, setPast] = useState<Calendar[]>([]);
   const [future, setFuture] = useState<Calendar[]>([]);
@@ -64,6 +67,15 @@ export function EditorPage() {
           theme: {
             background: fetched.theme.background ?? defaults.background,
             spacing: { ...DEFAULT_SPACING, ...fetched.theme.spacing },
+            headerFooter: fetched.theme.headerFooter
+              ? {
+                  ...defaults.headerFooter,
+                  ...fetched.theme.headerFooter,
+                  ...Object.fromEntries(
+                    HEADER_FOOTER_ELEMENT_IDS.map((elId) => [elId, { ...defaults.headerFooter[elId], ...fetched.theme.headerFooter[elId] }])
+                  ),
+                }
+              : defaults.headerFooter,
           },
         };
         setCalendar(loaded);
@@ -236,6 +248,7 @@ export function EditorPage() {
               : `Max 15 titles (has ${countError.count})`
             : null,
           onSettings: () => setSettingsOpen(true),
+          onHeaderFooter: () => setHeaderFooterOpen(true),
           onSave: () => handleSave(false),
           saving,
           onDownload: handleDownload,
@@ -288,6 +301,7 @@ export function EditorPage() {
             selectedTitleId={selectedTitleId}
             onSelectTitle={setSelectedTitleId}
             onImageOffsetChange={handleImageOffsetChange}
+            onOpenHeaderFooter={() => setHeaderFooterOpen(true)}
           />
         </div>
       </div>
@@ -297,6 +311,7 @@ export function EditorPage() {
       {settingsOpen && (
         <SettingsDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setSettingsOpen(false)} onAutoSaveMinutesChange={setAutoSaveMinutesState} />
       )}
+      {headerFooterOpen && <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} />}
     </div>
   );
 }
