@@ -16,15 +16,16 @@ export interface AutoFitTitleText {
 
 /**
  * Computes a one-time default font size (and, for longer titles, a forced two-line break) so the
- * title fills most of its box width. Titles with 2+ words and 12+ characters are split at the
- * word boundary that best balances the two resulting lines, then sized so the longer line fills
- * the target width — this maximizes the font size for a clean two-line layout.
+ * title fills most of its box width. Titles with 2+ words and at least `wrapCharThreshold`
+ * characters are split at the word boundary that best balances the two resulting lines, then sized
+ * so the longer line fills the target width — this maximizes the font size for a clean two-line
+ * layout.
  */
-export function computeAutoFitTitleText(name: string, boxWidth: number, fontFamily: string, fontStyle = "bold"): AutoFitTitleText {
+export function computeAutoFitTitleText(name: string, boxWidth: number, wrapCharThreshold: number, fontFamily: string, fontStyle = "bold"): AutoFitTitleText {
   const words = name.split(/\s+/).filter(Boolean);
   const targetWidth = boxWidth * WIDTH_FILL_RATIO;
 
-  if (words.length < 2 || name.length < 12) {
+  if (words.length < 2 || name.length < wrapCharThreshold) {
     const measured = measureTextWidth(name.toUpperCase(), REF_SIZE, fontFamily, fontStyle) || 1;
     const fontSize = clamp((targetWidth / measured) * REF_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE);
     return { fontSize, manualLineBreaks: [] };

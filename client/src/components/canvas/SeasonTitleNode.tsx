@@ -13,9 +13,10 @@ interface Props {
   style: SeasonTitleStyle;
 }
 
-// The recipe is fixed by design, not user-adjustable: Futura Bold 45pt for the season name and
-// Futura Medium 59pt for the year, both with tight tracking (in thousandths-of-an-em, the standard
-// design-tool "tracking" unit — e.g. -80 at 45pt is -3.6pt of letter-spacing, not -80px).
+// The base recipe is fixed by design: Futura Bold 45pt for the season name and Futura Medium 59pt
+// for the year, both with tight tracking (in thousandths-of-an-em, the standard design-tool
+// "tracking" unit — e.g. -80 at 45pt is -3.6pt of letter-spacing, not -80px). style.kerning adds
+// an additional user-adjustable letter-spacing delta (plain px) on top of this tracking.
 const SEASON_FONT_SIZE = 45;
 const SEASON_TRACKING = -80;
 const YEAR_FONT_SIZE = 59;
@@ -28,8 +29,8 @@ export function SeasonTitleNode({ x, y, seasonLabel, year, style }: Props) {
 
   const seasonFontSize = SEASON_FONT_SIZE * scale;
   const yearFontSize = YEAR_FONT_SIZE * scale;
-  const seasonKerning = (SEASON_TRACKING / 1000) * seasonFontSize;
-  const yearKerning = (YEAR_TRACKING / 1000) * yearFontSize;
+  const seasonKerning = (SEASON_TRACKING / 1000) * seasonFontSize + style.kerning;
+  const yearKerning = (YEAR_TRACKING / 1000) * yearFontSize + style.kerning;
   const seasonText = seasonLabel.toUpperCase();
 
   const seasonWidth = measureTextWidth(seasonText, seasonFontSize, "Futura Wizard", "700") + seasonKerning * Math.max(0, seasonText.length - 1);

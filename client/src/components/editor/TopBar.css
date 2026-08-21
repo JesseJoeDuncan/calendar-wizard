@@ -1,29 +1,64 @@
 .editor-top {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.6rem 1rem;
+  gap: 1.2rem;
+  padding: 0.75rem 1.2rem;
   background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-top: none;
+  border-left: none;
+  border-right: none;
   flex: none;
 }
 
+.tb-zone {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.tb-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.tb-center {
+  flex: none;
+  justify-content: center;
+}
+
+.tb-right {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.tb-logo {
+  height: 2.4rem;
+  width: auto;
+  flex: none;
+  margin-right: 0.3rem;
+}
+
 .icon-btn {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 7px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
+  width: 3.15rem;
+  height: 3.15rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.95rem;
-  color: var(--text-muted);
+  color: var(--text);
   cursor: pointer;
+  flex: none;
 }
 
-.icon-btn:hover {
-  background: var(--surface-3);
+.icon-btn:active:not(:disabled) {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 .icon-btn:disabled {
@@ -31,48 +66,87 @@
   cursor: not-allowed;
 }
 
-.cal-select {
-  border: 1px solid var(--border-strong);
-  border-radius: 7px;
-  padding: 0.4rem 0.6rem;
+.tb-center-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  font-size: 0.86rem;
-  background: var(--surface);
-  color: var(--text);
+  cursor: pointer;
 }
 
-.editor-top .spacer {
-  flex: 1;
+.tb-center-btn:active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.tb-tint-a {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface-2));
+  color: var(--accent);
+}
+
+.tb-tint-b {
+  background: color-mix(in srgb, var(--focus) 22%, var(--surface-2));
+  color: var(--focus);
+}
+
+.tb-tint-c {
+  background: color-mix(in srgb, #e0a640 26%, var(--surface-2));
+  color: #ad7a1e;
 }
 
 .count-warning {
-  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 12%, transparent);
-  border-radius: 6px;
-  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem;
 }
 
 .btn-ghost {
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  border-radius: 7px;
-  padding: 0.42rem 0.8rem;
-  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.15rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
+  flex: none;
+}
+
+.btn-ghost:active:not(:disabled) {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 .btn-dl {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   background: var(--chip-bg);
   color: var(--chip-ink);
-  border: none;
-  border-radius: 7px;
-  padding: 0.42rem 0.9rem;
-  font-size: 0.84rem;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.25rem;
+  font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
+  flex: none;
+}
+
+.btn-dl:active:not(:disabled) {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 .btn-dl:disabled,

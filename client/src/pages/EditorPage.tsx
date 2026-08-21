@@ -6,16 +6,18 @@ import { ExportStage } from "../components/canvas/ExportStage";
 import { DefaultSettingsModal } from "../components/editor/DefaultSettingsModal";
 import { DetailsPanel } from "../components/editor/DetailsPanel";
 import { HeaderFooterDrawer } from "../components/editor/HeaderFooterDrawer";
-import { SettingsDrawer } from "../components/editor/SettingsDrawer";
+import { Icon } from "../components/Icon";
+import { LayoutMenu } from "../components/editor/LayoutMenu";
+import { StyleMenu } from "../components/editor/StyleMenu";
 import { SeriesMiniCard } from "../components/editor/SeriesMiniCard";
 import { TitleCard } from "../components/editor/TitleCard";
 import { TopBar } from "../components/editor/TopBar";
 import { api } from "../lib/api";
 import { computeAutoFitTitleText } from "../lib/autoFitText";
 import { calendarLabel } from "../lib/calendarLabel";
+import { duplicateCalendarById, renameCalendarById } from "../lib/calendarActions";
 import { DEFAULT_DATE_STYLE, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE, computeGeometry } from "../lib/calendarGeometry";
 import { deepMergeDefaults } from "../lib/deepMerge";
-import { exportCalendarPdf } from "../lib/exportPdf";
 import { buildLayout, validateTitleCount } from "../lib/layoutEngine";
 import { getAutoSaveMinutes, getDefaultTheme } from "../lib/userDefaults";
 import type { Calendar, CalendarSummary } from "../types/calendar";
@@ -31,8 +33,10 @@ export function EditorPage() {
   const [calendar, setCalendar] = useState<Calendar | null>(null);
   const [summaries, setSummaries] = useState<CalendarSummary[]>([]);
   const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
+  const [xrayOn, setXrayOn] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [layoutMenuOpen, setLayoutMenuOpen] = useState(false);
+  const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const [headerFooterOpen, setHeaderFooterOpen] = useState(false);
   const [defaultSettingsOpen, setDefaultSettingsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +84,12 @@ export function EditorPage() {
               ? deepMergeDefaults(DEFAULT_RATING_STYLE, t.ratingStyle)
               : { ...DEFAULT_RATING_STYLE, opacity: legacyTitles[i]?.ratingOpacity ?? DEFAULT_RATING_STYLE.opacity },
             dateStyle: deepMergeDefaults(DEFAULT_DATE_STYLE, t.dateStyle),
+            imageVisible: t.imageVisible ?? true,
+            titleVisible: t.titleVisible ?? true,
+            dateVisible: t.dateVisible ?? true,
+            runtimeVisible: t.runtimeVisible ?? true,
+            customElements: t.customElements ?? [],
+            image: t.image ? { ...t.image, rotation: t.image.rotation ?? 0, flipHorizontal: t.image.flipHorizontal ?? false, flipVertical: t.image.flipVertical ?? false } : t.image,
           })),
           theme: deepMergeDefaults(defaults, fetched.theme),
         };
@@ -115,7 +125,7 @@ export function EditorPage() {
         titles: prev.titles.map((t) => {
           const w = widthByTitleId.get(t.id);
           if (!t.name || t.titleTextStyle.fontSize || !w) return t;
-          const fit = computeAutoFitTitleText(t.name, w, "Futura Wizard Condensed");
+          const fit = computeAutoFitTitleText(t.name, w, t.titleTextStyle.wrapCharThreshold ?? prev.theme.cardText.title.wrapCharThreshold, "Futura Wizard Condensed");
           return { ...t, titleTextStyle: { ...t.titleTextStyle, fontSize: fit.fontSize, manualLineBreaks: fit.manualLineBreaks } };
         }),
       };
@@ -245,24 +255,71 @@ export function EditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoSaveMinutes, calendar?.id]);
 
-  async function handleDelete() {
-    if (!calendar) return;
-    if (!window.confirm(`Delete "${calendarLabel(calendar)}"? This can't be undone.`)) return;
+  async function handleDelete(targetId: string) {
+    if (!window.confirm("Delete this calendar? This can't be undone.")) return;
     try {
-      await api.deleteCalendar(calendar.id);
-      const remaining = summaries.filter((s) => s.id !== calendar.id);
-      if (remaining.length > 0) navigate(`/edit/${remaining[0].id}`);
-      else navigate("/");
+      await api.deleteCalendar(targetId);
+      const remaining = summaries.filter((s) => s.id !== targetId);
+      setSummaries(remaining);
+      if (targetId === calendar?.id) {
+        if (remaining.length > 0) navigate(`/edit/${remaining[0].id}`);
+        else navigate("/");
+      }
     } catch (err) {
       console.error(err);
       setError("Delete failed. Check that the server is running.");
     }
   }
 
-  function handleDownload() {
-    if (!calendar || !exportStageRef.current) return;
-    const label = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;
-    exportCalendarPdf(exportStageRef.current, `Onyx-Downtown-${label}-${calendar.year}.pdf`);
+  async function handleDuplicateById(targetId: string) {
+    try {
+      const newId = await duplicateCalendarById(targetId);
+      const r = await api.listCalendars();
+      setSummaries(r.calendars);
+      navigate(`/edit/${newId}`);
+    } catch (err) {
+      console.error(err);
+      setError("Duplicate failed. Check that the server is running.");
+    }
+  }
+
+  async function handleRename(targetId: string, name: string) {
+    try {
+      await renameCalendarById(targetId, name);
+      const r = await api.listCalendars();
+      setSummaries(r.calendars);
+      if (calendar && targetId === calendar.id) setCalendar({ ...calendar, customName: name.trim() || undefined });
+    } catch (err) {
+      console.error(err);
+      setError("Rename failed. Check that the server is running.");
+    }
+  }
+
+  function handleAddSeries() {
+    if (!calendar) return;
+    const seriesTagDefaults = getDefaultTheme(calendar.season).cardText.seriesTag;
+    updateCalendar({
+      series: [
+        ...calendar.series,
+        {
+          id: crypto.randomUUID(),
+          name: "",
+          titleIds: [],
+          bandStyle: {
+            background: { type: "color", value: seriesTagDefaults.tagColor },
+            fontFamily: seriesTagDefaults.fontFamily,
+            fontSize: seriesTagDefaults.fontSize,
+            textColor: seriesTagDefaults.textColor,
+            opacity: seriesTagDefaults.opacity,
+            kerning: seriesTagDefaults.kerning,
+            lineSpacing: 1.08,
+            justify: "center",
+            offsetX: 0,
+            offsetY: 0,
+          },
+        },
+      ],
+    });
   }
 
   if (error) return <div className="editor-error">{error}</div>;
@@ -274,7 +331,8 @@ export function EditorPage() {
   const selectedBoxWidth = selectedTitleId ? geometry.rows.flatMap((r) => r.boxes).find((b) => b.titleId === selectedTitleId)?.w ?? null : null;
   const allSummaries: CalendarSummary[] = summaries.some((s) => s.id === calendar.id)
     ? summaries
-    : [...summaries, { id: calendar.id, season: calendar.season, customSeasonLabel: calendar.customSeasonLabel, year: calendar.year, updatedAt: calendar.updatedAt, createdAt: calendar.createdAt }];
+    : [...summaries, { id: calendar.id, season: calendar.season, customSeasonLabel: calendar.customSeasonLabel, customName: calendar.customName, year: calendar.year, updatedAt: calendar.updatedAt, createdAt: calendar.createdAt }];
+  const exportLabel = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;
 
   return (
     <div className="editor-page">
@@ -285,21 +343,26 @@ export function EditorPage() {
         onSwitch={(targetId) => navigate(`/edit/${targetId}`)}
         onNew={() => navigate("/")}
         onDelete={handleDelete}
+        onDuplicate={handleDuplicateById}
+        onRename={handleRename}
+        onOpenDefaultSettings={() => setDefaultSettingsOpen(true)}
         editor={{
           countWarning: countError
             ? countError.reason === "too-few"
               ? `Needs at least 9 titles (has ${countError.count})`
               : `Max 15 titles (has ${countError.count})`
             : null,
-          onSettings: () => setSettingsOpen(true),
+          onLayoutMenu: () => setLayoutMenuOpen(true),
+          onStyleMenu: () => setStyleMenuOpen(true),
           onHeaderFooter: () => setHeaderFooterOpen(true),
           onSave: () => handleSave(false),
           saving,
-          onDownload: handleDownload,
           onUndo: undo,
           onRedo: redo,
           canUndo: past.length > 0,
           canRedo: future.length > 0,
+          stageRef: exportStageRef,
+          exportFilenameBase: `Onyx-Downtown-${exportLabel}-${calendar.year}`,
         }}
       />
 
@@ -314,7 +377,10 @@ export function EditorPage() {
               selected={selectedTitleId === title.id}
               onChange={(next) => updateCalendar({ titles: calendar.titles.map((t) => (t.id === next.id ? next : t)) })}
               onSeriesChange={(seriesId) => handleTitleSeriesChange(title.id, seriesId)}
-              onOpenDetails={() => setSelectedTitleId(title.id)}
+              onOpenDetails={() => {
+                setSelectedTitleId(title.id);
+                setXrayOn(false);
+              }}
             />
           ))}
           {calendar.series.length > 0 && (
@@ -325,6 +391,9 @@ export function EditorPage() {
           {calendar.series.map((s) => (
             <SeriesMiniCard key={s.id} series={s} calendar={calendar} onChange={(next) => updateCalendar({ series: calendar.series.map((x) => (x.id === next.id ? next : x)) })} />
           ))}
+          <button type="button" className="series-add" onClick={handleAddSeries}>
+            <Icon name="add_tag" size={14} /> Add tag
+          </button>
         </div>
 
         {selectedTitle && (
@@ -334,6 +403,8 @@ export function EditorPage() {
             boxWidth={selectedBoxWidth}
             onChange={(next) => updateCalendar({ titles: calendar.titles.map((t) => (t.id === next.id ? next : t)) })}
             onBack={() => setSelectedTitleId(null)}
+            xrayOn={xrayOn}
+            onToggleXray={setXrayOn}
           />
         )}
 
@@ -343,24 +414,31 @@ export function EditorPage() {
             layout={layout}
             geometry={geometry}
             selectedTitleId={selectedTitleId}
-            onSelectTitle={setSelectedTitleId}
+            onSelectTitle={(id) => {
+              setSelectedTitleId(id);
+              setXrayOn(false);
+            }}
             onImageOffsetChange={handleImageOffsetChange}
             onImageScaleChange={handleImageScaleChange}
             onOpenHeaderFooter={() => setHeaderFooterOpen(true)}
+            xrayTitleId={xrayOn ? selectedTitleId : null}
           />
         </div>
 
         {headerFooterOpen && (
           <HeaderFooterDrawer calendar={calendar} onChange={updateCalendar} onClose={() => setHeaderFooterOpen(false)} onOpenDefaultSettings={() => setDefaultSettingsOpen(true)} />
         )}
-        {settingsOpen && (
-          <SettingsDrawer
+        {layoutMenuOpen && (
+          <LayoutMenu
             calendar={calendar}
             onChange={updateCalendar}
-            onClose={() => setSettingsOpen(false)}
+            onClose={() => setLayoutMenuOpen(false)}
             onAutoSaveMinutesChange={setAutoSaveMinutesState}
             onOpenDefaultSettings={() => setDefaultSettingsOpen(true)}
           />
+        )}
+        {styleMenuOpen && (
+          <StyleMenu calendar={calendar} onChange={updateCalendar} onClose={() => setStyleMenuOpen(false)} onOpenDefaultSettings={() => setDefaultSettingsOpen(true)} />
         )}
       </div>
 

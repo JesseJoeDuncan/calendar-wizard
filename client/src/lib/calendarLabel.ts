@@ -1,6 +1,7 @@
 import type { CalendarSummary } from "../types/calendar";
 
-export function calendarLabel(s: Pick<CalendarSummary, "season" | "customSeasonLabel" | "year">): string {
+export function calendarLabel(s: Pick<CalendarSummary, "season" | "customSeasonLabel" | "customName" | "year">): string {
+  if (s.customName) return s.customName;
   return `${s.season === "Custom" ? s.customSeasonLabel || "Custom" : s.season} ${s.year}`;
 }
 

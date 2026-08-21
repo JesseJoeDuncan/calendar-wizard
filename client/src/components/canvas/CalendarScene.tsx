@@ -8,6 +8,7 @@ import { FillRect } from "./FillRect";
 import { HeaderFooterGroup } from "./HeaderFooterGroup";
 import { SeriesBandNode } from "./SeriesBandNode";
 import { TitleBoxNode } from "./TitleBoxNode";
+import { XrayOverlayNode } from "./XrayOverlayNode";
 
 interface Props {
   calendar: Calendar;
@@ -22,6 +23,8 @@ interface Props {
   onImageScaleChange?: (titleId: string, scale: number) => void;
   /** Header/footer content always renders; this is only the click-to-open handler, absent for the export stage. */
   onOpenHeaderFooter?: () => void;
+  /** When set, everything else in the scene dims to 20% opacity and this title's image is redrawn unclipped, full opacity, on top. */
+  xrayTitleId?: string | null;
 }
 
 export function CalendarScene({
@@ -36,15 +39,19 @@ export function CalendarScene({
   onImageOffsetChange,
   onImageScaleChange,
   onOpenHeaderFooter,
+  xrayTitleId,
 }: Props) {
   const titleById = new Map(calendar.titles.map((t) => [t.id, t]));
   const seriesById = new Map(calendar.series.map((s) => [s.id, s]));
   const seasonLabel = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;
+  const xrayTitle = xrayTitleId ? titleById.get(xrayTitleId) : null;
+  const xrayBox = xrayTitle ? geometry.rows.flatMap((r) => r.boxes).find((b) => b.titleId === xrayTitle.id) : null;
 
   return (
     // Clips everything to the true 8.5x11 page bounds — some header/footer elements (the footer
     // shape in particular) intentionally extend past the canvas edge and rely on this to crop.
     <Group clipFunc={(ctx) => ctx.rect(0, 0, CANVAS_W, CANVAS_H)}>
+      <Group opacity={xrayTitle ? 0.2 : 1}>
       <FillRect fill={calendar.theme.background} x={0} y={0} w={CANVAS_W} h={CANVAS_H} />
       <BackgroundTextureNode texture={calendar.theme.backgroundTexture} width={CANVAS_W} height={CANVAS_H} />
 
@@ -97,6 +104,9 @@ export function CalendarScene({
         interactive={interactive}
         onOpen={onOpenHeaderFooter}
       />
+      </Group>
+
+      {xrayTitle && xrayBox && <XrayOverlayNode title={xrayTitle} geometry={xrayBox} />}
     </Group>
   );
 }

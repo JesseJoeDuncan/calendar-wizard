@@ -53,21 +53,23 @@
 
 .season-select {
   padding: 0.42rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text);
-  background: var(--surface-2);
+  background: var(--surface);
   cursor: pointer;
 }
 
 .custom-season-input,
 .year-field {
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.42rem 0.6rem;
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
   font-weight: 600;
 }
@@ -95,12 +97,15 @@
 }
 
 .add-row-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--accent);
   background: none;
-  border: 1px dashed var(--border-strong);
-  border-radius: 8px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
   padding: 0.45rem 0.9rem;
   cursor: pointer;
 }
@@ -119,21 +124,24 @@
 }
 
 .more-menu-btn {
-  width: 2.1rem;
-  height: 2.1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   background: var(--surface-2);
-  color: var(--text-muted);
+  color: var(--text);
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
 }
 
-.more-menu-btn:hover {
-  background: var(--surface-3);
-  color: var(--text);
+.more-menu-btn:active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 .menu-backdrop {
@@ -149,8 +157,8 @@
   z-index: 11;
   min-width: 10rem;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   box-shadow: var(--shadow);
   padding: 0.3rem;
 }
@@ -160,7 +168,7 @@
   text-align: left;
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 0.5rem 0.6rem;
   font-size: 0.85rem;
   font-weight: 600;
@@ -184,11 +192,15 @@
 }
 
 .form-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   margin-top: 1rem;
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.6rem 0.85rem;
   font-size: 0.88rem;
 }
@@ -202,12 +214,17 @@
 .btn-primary {
   background: var(--accent);
   color: var(--accent-ink);
-  border: none;
-  border-radius: 9px;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
   padding: 0.7rem 1.5rem;
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
+}
+
+.btn-primary:active:not(:disabled) {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 .btn-primary:disabled {

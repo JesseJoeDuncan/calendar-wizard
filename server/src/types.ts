@@ -18,6 +18,27 @@ export interface ImageState {
   scale: number;
   offsetX: number;
   offsetY: number;
+  rotation?: 0 | 90 | 180 | 270;
+  flipHorizontal?: boolean;
+  flipVertical?: boolean;
+}
+
+export type CustomElementKind = "text" | "image";
+
+export interface CustomElementStyle {
+  id: string;
+  kind: CustomElementKind;
+  label: string;
+  visible: boolean;
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+  text?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  color?: string;
+  kerning?: number;
+  imageUrl?: string;
 }
 
 export interface ImageCandidate {
@@ -39,6 +60,7 @@ export interface TitleTextStyle {
   offsetY: number;
   wordSizes?: number[];
   manualLineBreaks?: number[];
+  wrapCharThreshold?: number;
 }
 
 export interface RuntimeRatingStyle {
@@ -64,6 +86,10 @@ export interface Title {
   runtimeMinutes?: number;
   mpaRating: MpaRating;
   ratingVisible: boolean;
+  imageVisible?: boolean;
+  titleVisible?: boolean;
+  dateVisible?: boolean;
+  runtimeVisible?: boolean;
   image?: ImageState;
   imageCandidates?: ImageCandidate[];
   titleTextStyle: TitleTextStyle;
@@ -73,6 +99,7 @@ export interface Title {
   dateOffsetX: number;
   dateOffsetY: number;
   badges: Badge[];
+  customElements?: CustomElementStyle[];
   seriesId?: string;
 }
 
@@ -138,6 +165,7 @@ export interface Calendar {
   id: string;
   season: Season;
   customSeasonLabel?: string;
+  customName?: string;
   year: number;
   titles: Title[];
   series: Series[];

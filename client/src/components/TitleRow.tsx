@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { DraftTitle } from "../lib/draftTypes";
 import { useDebouncedTmdbSearch } from "../lib/useDebouncedTmdbSearch";
+import { Icon } from "./Icon";
 import "./TitleRow.css";
 
 interface Props {
@@ -106,8 +107,8 @@ export function TitleRow({ title, index, onChange, onDelete }: Props) {
           </ul>
         )}
       </div>
-      <button type="button" className="del-btn" onClick={onDelete} aria-label={`Remove entry ${index + 1}`}>
-        ✕
+      <button type="button" className="del-btn" onClick={onDelete} aria-label={`Remove entry ${index + 1}`} title="Remove">
+        <Icon name="close_window" />
       </button>
     </div>
   );

@@ -6,8 +6,9 @@
 }
 
 .date-input {
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.45rem 0.5rem;
   background: var(--surface);
   color: var(--text);
@@ -23,15 +24,15 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.4rem 0.65rem;
   background: var(--surface);
 }
 
 .title-field:focus-within {
   border-color: var(--focus);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus) 25%, transparent);
 }
 
 .title-input {
@@ -47,10 +48,10 @@
 .poster-mini {
   width: 1.35rem;
   height: 1.9rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   flex: none;
   object-fit: cover;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset;
+  border: 1px solid var(--bevel-dark);
 }
 
 .poster-mini-empty {
@@ -63,13 +64,13 @@
   color: var(--text-muted);
   cursor: pointer;
   font-size: 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 0.3rem;
 }
 
 .del-btn:hover {
   color: var(--danger);
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 
 .suggest-list {
@@ -82,8 +83,8 @@
   padding: 0.25rem;
   list-style: none;
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   box-shadow: var(--shadow);
   max-height: 15rem;
   overflow-y: auto;
@@ -94,7 +95,7 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.4rem 0.5rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.88rem;
   cursor: pointer;
 }

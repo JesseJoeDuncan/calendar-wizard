@@ -5,6 +5,7 @@ import { CANVAS_H, CANVAS_W, type CalendarGeometry } from "../../lib/calendarGeo
 import type { CalendarLayout } from "../../lib/layoutEngine";
 import { useFontsLoaded } from "../../lib/useFontsLoaded";
 import type { Calendar } from "../../types/calendar";
+import { Icon } from "../Icon";
 import { CalendarScene } from "./CalendarScene";
 import "./CalendarCanvas.css";
 
@@ -20,12 +21,13 @@ interface Props {
   onImageScaleChange?: (titleId: string, scale: number) => void;
   onOpenHeaderFooter?: () => void;
   stageRef?: React.RefObject<Konva.Stage | null>;
+  xrayTitleId?: string | null;
 }
 
 const MIN_ZOOM = 0.4;
 const MAX_ZOOM = 4;
 
-export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, onImageScaleChange, onOpenHeaderFooter, stageRef }: Props) {
+export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, onSelectTitle, onImageOffsetChange, onImageScaleChange, onOpenHeaderFooter, stageRef, xrayTitleId }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const internalStageRef = useRef<Konva.Stage>(null);
   const actualStageRef = stageRef ?? internalStageRef;
@@ -115,17 +117,17 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
     <div className="canvas-viewport" ref={containerRef}>
       <div className="canvas-toolbar">
         <button className={`icon-btn ${mode === "select" ? "sel" : ""}`} title="Select" onClick={() => setMode("select")}>
-          ⠿
+          <Icon name="select_tool" />
         </button>
         <button className={`icon-btn ${mode === "pan" ? "sel" : ""}`} title="Pan" onClick={() => setMode("pan")}>
-          ✋
+          <Icon name="grab_tool" />
         </button>
         <div className="divider" />
         <button className="icon-btn" title="Zoom in" onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z * 1.2))}>
-          ＋
+          <Icon name="zoom_in" />
         </button>
         <button className="icon-btn" title="Zoom out" onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z / 1.2))}>
-          －
+          <Icon name="zoom_out" />
         </button>
         <button className="icon-btn" title="Reset view" onClick={resetView}>
           ⤢
@@ -160,6 +162,7 @@ export function CalendarCanvas({ calendar, layout, geometry, selectedTitleId, on
               onImageOffsetChange={onImageOffsetChange}
               onImageScaleChange={onImageScaleChange}
               onOpenHeaderFooter={onOpenHeaderFooter}
+              xrayTitleId={xrayTitleId}
             />
           </Layer>
         </Stage>

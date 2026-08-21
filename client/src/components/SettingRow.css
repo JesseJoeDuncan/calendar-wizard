@@ -15,6 +15,18 @@
   font-weight: 600;
 }
 
+.setting-row-label-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.setting-row-label-subtle {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--surface) 65%, var(--text-muted) 35%);
+}
+
 .setting-row-value {
   display: flex;
   align-items: center;
@@ -23,10 +35,11 @@
 
 .setting-num {
   width: 4.2rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.2rem 0.4rem;
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
   font-size: 0.78rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -46,12 +59,12 @@
   font-size: 0.9rem;
   line-height: 1;
   padding: 0.15rem 0.25rem;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
 }
 
 .setting-reset:hover:not(:disabled) {
   color: var(--accent);
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 
 .setting-reset:disabled {

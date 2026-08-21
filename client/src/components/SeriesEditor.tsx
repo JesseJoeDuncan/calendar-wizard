@@ -1,4 +1,5 @@
 import { nextId, type DraftSeries, type DraftTitle } from "../lib/draftTypes";
+import { Icon } from "./Icon";
 import "./SeriesEditor.css";
 
 interface Props {
@@ -52,8 +53,8 @@ export function SeriesEditor({ titles, series, onChange, onTitlesChange }: Props
                 value={s.name}
                 onChange={(e) => updateSeries(s.id, { name: e.target.value })}
               />
-              <button type="button" className="del-btn" onClick={() => removeSeries(s.id)} aria-label={`Remove series ${s.name || "untitled"}`}>
-                ✕
+              <button type="button" className="del-btn" onClick={() => removeSeries(s.id)} aria-label={`Remove series ${s.name || "untitled"}`} title="Remove series">
+                <Icon name="delete" />
               </button>
             </div>
             <div className="series-title-picker">
@@ -70,7 +71,7 @@ export function SeriesEditor({ titles, series, onChange, onTitlesChange }: Props
       })}
 
       <button type="button" className="series-add" onClick={addSeries}>
-        + Add series
+        <Icon name="add" size={14} /> Add series
       </button>
     </div>
   );

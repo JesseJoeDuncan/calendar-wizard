@@ -1,0 +1,39 @@
+.ce-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ce-image-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ce-thumb {
+  width: 2.2rem;
+  height: 2.2rem;
+  object-fit: cover;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+
+.ce-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+
+.ce-remove:hover {
+  text-decoration: underline;
+}

@@ -40,6 +40,10 @@ export function buildSampleCalendar(theme: CalendarTheme, season: Season = "Summ
       runtimeMinutes: 88 + ((i * 13) % 60),
       mpaRating: SAMPLE_RATINGS[i % SAMPLE_RATINGS.length],
       ratingVisible: true,
+      imageVisible: true,
+      titleVisible: true,
+      dateVisible: true,
+      runtimeVisible: true,
       titleTextStyle: { fontSize: 0, kerning: 0, lineSpacing: 1.08, justify: "left", dropShadow: true, offsetX: 0, offsetY: 0 },
       runtimeStyle: { ...DEFAULT_RUNTIME_STYLE },
       ratingStyle: { ...DEFAULT_RATING_STYLE },
@@ -47,6 +51,7 @@ export function buildSampleCalendar(theme: CalendarTheme, season: Season = "Summ
       dateOffsetX: 0,
       dateOffsetY: 0,
       badges: [],
+      customElements: [],
       seriesId: i === 4 || i === 5 ? seriesId : undefined,
     };
   });
@@ -80,7 +85,7 @@ export function buildSampleCalendar(theme: CalendarTheme, season: Season = "Summ
   const fittedTitles = titles.map((t) => {
     const w = widthByTitleId.get(t.id);
     if (!w) return t;
-    const fit = computeAutoFitTitleText(t.name, w, "Futura Wizard Condensed");
+    const fit = computeAutoFitTitleText(t.name, w, theme.cardText.title.wrapCharThreshold, "Futura Wizard Condensed");
     return { ...t, titleTextStyle: { ...t.titleTextStyle, fontSize: fit.fontSize, manualLineBreaks: fit.manualLineBreaks } };
   });
 

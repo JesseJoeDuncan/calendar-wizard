@@ -60,6 +60,7 @@ export function defaultSeasonTitleStyle(): SeasonTitleStyle {
     offsetX: 0,
     offsetY: 0,
     scale: 1,
+    kerning: 0,
     echoSpread: 1,
     frontColor: "#1d6579",
     echo1Color: "#dce2ea",
@@ -115,5 +116,5 @@ export function defaultHeaderFooter(): CalendarHeaderFooter {
       defaultElementStyle(id === "footerShape" ? "#8a8a8a" : "#000000", id === "qrCode" ? defaultQrCodeEcho() : undefined),
     ])
   ) as Record<HeaderFooterElementId, HeaderFooterElementStyle>;
-  return { footerShapeVariant: "bumps", ...elements };
+  return { footerShapeVariant: "bumps", customElements: [], ...elements };
 }

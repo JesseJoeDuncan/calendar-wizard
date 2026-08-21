@@ -2,6 +2,8 @@ import { useMemo, useRef, useState } from "react";
 import { CalendarCanvas } from "../canvas/CalendarCanvas";
 import { PaletteColorInput } from "../PaletteColorInput";
 import { SettingRow } from "../SettingRow";
+import { Icon, type IconName } from "../Icon";
+import { VisibilityToggle } from "../VisibilityToggle";
 import { applyPaletteToTheme } from "../../lib/colorPalette";
 import { computeGeometry } from "../../lib/calendarGeometry";
 import { deepMergeDefaults, diffAgainstBase } from "../../lib/deepMerge";
@@ -19,11 +21,10 @@ const RATINGS: MpaRating[] = ["G", "PG", "PG-13", "R", "NC-17", "NR"];
 
 type CategoryId = "layout" | "palettes" | "headerFooter" | "texture" | "cardDate" | "cardTitle" | "cardRuntime" | "cardRating" | "cardCorners" | "cardShadow" | "cardSeriesTag";
 
-const TOP_CATEGORIES: { id: CategoryId; label: string }[] = [
-  { id: "layout", label: "Layout & Spacing" },
-  { id: "palettes", label: "Color Palettes" },
-  { id: "headerFooter", label: "Header & Footer" },
-  { id: "texture", label: "Background Texture" },
+const TOP_CATEGORIES: { id: CategoryId; label: string; icon: IconName }[] = [
+  { id: "layout", label: "Layout & Spacing", icon: "layout" },
+  { id: "palettes", label: "Color Palettes", icon: "color_palette" },
+  { id: "headerFooter", label: "Header & Footer", icon: "header_footer_menu" },
 ];
 
 const MOVIE_CARD_CHILDREN: { id: CategoryId; label: string }[] = [
@@ -35,6 +36,12 @@ const MOVIE_CARD_CHILDREN: { id: CategoryId; label: string }[] = [
   { id: "cardShadow", label: "Drop Shadows" },
   { id: "cardSeriesTag", label: "Series Tags" },
 ];
+
+const CARD_CHILD_ICONS: Partial<Record<CategoryId, IconName>> = {
+  cardCorners: "corner_radius",
+  cardShadow: "dropshadow",
+  cardSeriesTag: "tag",
+};
 
 interface Props {
   calendar: Calendar;
@@ -127,15 +134,17 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
             <span className="dsm-title-sub">Applies to every new calendar — this preview uses sample content.</span>
           </div>
           <button type="button" className="dsm-close" onClick={handleRequestClose} title="Close">
-            ✕
+            <Icon name="close_window" />
           </button>
         </div>
 
         <div className="dsm-body">
           <nav className="dsm-nav">
-            {TOP_CATEGORIES.slice(0, 3).map((c) => (
+            {TOP_CATEGORIES.map((c) => (
               <button key={c.id} type="button" className={`dsm-nav-item ${activeCategory === c.id ? "sel" : ""}`} onClick={() => selectCategory(c.id)}>
-                {c.label}
+                <span className="dsm-nav-label">
+                  <Icon name={c.icon} size={14} /> {c.label}
+                </span>
               </button>
             ))}
 
@@ -144,13 +153,17 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               className={`dsm-nav-item dsm-nav-parent ${MOVIE_CARD_CHILDREN.some((c) => c.id === activeCategory) ? "sel" : ""}`}
               onClick={() => setMovieCardsOpen((o) => !o)}
             >
-              Movie Cards
+              <span className="dsm-nav-label">
+                <Icon name="add_movie_card" size={14} /> Movie Cards
+              </span>
               <span className="dsm-nav-caret">{movieCardsOpen ? "▾" : "▸"}</span>
             </button>
             {movieCardsOpen &&
               MOVIE_CARD_CHILDREN.map((c) => (
                 <button key={c.id} type="button" className={`dsm-nav-item dsm-nav-child ${activeCategory === c.id ? "sel" : ""}`} onClick={() => selectCategory(c.id)}>
-                  {c.label}
+                  <span className="dsm-nav-label">
+                    {CARD_CHILD_ICONS[c.id] && <Icon name={CARD_CHILD_ICONS[c.id]!} size={13} />} {c.label}
+                  </span>
                 </button>
               ))}
 
@@ -159,7 +172,9 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               className={`dsm-nav-item ${activeCategory === "texture" ? "sel" : ""}`}
               onClick={() => selectCategory("texture")}
             >
-              Background Texture
+              <span className="dsm-nav-label">
+                <Icon name="special_effect" size={14} /> Background Texture
+              </span>
             </button>
           </nav>
 
@@ -189,7 +204,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(v) => updateSpacing({ rowsHeightScale: v })}
                 />
                 <SettingRow
-                  label="Band height"
+                  label="Tag height"
                   value={theme.spacing.bandHeightRatio}
                   defaultValue={factory.spacing.bandHeightRatio}
                   min={0.08}
@@ -218,7 +233,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               <div className="dsm-pane">
                 <h3>Background Texture</h3>
                 <label className="drawer-field">
-                  <span>Texture Style</span>
+                  <span><Icon name="special_effect" size={13} title="Texture Style" /> Texture Style</span>
                   <select
                     value={theme.backgroundTexture.style}
                     onChange={(e) => updateTheme({ backgroundTexture: { ...theme.backgroundTexture, style: e.target.value as BackgroundTextureStyle } })}
@@ -247,7 +262,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               <div className="dsm-pane">
                 <h3>Date Text</h3>
                 <SettingRow
-                  label="Number size"
+                  label="Number size" icon="text_size"
                   value={theme.spacing.dateNumberSizePct}
                   defaultValue={factory.spacing.dateNumberSizePct}
                   min={0.15}
@@ -256,7 +271,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(v) => updateSpacing({ dateNumberSizePct: v })}
                 />
                 <SettingRow
-                  label="Month size"
+                  label="Month size" icon="text_size"
                   value={theme.spacing.dateMonthSizePct}
                   defaultValue={factory.spacing.dateMonthSizePct}
                   min={0.03}
@@ -274,7 +289,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(v) => updateSpacing({ dateMonthGap: v })}
                 />
                 <label className="drawer-field">
-                  <span>Font</span>
+                  <span className="setting-row-label-icon" title="Font"><Icon name="font" size={13} /> <span className="setting-row-label-subtle">Font</span></span>
                   <select value={theme.cardText.date.fontFamily} onChange={(e) => updateCardText("date", { fontFamily: e.target.value })}>
                     {FONT_OPTIONS.map((f) => (
                       <option key={f} value={f}>
@@ -284,10 +299,10 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   </select>
                 </label>
                 <PaletteColorInput label="Color" value={theme.cardText.date.color} defaultValue={factory.cardText.date.color} palette={theme.palette} onChange={(hex) => updateCardText("date", { color: hex })} />
-                <SettingRow label="Margin from left" value={theme.cardText.date.marginX} defaultValue={factory.cardText.date.marginX} min={0} max={40} unit="px" onChange={(v) => updateCardText("date", { marginX: v })} />
-                <SettingRow label="Margin from top" value={theme.cardText.date.marginY} defaultValue={factory.cardText.date.marginY} min={0} max={40} unit="px" onChange={(v) => updateCardText("date", { marginY: v })} />
+                <SettingRow label="Margin from left" icon="horizontal_distance" value={theme.cardText.date.marginX} defaultValue={factory.cardText.date.marginX} min={0} max={40} unit="px" onChange={(v) => updateCardText("date", { marginX: v })} />
+                <SettingRow label="Margin from top" icon="vertical_distance" value={theme.cardText.date.marginY} defaultValue={factory.cardText.date.marginY} min={0} max={40} unit="px" onChange={(v) => updateCardText("date", { marginY: v })} />
                 <SettingRow
-                  label="Month kerning"
+                  label="Month kerning" icon="kerning"
                   value={theme.cardText.date.monthKerning}
                   defaultValue={factory.cardText.date.monthKerning}
                   min={-2}
@@ -303,7 +318,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(hex) => updateCardText("date", { dropShadowColor: hex })}
                 />
                 <SettingRow
-                  label="Drop shadow blur"
+                  label="Drop shadow blur" icon="dropshadow"
                   value={theme.cardText.date.dropShadowBlur}
                   defaultValue={factory.cardText.date.dropShadowBlur}
                   min={0}
@@ -318,7 +333,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               <div className="dsm-pane">
                 <h3>Title Text</h3>
                 <label className="drawer-field">
-                  <span>Font</span>
+                  <span className="setting-row-label-icon" title="Font"><Icon name="font" size={13} /> <span className="setting-row-label-subtle">Font</span></span>
                   <select value={theme.cardText.title.fontFamily} onChange={(e) => updateCardText("title", { fontFamily: e.target.value })}>
                     {FONT_OPTIONS.map((f) => (
                       <option key={f} value={f}>
@@ -329,7 +344,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 </label>
                 <PaletteColorInput label="Color" value={theme.cardText.title.color} defaultValue={factory.cardText.title.color} palette={theme.palette} onChange={(hex) => updateCardText("title", { color: hex })} />
                 <SettingRow
-                  label="Margin from left/right"
+                  label="Margin from left/right" icon="horizontal_distance"
                   value={theme.cardText.title.marginX}
                   defaultValue={factory.cardText.title.marginX}
                   min={0}
@@ -338,7 +353,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(v) => updateCardText("title", { marginX: v })}
                 />
                 <SettingRow
-                  label="Gap above bottom edge"
+                  label="Gap above bottom edge" icon="vertical_distance"
                   value={theme.cardText.title.bottomGapPct}
                   defaultValue={factory.cardText.title.bottomGapPct}
                   min={0}
@@ -354,7 +369,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(hex) => updateCardText("title", { dropShadowColor: hex })}
                 />
                 <SettingRow
-                  label="Drop shadow blur"
+                  label="Drop shadow blur" icon="dropshadow"
                   value={theme.cardText.title.dropShadowBlur}
                   defaultValue={factory.cardText.title.dropShadowBlur}
                   min={0}
@@ -370,7 +385,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               <div className="dsm-pane">
                 <h3>Runtime</h3>
                 <label className="drawer-field">
-                  <span>Font</span>
+                  <span className="setting-row-label-icon" title="Font"><Icon name="font" size={13} /> <span className="setting-row-label-subtle">Font</span></span>
                   <select value={theme.cardText.runtime.fontFamily} onChange={(e) => updateCardText("runtime", { fontFamily: e.target.value })}>
                     {FONT_OPTIONS.map((f) => (
                       <option key={f} value={f}>
@@ -380,10 +395,10 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   </select>
                 </label>
                 <PaletteColorInput label="Color" value={theme.cardText.runtime.color} defaultValue={factory.cardText.runtime.color} palette={theme.palette} onChange={(hex) => updateCardText("runtime", { color: hex })} />
-                <SettingRow label="Size" value={theme.cardText.runtime.baseSize} defaultValue={factory.cardText.runtime.baseSize} min={4} max={24} step={0.1} onChange={(v) => updateCardText("runtime", { baseSize: v })} />
-                <SettingRow label="Kerning" value={theme.cardText.runtime.kerning} defaultValue={factory.cardText.runtime.kerning} min={-2} max={6} step={0.1} onChange={(v) => updateCardText("runtime", { kerning: v })} />
+                <SettingRow label="Size" icon="text_size" value={theme.cardText.runtime.baseSize} defaultValue={factory.cardText.runtime.baseSize} min={4} max={24} step={0.1} onChange={(v) => updateCardText("runtime", { baseSize: v })} />
+                <SettingRow label="Kerning" icon="kerning" value={theme.cardText.runtime.kerning} defaultValue={factory.cardText.runtime.kerning} min={-2} max={6} step={0.1} onChange={(v) => updateCardText("runtime", { kerning: v })} />
                 <SettingRow
-                  label="Margin from right edge"
+                  label="Margin from right edge" icon="horizontal_distance"
                   value={theme.cardText.runtime.marginX}
                   defaultValue={factory.cardText.runtime.marginX}
                   min={0}
@@ -392,7 +407,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(v) => updateCardText("runtime", { marginX: v })}
                 />
                 <SettingRow
-                  label="Margin from bottom edge"
+                  label="Margin from bottom edge" icon="vertical_distance"
                   value={theme.cardText.runtime.marginY}
                   defaultValue={factory.cardText.runtime.marginY}
                   min={0}
@@ -408,7 +423,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(hex) => updateCardText("runtime", { dropShadowColor: hex })}
                 />
                 <SettingRow
-                  label="Drop shadow blur"
+                  label="Drop shadow blur" icon="dropshadow"
                   value={theme.cardText.runtime.dropShadowBlur}
                   defaultValue={factory.cardText.runtime.dropShadowBlur}
                   min={0}
@@ -423,7 +438,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
             {activeCategory === "cardRating" && (
               <div className="dsm-pane">
                 <h3>Rating</h3>
-                <SettingRow label="Base size" value={theme.cardText.rating.baseSize} defaultValue={factory.cardText.rating.baseSize} min={8} max={36} step={0.1} onChange={(v) => updateCardText("rating", { baseSize: v })} />
+                <SettingRow label="Base size" icon="text_size" value={theme.cardText.rating.baseSize} defaultValue={factory.cardText.rating.baseSize} min={8} max={36} step={0.1} onChange={(v) => updateCardText("rating", { baseSize: v })} />
                 <PaletteColorInput label="Color" value={theme.cardText.rating.color} defaultValue={factory.cardText.rating.color} palette={theme.palette} onChange={(hex) => updateCardText("rating", { color: hex })} />
                 <PaletteColorInput
                   label="Drop shadow color"
@@ -433,7 +448,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(hex) => updateCardText("rating", { dropShadowColor: hex })}
                 />
                 <SettingRow
-                  label="Drop shadow blur"
+                  label="Drop shadow blur" icon="dropshadow"
                   value={theme.cardText.rating.dropShadowBlur}
                   defaultValue={factory.cardText.rating.dropShadowBlur}
                   min={0}
@@ -469,10 +484,10 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                         value={theme.cardText.rating.sizeByRating[r]}
                         onChange={(e) => updateCardText("rating", { sizeByRating: { ...theme.cardText.rating.sizeByRating, [r]: Number(e.target.value) } })}
                       />
-                      <input
-                        type="checkbox"
-                        checked={theme.cardText.rating.visibleByRating[r]}
-                        onChange={(e) => updateCardText("rating", { visibleByRating: { ...theme.cardText.rating.visibleByRating, [r]: e.target.checked } })}
+                      <VisibilityToggle
+                        visible={theme.cardText.rating.visibleByRating[r]}
+                        onChange={(v) => updateCardText("rating", { visibleByRating: { ...theme.cardText.rating.visibleByRating, [r]: v } })}
+                        title={`${r} visible by default`}
                       />
                     </div>
                   ))}
@@ -523,6 +538,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 <PaletteColorInput label="Color" value={theme.cardShadow.color} defaultValue={factory.cardShadow.color} palette={theme.palette} onChange={(hex) => updateTheme({ cardShadow: { ...theme.cardShadow, color: hex } })} />
                 <SettingRow
                   label="Blur"
+                  icon="dropshadow"
                   value={theme.cardShadow.blur}
                   defaultValue={factory.cardShadow.blur}
                   min={0}
@@ -533,6 +549,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 />
                 <SettingRow
                   label="Opacity"
+                  icon="opacity"
                   value={theme.cardShadow.opacity}
                   defaultValue={factory.cardShadow.opacity}
                   min={0}
@@ -543,6 +560,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 />
                 <SettingRow
                   label="Offset X"
+                  icon="horizontal_distance"
                   value={theme.cardShadow.offsetX}
                   defaultValue={factory.cardShadow.offsetX}
                   min={-20}
@@ -553,6 +571,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 />
                 <SettingRow
                   label="Offset Y"
+                  icon="vertical_distance"
                   value={theme.cardShadow.offsetY}
                   defaultValue={factory.cardShadow.offsetY}
                   min={-20}
@@ -569,7 +588,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
               <div className="dsm-pane">
                 <h3>Series Tags</h3>
                 <label className="drawer-field">
-                  <span>Font</span>
+                  <span className="setting-row-label-icon" title="Font"><Icon name="font" size={13} /> <span className="setting-row-label-subtle">Font</span></span>
                   <select value={theme.cardText.seriesTag.fontFamily} onChange={(e) => updateCardText("seriesTag", { fontFamily: e.target.value })}>
                     {FONT_OPTIONS.map((f) => (
                       <option key={f} value={f}>
@@ -580,6 +599,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 </label>
                 <SettingRow
                   label="Text size"
+                  icon="text_size"
                   value={theme.cardText.seriesTag.fontSize}
                   defaultValue={factory.cardText.seriesTag.fontSize}
                   min={6}
@@ -603,6 +623,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                 />
                 <SettingRow
                   label="Text opacity"
+                  icon="opacity"
                   value={theme.cardText.seriesTag.opacity}
                   defaultValue={factory.cardText.seriesTag.opacity}
                   min={0}
@@ -611,7 +632,7 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
                   onChange={(v) => updateCardText("seriesTag", { opacity: v })}
                 />
                 <SettingRow
-                  label="Kerning"
+                  label="Kerning" icon="kerning"
                   value={theme.cardText.seriesTag.kerning}
                   defaultValue={factory.cardText.seriesTag.kerning}
                   min={-2}
@@ -636,7 +657,13 @@ export function DefaultSettingsModal({ calendar, onClose, onApplyToCalendar }: P
           </label>
           <div className="dsm-spacer" />
           <button type="button" className="dsm-save" onClick={handleSave}>
-            {savedFlash ? "Saved ✓" : "Save"}
+            {savedFlash ? (
+              "Saved ✓"
+            ) : (
+              <>
+                <Icon name="save" size={14} /> Save
+              </>
+            )}
           </button>
         </div>
       </div>

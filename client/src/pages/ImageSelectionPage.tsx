@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { HScrollStrip } from "../components/HScrollStrip";
+import { DefaultSettingsModal } from "../components/editor/DefaultSettingsModal";
 import { TopBar } from "../components/editor/TopBar";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
+import { duplicateCalendarById, renameCalendarById } from "../lib/calendarActions";
 import { DEFAULT_SPACING } from "../lib/calendarGeometry";
 import { calendarLabel } from "../lib/calendarLabel";
 import type { Calendar, CalendarSummary, ImageCandidate, MpaRating, Title } from "../types/calendar";
@@ -53,6 +56,7 @@ export function ImageSelectionPage() {
   const [error, setError] = useState<string | null>(null);
   const [states, setStates] = useState<Record<string, TitleImageState>>({});
   const [advancing, setAdvancing] = useState(false);
+  const [defaultSettingsOpen, setDefaultSettingsOpen] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -93,6 +97,10 @@ export function ImageSelectionPage() {
                   mpaRating: detail.mpaRating,
                   backdrops: detail.backdrops,
                   posters: detail.posters,
+                  // Pre-select the first candidate so a calendar can be built without the user
+                  // having to click through every title — only when nothing's chosen yet (a
+                  // previously-saved selection or an upload always takes precedence).
+                  selectedPath: prev[t.id]?.selectedPath || prev[t.id]?.uploadedUrl ? prev[t.id].selectedPath : detail.backdrops[0]?.tmdbPath ?? detail.posters[0]?.tmdbPath ?? null,
                 },
               }));
             } catch (err) {
@@ -156,10 +164,10 @@ export function ImageSelectionPage() {
         const candidates = [...s.backdrops, ...s.posters];
         let image: Title["image"] | undefined = t.image;
         if (s.uploadedUrl) {
-          image = { source: "upload", url: s.uploadedUrl, scale: 1, offsetX: 0, offsetY: 0 };
+          image = { source: "upload", url: s.uploadedUrl, scale: 1, offsetX: 0, offsetY: 0, rotation: 0, flipHorizontal: false, flipVertical: false };
         } else if (s.selectedPath) {
           const match = candidates.find((c) => c.tmdbPath === s.selectedPath);
-          if (match) image = { source: "tmdb", tmdbPath: match.tmdbPath, url: match.fullUrl, scale: 1, offsetX: 0, offsetY: 0 };
+          if (match) image = { source: "tmdb", tmdbPath: match.tmdbPath, url: match.fullUrl, scale: 1, offsetX: 0, offsetY: 0, rotation: 0, flipHorizontal: false, flipVertical: false };
         }
         return {
           ...t,
@@ -186,16 +194,39 @@ export function ImageSelectionPage() {
 
   const label = calendar.season === "Custom" ? calendar.customSeasonLabel || "Custom" : calendar.season;
 
-  async function handleDeleteCalendar() {
-    if (!calendar) return;
-    if (!window.confirm(`Delete "${calendarLabel(calendar)}"? This can't be undone.`)) return;
+  async function handleDeleteCalendar(targetId: string) {
+    if (!window.confirm("Delete this calendar? This can't be undone.")) return;
     try {
-      await api.deleteCalendar(calendar.id);
-      const remaining = summaries.filter((s) => s.id !== calendar.id);
-      navigate(remaining.length > 0 ? `/edit/${remaining[0].id}` : "/");
+      await api.deleteCalendar(targetId);
+      const remaining = summaries.filter((s) => s.id !== targetId);
+      setSummaries(remaining);
+      if (targetId === calendar?.id) navigate(remaining.length > 0 ? `/edit/${remaining[0].id}` : "/");
     } catch (err) {
       console.error(err);
       setError("Delete failed. Check that the server is running.");
+    }
+  }
+
+  async function handleDuplicateById(targetId: string) {
+    try {
+      const newId = await duplicateCalendarById(targetId);
+      const r = await api.listCalendars();
+      setSummaries(r.calendars);
+      navigate(`/edit/${newId}`);
+    } catch (err) {
+      console.error(err);
+      setError("Duplicate failed. Check that the server is running.");
+    }
+  }
+
+  async function handleRename(targetId: string, name: string) {
+    try {
+      await renameCalendarById(targetId, name);
+      const r = await api.listCalendars();
+      setSummaries(r.calendars);
+    } catch (err) {
+      console.error(err);
+      setError("Rename failed. Check that the server is running.");
     }
   }
 
@@ -204,12 +235,18 @@ export function ImageSelectionPage() {
       <div className="isel-sticky-top">
         <TopBar
           currentId={calendar.id}
-          currentLabel={`${label} ${calendar.year}`}
+          currentLabel={calendarLabel(calendar)}
           summaries={summaries}
           onSwitch={(targetId) => navigate(`/edit/${targetId}`)}
           onNew={() => navigate("/")}
           onDelete={handleDeleteCalendar}
+          onDuplicate={handleDuplicateById}
+          onRename={handleRename}
+          onOpenDefaultSettings={() => setDefaultSettingsOpen(true)}
         />
+        {defaultSettingsOpen && (
+          <DefaultSettingsModal calendar={calendar} onClose={() => setDefaultSettingsOpen(false)} onApplyToCalendar={(theme) => setCalendar({ ...calendar, theme })} />
+        )}
         <div className="isel-top">
           <div>
             <h1>Choose an image for each title</h1>
@@ -260,7 +297,19 @@ export function ImageSelectionPage() {
                   onClick={() => fileInputRefs.current[t.id]?.click()}
                   disabled={s.uploading}
                 >
-                  {s.uploadedUrl ? <img src={s.uploadedUrl} alt="" /> : <span>{s.uploading ? "Uploading…" : "Upload your own"}</span>}
+                  {s.uploadedUrl ? (
+                    <img src={s.uploadedUrl} alt="" />
+                  ) : (
+                    <span>
+                      {s.uploading ? "Uploading…" : (
+                        <>
+                          <Icon name="upload_image" size={18} />
+                          <br />
+                          Upload your own
+                        </>
+                      )}
+                    </span>
+                  )}
                 </button>
                 <input
                   ref={(el) => {
@@ -278,7 +327,11 @@ export function ImageSelectionPage() {
 
                 {hasMore && (
                   <button type="button" className="isel-tile isel-more" onClick={() => loadMore(t.id)}>
-                    + Load more
+                    <span>
+                      <Icon name="add" size={16} />
+                      <br />
+                      Load more
+                    </span>
                   </button>
                 )}
 

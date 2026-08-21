@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Calendar, Series } from "../../types/calendar";
+import { Icon } from "../Icon";
 import "./SeriesMiniCard.css";
 
 const FONT_OPTIONS = ["Futura Wizard", "Futura Wizard Condensed", "Market Deco"];
@@ -28,9 +29,10 @@ export function SeriesMiniCard({ series, calendar, onChange }: Props) {
   return (
     <div className="series-mini">
       <div className="sm-row">
+        <Icon name="tag" size={14} />
         <input className="sm-title" value={series.name} onChange={(e) => onChange({ ...series, name: e.target.value })} />
-        <button className="sm-style-btn" onClick={() => setStyleOpen((v) => !v)} title="Band style">
-          🎨
+        <button className="sm-style-btn" onClick={() => setStyleOpen((v) => !v)} title="Tag style">
+          <Icon name="edit" />
         </button>
       </div>
       <div className="sm-sub">{memberNames.length ? memberNames.join(" · ") : "No titles assigned yet"}</div>
@@ -50,7 +52,7 @@ export function SeriesMiniCard({ series, calendar, onChange }: Props) {
             <input type="color" value={series.bandStyle.textColor} onChange={(e) => updateStyle({ textColor: e.target.value })} />
           </label>
           <label className="sm-field">
-            <span>Font</span>
+            <span className="setting-row-label-icon" title="Font"><Icon name="font" size={13} /> <span className="setting-row-label-subtle">Font</span></span>
             <select value={series.bandStyle.fontFamily} onChange={(e) => updateStyle({ fontFamily: e.target.value })}>
               {FONT_OPTIONS.map((f) => (
                 <option key={f} value={f}>
@@ -60,18 +62,18 @@ export function SeriesMiniCard({ series, calendar, onChange }: Props) {
             </select>
           </label>
           <label className="sm-field">
-            <span>Base size</span>
+            <span className="setting-row-label-icon" title="Base size"><Icon name="text_size" size={13} /> <span className="setting-row-label-subtle">Base size</span></span>
             <div className="sm-num-row">
               <input type="range" min={6} max={40} step={0.1} value={series.bandStyle.fontSize} onChange={(e) => updateStyle({ fontSize: Number(e.target.value) })} />
               <input type="number" className="sm-num" step={0.1} value={series.bandStyle.fontSize} onChange={(e) => updateStyle({ fontSize: Number(e.target.value) })} />
             </div>
           </label>
           <label className="sm-field">
-            <span>Text opacity</span>
+            <span className="setting-row-label-icon" title="Text opacity"><Icon name="opacity" size={13} /> <span className="setting-row-label-subtle">Text opacity</span></span>
             <input type="range" min={0} max={1} step={0.02} value={series.bandStyle.opacity} onChange={(e) => updateStyle({ opacity: Number(e.target.value) })} />
           </label>
           <label className="sm-field">
-            <span>Kerning</span>
+            <span className="setting-row-label-icon" title="Kerning"><Icon name="kerning" size={13} /> <span className="setting-row-label-subtle">Kerning</span></span>
             <input type="range" min={-4} max={12} step={0.1} value={series.bandStyle.kerning} onChange={(e) => updateStyle({ kerning: Number(e.target.value) })} />
           </label>
           <div className="sm-field">
@@ -84,17 +86,17 @@ export function SeriesMiniCard({ series, calendar, onChange }: Props) {
                   className={`sm-just-btn ${series.bandStyle.justify === j ? "sel" : ""}`}
                   onClick={() => updateStyle({ justify: j })}
                 >
-                  {j === "left" ? "◧" : j === "right" ? "◨" : "▦"}
+                  {j === "left" ? <Icon name="left" size={12} /> : j === "right" ? <Icon name="right" size={12} /> : "▦"}
                 </button>
               ))}
             </div>
           </div>
           <label className="sm-field">
-            <span>Position X</span>
+            <span className="setting-row-label-icon" title="Position X"><Icon name="horizontal_distance" size={13} /> <span className="setting-row-label-subtle">Position X</span></span>
             <input type="range" min={-100} max={100} step={0.5} value={series.bandStyle.offsetX} onChange={(e) => updateStyle({ offsetX: Number(e.target.value) })} />
           </label>
           <label className="sm-field">
-            <span>Position Y</span>
+            <span className="setting-row-label-icon" title="Position Y"><Icon name="vertical_distance" size={13} /> <span className="setting-row-label-subtle">Position Y</span></span>
             <input type="range" min={-40} max={40} step={0.5} value={series.bandStyle.offsetY} onChange={(e) => updateStyle({ offsetY: Number(e.target.value) })} />
           </label>
 

@@ -19,6 +19,9 @@ export interface ImageState {
   scale: number;
   offsetX: number;
   offsetY: number;
+  rotation: 0 | 90 | 180 | 270;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
 }
 
 export interface ImageCandidate {
@@ -42,6 +45,8 @@ export interface TitleTextStyle {
   wordSizes?: number[];
   /** Word indices (0-based) after which to force a line break, set once by the auto-fit default. */
   manualLineBreaks?: number[];
+  /** Per-title override of TitleTextDefaults.wrapCharThreshold — the character count above which the auto-fit sizing forces a second line. */
+  wrapCharThreshold?: number;
 }
 
 export interface RuntimeRatingStyle {
@@ -60,6 +65,28 @@ export interface DateTextStyle {
   numberKerning: number;
 }
 
+export type CustomElementKind = "text" | "image";
+
+/** A freeform, user-added text or image layer — used both per-title (Title.customElements) and in the header/footer (CalendarHeaderFooter.customElements). Later entries in an array paint on top of (occlude) earlier ones and the fixed elements around them. */
+export interface CustomElementStyle {
+  id: string;
+  kind: CustomElementKind;
+  /** Set once at creation ("New Text Element 1" etc.) — the CollapsibleSection title for this element. */
+  label: string;
+  visible: boolean;
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+  /** kind: "text" */
+  text?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  color?: string;
+  kerning?: number;
+  /** kind: "image" */
+  imageUrl?: string;
+}
+
 export interface Title {
   id: string;
   tmdbId?: number;
@@ -68,6 +95,10 @@ export interface Title {
   runtimeMinutes?: number;
   mpaRating: MpaRating;
   ratingVisible: boolean;
+  imageVisible: boolean;
+  titleVisible: boolean;
+  dateVisible: boolean;
+  runtimeVisible: boolean;
   image?: ImageState;
   imageCandidates?: ImageCandidate[];
   titleTextStyle: TitleTextStyle;
@@ -77,6 +108,7 @@ export interface Title {
   dateOffsetX: number;
   dateOffsetY: number;
   badges: Badge[];
+  customElements: CustomElementStyle[];
   seriesId?: string;
 }
 
@@ -179,6 +211,7 @@ export type HeaderFooterElementId =
 
 export type CalendarHeaderFooter = {
   footerShapeVariant: FooterShapeVariant;
+  customElements: CustomElementStyle[];
 } & Record<HeaderFooterElementId, HeaderFooterElementStyle>;
 
 /**
@@ -191,6 +224,8 @@ export interface SeasonTitleStyle {
   offsetX: number;
   offsetY: number;
   scale: number;
+  /** Letter-spacing applied to both the season word and the year. */
+  kerning: number;
   /** Multiplier on the per-copy offset distance within each echo layer — 1 is the tuned default; lower packs the echoes tighter, higher spreads them further back. */
   echoSpread: number;
   frontColor: string;
@@ -275,6 +310,8 @@ export interface TitleTextDefaults extends TextLookDefaults {
   marginX: number;
   /** Default gap above the card's bottom edge, as a fraction of row height. */
   bottomGapPct: number;
+  /** Character count above which the auto-fit sizing forces a second line — per-title titleTextStyle.wrapCharThreshold overrides this. */
+  wrapCharThreshold: number;
 }
 
 /** Applied to every card's runtime text uniformly. */
@@ -343,6 +380,8 @@ export interface Calendar {
   id: string;
   season: Season;
   customSeasonLabel?: string;
+  /** User-set rename (via the TopBar calendar switcher) — overrides the computed season/year label when present. */
+  customName?: string;
   year: number;
   titles: Title[];
   series: Series[];
@@ -355,6 +394,7 @@ export interface CalendarSummary {
   id: string;
   season: Season;
   customSeasonLabel?: string;
+  customName?: string;
   year: number;
   updatedAt: string;
   createdAt: string;

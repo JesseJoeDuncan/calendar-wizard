@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { SettingRow } from "../SettingRow";
-import { PaletteColorInput } from "../PaletteColorInput";
-import type { BackgroundTextureStyle, Calendar } from "../../types/calendar";
-import { TEXTURE_STYLE_OPTIONS } from "../../lib/textureTiles";
+import { Icon } from "../Icon";
+import type { Calendar } from "../../types/calendar";
 import { DEFAULT_AUTOSAVE_MINUTES, getAutoSaveMinutes, getDefaultTheme, setAutoSaveMinutes } from "../../lib/userDefaults";
 import { CollapsibleSection } from "./CollapsibleSection";
 import "./SettingsDrawer.css";
@@ -15,22 +14,19 @@ interface Props {
   onOpenDefaultSettings: () => void;
 }
 
-export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesChange, onOpenDefaultSettings }: Props) {
+/** Spacing, date text sizing, and corner rounding for this calendar — the layout half of what used to be a single Settings drawer. */
+export function LayoutMenu({ calendar, onChange, onClose, onAutoSaveMinutesChange, onOpenDefaultSettings }: Props) {
   const { theme } = calendar;
   const defaults = getDefaultTheme(calendar.season);
   const [autoSaveMinutes, setAutoSaveMinutesState] = useState(getAutoSaveMinutes());
-
-  function updateTheme(patch: Partial<typeof theme>) {
-    onChange({ theme: { ...theme, ...patch } });
-  }
 
   function updateSpacing(patch: Partial<typeof theme.spacing>) {
     onChange({ theme: { ...theme, spacing: { ...theme.spacing, ...patch } } });
   }
 
   function resetAll() {
-    if (!window.confirm("Reset all settings on this calendar back to the default values?")) return;
-    onChange({ theme: defaults });
+    if (!window.confirm("Reset this calendar's spacing, date text, and corner rounding back to the default values?")) return;
+    onChange({ theme: { ...theme, spacing: defaults.spacing } });
   }
 
   function changeAutoSave(minutes: number) {
@@ -42,49 +38,13 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
   return (
     <div className="side-panel">
       <div className="drawer-head">
-        <h3>Settings</h3>
-        <button className="del-btn" onClick={onClose}>
-          ✕
+        <h3>Layout</h3>
+        <button className="del-btn" onClick={onClose} title="Close">
+          <Icon name="close_window" />
         </button>
       </div>
 
-      <div className="drawer-section">
-        <h4>Colors</h4>
-        <PaletteColorInput
-          label="Background"
-          value={theme.background.value}
-          onChange={(hex) => updateTheme({ background: { ...theme.background, type: "color", value: hex } })}
-          palette={theme.palette}
-        />
-      </div>
-
-      <CollapsibleSection title="Background Texture">
-        <label className="drawer-field">
-          <span>Texture Style</span>
-          <select
-            value={theme.backgroundTexture.style}
-            onChange={(e) => updateTheme({ backgroundTexture: { ...theme.backgroundTexture, style: e.target.value as BackgroundTextureStyle } })}
-          >
-            {TEXTURE_STYLE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <SettingRow
-          label="Texture Opacity"
-          value={theme.backgroundTexture.opacity}
-          defaultValue={defaults.backgroundTexture.opacity}
-          min={0}
-          max={1}
-          step={0.02}
-          disabled={theme.backgroundTexture.style === "none"}
-          onChange={(v) => updateTheme({ backgroundTexture: { ...theme.backgroundTexture, opacity: v } })}
-        />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Layout & spacing" defaultOpen>
+      <CollapsibleSection title="Spacing" defaultOpen>
         <SettingRow label="Outer margin" value={theme.spacing.outerMargin} defaultValue={defaults.spacing.outerMargin} min={0} max={80} unit="px" onChange={(v) => updateSpacing({ outerMargin: v })} />
         <SettingRow label="Box gutter" value={theme.spacing.boxGutter} defaultValue={defaults.spacing.boxGutter} min={0} max={40} unit="px" onChange={(v) => updateSpacing({ boxGutter: v })} />
         <SettingRow
@@ -107,7 +67,7 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
           onChange={(v) => updateSpacing({ rowsHeightScale: v })}
         />
         <SettingRow
-          label="Band height"
+          label="Tag height"
           value={theme.spacing.bandHeightRatio}
           defaultValue={defaults.spacing.bandHeightRatio}
           min={0.08}
@@ -177,56 +137,6 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
         />
       </CollapsibleSection>
 
-      <CollapsibleSection
-        title="Card & band shadow"
-        headExtra={<input type="checkbox" checked={theme.cardShadow.enabled} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, enabled: e.target.checked } })} />}
-      >
-        <label className="drawer-field">
-          <span>Color</span>
-          <input type="color" value={theme.cardShadow.color} onChange={(e) => updateTheme({ cardShadow: { ...theme.cardShadow, color: e.target.value } })} />
-        </label>
-        <SettingRow
-          label="Blur"
-          value={theme.cardShadow.blur}
-          defaultValue={defaults.cardShadow.blur}
-          min={0}
-          max={40}
-          unit="px"
-          disabled={!theme.cardShadow.enabled}
-          onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, blur: v } })}
-        />
-        <SettingRow
-          label="Opacity"
-          value={theme.cardShadow.opacity}
-          defaultValue={defaults.cardShadow.opacity}
-          min={0}
-          max={1}
-          step={0.02}
-          disabled={!theme.cardShadow.enabled}
-          onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, opacity: v } })}
-        />
-        <SettingRow
-          label="Offset X"
-          value={theme.cardShadow.offsetX}
-          defaultValue={defaults.cardShadow.offsetX}
-          min={-20}
-          max={20}
-          unit="px"
-          disabled={!theme.cardShadow.enabled}
-          onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, offsetX: v } })}
-        />
-        <SettingRow
-          label="Offset Y"
-          value={theme.cardShadow.offsetY}
-          defaultValue={defaults.cardShadow.offsetY}
-          min={-20}
-          max={20}
-          unit="px"
-          disabled={!theme.cardShadow.enabled}
-          onChange={(v) => updateTheme({ cardShadow: { ...theme.cardShadow, offsetY: v } })}
-        />
-      </CollapsibleSection>
-
       <div className="drawer-section">
         <h4>Auto-save</h4>
         <SettingRow label="Interval" value={autoSaveMinutes} defaultValue={DEFAULT_AUTOSAVE_MINUTES} min={1} max={30} unit="min" onChange={changeAutoSave} />
@@ -234,10 +144,10 @@ export function SettingsDrawer({ calendar, onChange, onClose, onAutoSaveMinutesC
 
       <div className="drawer-footer">
         <button type="button" className="drawer-reset-all" onClick={resetAll}>
-          Reset all settings to default
+          <Icon name="reset_all_to_default" size={14} /> Reset all settings to default
         </button>
         <button type="button" className="drawer-save-default" onClick={onOpenDefaultSettings}>
-          Edit default settings →
+          <Icon name="defaults_menu" size={14} /> Edit default settings
         </button>
       </div>
     </div>

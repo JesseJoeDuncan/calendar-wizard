@@ -6,17 +6,32 @@
 .hf-shape-btn {
   flex: 1;
   background: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
   padding: 0.45rem 0.3rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text);
   cursor: pointer;
 }
 
 .hf-shape-btn.sel {
   background: var(--chip-bg);
   color: var(--chip-ink);
-  border-color: transparent;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+.hf-elem-thumb {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex: none;
+}
+
+.hf-add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
 }

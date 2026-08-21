@@ -3,6 +3,7 @@ import type Konva from "konva";
 import useImage from "use-image";
 import type { BoxGeometry } from "../../lib/calendarGeometry";
 import { formatDateBadge, formatRuntime } from "../../lib/format";
+import { computeImageDrawRect } from "../../lib/imageFit";
 import type { BoxLayout, CornerWeight } from "../../lib/layoutEngine";
 import { placeholderGradient } from "../../lib/placeholderPalette";
 import { roundedRectPath } from "../../lib/roundedRectPath";
@@ -10,6 +11,7 @@ import { measureTextWidth } from "../../lib/textMeasure";
 import type { CalendarSpacing, CardTextDefaults, DropShadowSettings, Title } from "../../types/calendar";
 import { proxiedImageUrl } from "../../lib/imageProxy";
 import { BadgeNode } from "./BadgeNode";
+import { CustomElementNode } from "./CustomElementNode";
 import { MpaBadge } from "./MpaBadge";
 import { RichWordText } from "./RichWordText";
 
@@ -66,26 +68,30 @@ export function TitleBoxNode({
 
   const [img] = useImage(proxiedImageUrl(title.image?.url), "anonymous");
 
-  let drawImg: { drawX: number; drawY: number; drawW: number; drawH: number } | null = null;
-  if (img) {
-    const scale = title.image?.scale ?? 1;
-    const cover = Math.max(w / img.width, h / img.height) * scale;
-    const drawW = img.width * cover;
-    const drawH = img.height * cover;
-    drawImg = {
-      drawW,
-      drawH,
-      drawX: x + (w - drawW) / 2 + (title.image?.offsetX ?? 0),
-      drawY: y + (h - drawH) / 2 + (title.image?.offsetY ?? 0),
-    };
-  }
+  const drawImg =
+    img && title.image
+      ? computeImageDrawRect({
+          boxX: x,
+          boxY: y,
+          boxW: w,
+          boxH: h,
+          imgW: img.width,
+          imgH: img.height,
+          scale: title.image.scale,
+          userOffsetX: title.image.offsetX,
+          userOffsetY: title.image.offsetY,
+          rotation: title.image.rotation,
+          flipHorizontal: title.image.flipHorizontal,
+          flipVertical: title.image.flipVertical,
+        })
+      : null;
 
   function handleImageDragMove(e: Konva.KonvaEventObject<DragEvent>) {
-    if (!drawImg || !onImageOffsetChange) return;
+    if (!onImageOffsetChange) return;
     const node = e.target;
-    const baseX = x + (w - drawImg.drawW) / 2;
-    const baseY = y + (h - drawImg.drawH) / 2;
-    onImageOffsetChange(title.id, node.x() - baseX, node.y() - baseY);
+    const boxCenterX = x + w / 2;
+    const boxCenterY = y + h / 2;
+    onImageOffsetChange(title.id, node.x() - boxCenterX, node.y() - boxCenterY);
   }
 
   // In details mode, scrolling over the selected card's image scales it instead of zooming the
@@ -167,46 +173,55 @@ export function TitleBoxNode({
       >
         {/* Base layer: flat placeholder, then the selected image on top, covering the box */}
         <Rect x={x} y={y} width={w} height={h} fillLinearGradientStartPoint={{ x: 0, y: 0 }} fillLinearGradientEndPoint={{ x: w, y: h }} fillLinearGradientColorStops={[0, gradA, 1, gradB]} />
-        {drawImg && img && (
+        {drawImg && img && title.imageVisible && (
           <KonvaImage
             image={img}
-            x={drawImg.drawX}
-            y={drawImg.drawY}
-            width={drawImg.drawW}
-            height={drawImg.drawH}
+            x={drawImg.centerX}
+            y={drawImg.centerY}
+            width={drawImg.width}
+            height={drawImg.height}
+            offsetX={drawImg.offsetX}
+            offsetY={drawImg.offsetY}
+            rotation={drawImg.rotation}
+            scaleX={drawImg.scaleX}
+            scaleY={drawImg.scaleY}
             draggable={selected && interactive}
             onDragMove={handleImageDragMove}
           />
         )}
 
-        <Text
-          x={monthX}
-          y={monthY}
-          text={mo}
-          fontFamily={cardText.date.fontFamily}
-          fontStyle="bold"
-          fontSize={monthFontSize}
-          fill={cardText.date.color}
-          letterSpacing={cardText.date.monthKerning}
-          opacity={title.dateStyle.opacity}
-          shadowColor={cardText.date.dropShadowColor}
-          shadowBlur={cardText.date.dropShadowBlur}
-          shadowOpacity={title.dateStyle.dropShadowOpacity}
-        />
-        <Text
-          x={dayX}
-          y={dayY}
-          text={dy}
-          fontFamily={cardText.date.fontFamily}
-          fontStyle="bold"
-          fontSize={dayFontSize}
-          fill={cardText.date.color}
-          letterSpacing={title.dateStyle.numberKerning}
-          opacity={title.dateStyle.opacity}
-          shadowColor={cardText.date.dropShadowColor}
-          shadowBlur={cardText.date.dropShadowBlur}
-          shadowOpacity={title.dateStyle.dropShadowOpacity}
-        />
+        {title.dateVisible && (
+          <>
+            <Text
+              x={monthX}
+              y={monthY}
+              text={mo}
+              fontFamily={cardText.date.fontFamily}
+              fontStyle="bold"
+              fontSize={monthFontSize}
+              fill={cardText.date.color}
+              letterSpacing={cardText.date.monthKerning}
+              opacity={title.dateStyle.opacity}
+              shadowColor={cardText.date.dropShadowColor}
+              shadowBlur={cardText.date.dropShadowBlur}
+              shadowOpacity={title.dateStyle.dropShadowOpacity}
+            />
+            <Text
+              x={dayX}
+              y={dayY}
+              text={dy}
+              fontFamily={cardText.date.fontFamily}
+              fontStyle="bold"
+              fontSize={dayFontSize}
+              fill={cardText.date.color}
+              letterSpacing={title.dateStyle.numberKerning}
+              opacity={title.dateStyle.opacity}
+              shadowColor={cardText.date.dropShadowColor}
+              shadowBlur={cardText.date.dropShadowBlur}
+              shadowOpacity={title.dateStyle.dropShadowOpacity}
+            />
+          </>
+        )}
 
         {hovered && interactive && !selected && <Rect x={x} y={y} width={w} height={h} fill="#ffffff" opacity={0.12} />}
 
@@ -226,7 +241,7 @@ export function TitleBoxNode({
           />
         )}
 
-        {title.name && (
+        {title.name && title.titleVisible && (
           <RichWordText
             text={title.name}
             x={x + cardText.title.marginX}
@@ -251,7 +266,7 @@ export function TitleBoxNode({
           />
         )}
 
-        {runtimeLabel && (
+        {runtimeLabel && title.runtimeVisible && (
           <Text
             x={runtimeX}
             y={runtimeY}
@@ -262,7 +277,6 @@ export function TitleBoxNode({
             fill={cardText.runtime.color}
             letterSpacing={cardText.runtime.kerning}
             opacity={title.runtimeStyle.opacity}
-            shadowEnabled={title.runtimeStyle.dropShadow}
             shadowColor={cardText.runtime.dropShadowColor}
             shadowBlur={cardText.runtime.dropShadowBlur}
             shadowOpacity={title.runtimeStyle.dropShadowOpacity}
@@ -271,6 +285,10 @@ export function TitleBoxNode({
 
         {title.badges.map((badge, i) => (
           <BadgeNode key={badge.id} badge={badge} boxX={x} boxY={y} boxW={w} boxH={h} stackIndex={i} />
+        ))}
+
+        {title.customElements.map((el) => (
+          <CustomElementNode key={el.id} element={el} anchorX={x + w / 2} anchorY={y + h / 2} />
         ))}
       </Group>
     </>

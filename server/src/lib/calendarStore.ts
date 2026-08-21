@@ -8,14 +8,14 @@ async function ensureDir() {
   await mkdir(DATA_DIR, { recursive: true });
 }
 
-export async function listCalendars(): Promise<Pick<Calendar, "id" | "season" | "customSeasonLabel" | "year" | "updatedAt" | "createdAt">[]> {
+export async function listCalendars(): Promise<Pick<Calendar, "id" | "season" | "customSeasonLabel" | "customName" | "year" | "updatedAt" | "createdAt">[]> {
   await ensureDir();
   const files = (await readdir(DATA_DIR)).filter((f) => f.endsWith(".json"));
   const summaries = await Promise.all(
     files.map(async (f) => {
       const raw = await readFile(path.join(DATA_DIR, f), "utf-8");
       const cal = JSON.parse(raw) as Calendar;
-      return { id: cal.id, season: cal.season, customSeasonLabel: cal.customSeasonLabel, year: cal.year, updatedAt: cal.updatedAt, createdAt: cal.createdAt };
+      return { id: cal.id, season: cal.season, customSeasonLabel: cal.customSeasonLabel, customName: cal.customName, year: cal.year, updatedAt: cal.updatedAt, createdAt: cal.createdAt };
     })
   );
   return summaries.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));

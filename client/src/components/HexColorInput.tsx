@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Icon } from "./Icon";
 import "./HexColorInput.css";
 
 interface Props {
@@ -53,7 +54,7 @@ export function HexColorInput({ value, onChange, defaultValue }: Props) {
       />
       {defaultValue !== undefined && (
         <button type="button" className="setting-reset" title="Reset to default" onClick={() => onChange(defaultValue)}>
-          ⟲
+          <Icon name="reset_to_default" size={13} />
         </button>
       )}
     </div>

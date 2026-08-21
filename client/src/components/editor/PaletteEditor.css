@@ -1,36 +1,46 @@
 .pe-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-bottom: 0.8rem;
+  gap: 0.25rem;
+  margin-bottom: 0;
+  position: relative;
+  top: 2px;
+  z-index: 1;
 }
 
 .pe-tab {
-  border: 1px solid var(--border-strong);
-  background: var(--surface-2);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-bottom: none;
+  background: var(--surface-3);
   color: var(--text-muted);
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
+  border-radius: 4px 4px 0 0;
+  padding: 0.35rem 0.7rem;
   font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
 }
 
 .pe-tab.sel {
-  background: var(--chip-bg);
-  color: var(--chip-ink);
-  border-color: transparent;
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--bevel-light) var(--bevel-dark) transparent var(--bevel-light);
 }
 
 .pe-categories {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  background: var(--surface);
+  padding: 0.8rem;
 }
 
 .pe-category {
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.65rem 0.7rem;
 }
 
@@ -50,8 +60,9 @@
 .pe-category-name-input {
   flex: 1;
   min-width: 0;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.25rem 0.45rem;
   background: var(--surface-2);
   color: var(--text);
@@ -67,12 +78,12 @@
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0.15rem 0.25rem;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
 }
 
 .pe-cat-delete:hover {
   color: var(--accent);
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 
 .pe-elements {
@@ -89,7 +100,7 @@
   font-size: 0.78rem;
   padding: 0.3rem 0.5rem;
   background: var(--surface-2);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .pe-empty {
@@ -106,12 +117,16 @@
 }
 
 .pe-element-move button {
-  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   background: var(--surface);
   color: var(--text-muted);
-  border-radius: 4px;
-  width: 1.3rem;
-  height: 1.3rem;
+  border-radius: var(--radius-sm);
+  width: 1.4rem;
+  height: 1.4rem;
   font-size: 0.7rem;
   line-height: 1;
   cursor: pointer;
@@ -127,11 +142,14 @@
 }
 
 .pe-add-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   align-self: flex-start;
-  border: 1px dashed var(--border-strong);
+  border: 2px dashed var(--border-strong);
   background: none;
   color: var(--text-muted);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 0.45rem 0.8rem;
   font-size: 0.78rem;
   font-weight: 600;

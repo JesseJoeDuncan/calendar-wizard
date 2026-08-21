@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Group, Rect } from "react-konva";
-import type { CalendarGeometry } from "../../lib/calendarGeometry";
+import { CANVAS_W, HEADER_H, type CalendarGeometry } from "../../lib/calendarGeometry";
 import { HEADER_FOOTER_ELEMENT_IDS, SEASON_TITLE_ANCHOR, getElementAnchor } from "../../lib/headerFooterLayout";
 import type { CalendarHeaderFooter, SeasonTitleStyle } from "../../types/calendar";
+import { CustomElementNode } from "./CustomElementNode";
 import { HeaderFooterElementNode } from "./HeaderFooterElementNode";
 import { SeasonTitleNode } from "./SeasonTitleNode";
 
@@ -57,6 +58,9 @@ export function HeaderFooterGroup({ headerFooter, seasonTitle, seasonLabel, year
         <Rect x={geometry.header.x} y={geometry.header.y} width={geometry.header.w} height={geometry.header.h} fill="#000000" opacity={0} listening={interactive} />
         {restIds.filter((id) => id === "sundayNightText" || id === "onyxLogo").map(renderElement)}
         <SeasonTitleNode x={SEASON_TITLE_ANCHOR.x} y={SEASON_TITLE_ANCHOR.y} seasonLabel={seasonLabel} year={year} style={seasonTitle} />
+        {headerFooter.customElements.map((el) => (
+          <CustomElementNode key={el.id} element={el} anchorX={CANVAS_W / 2} anchorY={HEADER_H / 2} />
+        ))}
         {hoveredRegion === "header" && <Rect x={geometry.header.x} y={geometry.header.y} width={geometry.header.w} height={geometry.header.h} fill="#ffffff" opacity={0.12} listening={false} />}
       </Group>
 

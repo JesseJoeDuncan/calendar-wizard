@@ -1,0 +1,106 @@
+.cw-wrap {
+  position: relative;
+}
+
+.cw-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.86rem;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  max-width: 16rem;
+}
+
+.cw-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cw-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+
+.cw-panel {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 0;
+  z-index: 91;
+  min-width: 20rem;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 0.3rem;
+}
+
+.cw-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  border-radius: var(--radius-sm);
+}
+
+.cw-row.sel {
+  background: var(--accent-soft);
+}
+
+.cw-row-label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cw-row-label:hover {
+  color: var(--accent);
+}
+
+.cw-rename-input {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+  margin: 0.1rem;
+}
+
+.cw-row-icon {
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.cw-row-icon:hover {
+  color: var(--accent);
+  background: var(--surface-3);
+}

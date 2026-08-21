@@ -1,5 +1,5 @@
 .details-left {
-  border-right: 1px solid var(--border);
+  border-right: 2px solid var(--bevel-dark);
   background: var(--surface-2);
   padding: 0.9rem 1rem;
   overflow-y: auto;
@@ -47,8 +47,9 @@
 
 .field-input {
   width: 100%;
-  border: 1px solid var(--border-strong);
-  border-radius: 7px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
   padding: 0.4rem 0.6rem;
@@ -82,8 +83,9 @@
 
 .img-opt {
   aspect-ratio: 3/2;
-  border-radius: 5px;
-  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   padding: 0;
   overflow: hidden;
   cursor: pointer;
@@ -108,7 +110,7 @@
   color: var(--text-muted);
   font-size: 0.65rem;
   font-weight: 700;
-  border: 1px dashed var(--border-strong);
+  border-style: dashed;
   text-align: center;
 }
 
@@ -203,11 +205,12 @@
 }
 
 .just-btn {
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 5px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,7 +220,7 @@
 
 .just-btn.sel {
   background: var(--accent-soft);
-  border-color: var(--accent);
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
   color: var(--accent);
 }
 
@@ -252,4 +255,31 @@
 .badge-style-select {
   flex: none;
   width: 5rem;
+}
+
+.img-transform-row {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.img-transform-row .del-btn {
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  background: var(--surface-2);
+}
+
+.img-transform-row .del-btn.sel {
+  background: var(--accent-soft);
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  color: var(--accent);
+}
+
+.details-add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--border-strong);
 }

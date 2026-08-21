@@ -1,4 +1,4 @@
-import type { CalendarTheme, ColorPalette, Season } from "../types/calendar";
+import type { CalendarTheme, ColorPalette, Season, SeasonTitleStyle } from "../types/calendar";
 import { DEFAULT_CARD_SHADOW, DEFAULT_CARD_TEXT, DEFAULT_SPACING } from "./calendarGeometry";
 import { applyPaletteToTheme, defaultPaletteForSeason } from "./colorPalette";
 import { deepMergeDefaults } from "./deepMerge";
@@ -6,7 +6,11 @@ import { defaultHeaderFooter, defaultSeasonTitleStyle } from "./headerFooterLayo
 
 const THEME_KEY = "calendarWizard.defaultTheme";
 const PALETTES_KEY = "calendarWizard.defaultPalettes";
+const SEASON_TITLE_LAYOUT_KEY = "calendarWizard.defaultSeasonTitleLayout";
 const AUTOSAVE_KEY = "calendarWizard.autoSaveMinutes";
+
+/** The season title's placement/scale/kerning — unlike the rest of CalendarTheme, this is season-specific (like the palette), not shared across every season. */
+type SeasonTitleLayout = Pick<SeasonTitleStyle, "offsetX" | "offsetY" | "scale" | "kerning">;
 
 export const DEFAULT_BACKGROUND_TEXTURE = { style: "none" as const, opacity: 0.15 };
 
@@ -51,16 +55,37 @@ export function getDefaultPalette(season: Season): ColorPalette {
   return deepMergeDefaults(defaultPaletteForSeason(season), stored[season]);
 }
 
-/** The default theme for a given season: shared spacing/position settings plus that season's resolved palette colors. */
+function getAllSeasonTitleLayouts(): Partial<Record<Season, SeasonTitleLayout>> {
+  try {
+    const raw = localStorage.getItem(SEASON_TITLE_LAYOUT_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // ignore malformed storage
+  }
+  return {};
+}
+
+export function getDefaultSeasonTitleLayout(season: Season): SeasonTitleLayout {
+  const base = defaultSeasonTitleStyle();
+  const stored = getAllSeasonTitleLayouts();
+  return deepMergeDefaults({ offsetX: base.offsetX, offsetY: base.offsetY, scale: base.scale, kerning: base.kerning }, stored[season]);
+}
+
+/** The default theme for a given season: shared spacing settings, that season's resolved palette colors, and that season's own season-title placement/scale/kerning. */
 export function getDefaultTheme(season: Season): CalendarTheme {
-  return applyPaletteToTheme(getBaseDefaultTheme(), getDefaultPalette(season));
+  const themed = applyPaletteToTheme(getBaseDefaultTheme(), getDefaultPalette(season));
+  return { ...themed, seasonTitle: { ...themed.seasonTitle, ...getDefaultSeasonTitleLayout(season) } };
 }
 
 export function saveAsDefaultTheme(theme: CalendarTheme, season: Season) {
   localStorage.setItem(THEME_KEY, JSON.stringify(theme));
-  const all = getAllDefaultPalettes();
-  all[season] = theme.palette;
-  localStorage.setItem(PALETTES_KEY, JSON.stringify(all));
+  const allPalettes = getAllDefaultPalettes();
+  allPalettes[season] = theme.palette;
+  localStorage.setItem(PALETTES_KEY, JSON.stringify(allPalettes));
+
+  const allLayouts = getAllSeasonTitleLayouts();
+  allLayouts[season] = { offsetX: theme.seasonTitle.offsetX, offsetY: theme.seasonTitle.offsetY, scale: theme.seasonTitle.scale, kerning: theme.seasonTitle.kerning };
+  localStorage.setItem(SEASON_TITLE_LAYOUT_KEY, JSON.stringify(allLayouts));
 }
 
 export const DEFAULT_AUTOSAVE_MINUTES = 5;

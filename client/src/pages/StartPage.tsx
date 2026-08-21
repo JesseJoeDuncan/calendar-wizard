@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { DefaultSettingsModal } from "../components/editor/DefaultSettingsModal";
 import { TopBar } from "../components/editor/TopBar";
 import { SeriesEditor } from "../components/SeriesEditor";
 import { TitleRow } from "../components/TitleRow";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
+import { duplicateCalendarById, renameCalendarById } from "../lib/calendarActions";
 import { DEFAULT_DATE_STYLE, DEFAULT_RATING_STYLE, DEFAULT_RUNTIME_STYLE } from "../lib/calendarGeometry";
 import { nextId, type DraftSeries, type DraftTitle } from "../lib/draftTypes";
 import { MAX_TITLES, MIN_TITLES, validateTitleCount } from "../lib/layoutEngine";
@@ -52,6 +55,7 @@ export function StartPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [defaultSettingsOpen, setDefaultSettingsOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
 
@@ -172,15 +176,40 @@ export function StartPage() {
     navigate("/");
   }
 
-  async function handleDelete() {
-    if (!id) return;
-    if (!window.confirm("Delete this new calendar?")) return;
+  async function handleDelete(targetId: string) {
+    if (!window.confirm("Delete this calendar? This can't be undone.")) return;
     try {
-      await api.deleteCalendar(id);
+      await api.deleteCalendar(targetId);
+      setSummaries((prev) => prev.filter((s) => s.id !== targetId));
     } catch (err) {
       console.error(err);
+      setError("Delete failed. Check that the server is running.");
+      return;
     }
-    navigate("/");
+    if (targetId === id) navigate("/");
+  }
+
+  async function handleDuplicateById(targetId: string) {
+    try {
+      const newId = await duplicateCalendarById(targetId);
+      const r = await api.listCalendars();
+      setSummaries(r.calendars);
+      navigate(`/edit/${newId}`);
+    } catch (err) {
+      console.error(err);
+      setError("Duplicate failed. Check that the server is running.");
+    }
+  }
+
+  async function handleRename(targetId: string, name: string) {
+    try {
+      await renameCalendarById(targetId, name);
+      const r = await api.listCalendars();
+      setSummaries(r.calendars);
+    } catch (err) {
+      console.error(err);
+      setError("Rename failed. Check that the server is running.");
+    }
   }
 
   async function handleCreate() {
@@ -213,6 +242,10 @@ export function StartPage() {
         date: t.date,
         mpaRating: "NR" as const,
         ratingVisible: false,
+        imageVisible: true,
+        titleVisible: true,
+        dateVisible: true,
+        runtimeVisible: true,
         // fontSize 0 is the "not yet auto-fit" sentinel — the editor computes a real size once it
         // knows this title's actual box width.
         titleTextStyle: { fontSize: 0, kerning: 0, lineSpacing: 1.08, justify: "left" as const, dropShadow: true, offsetX: 0, offsetY: 0 },
@@ -222,6 +255,7 @@ export function StartPage() {
         dateOffsetX: 0,
         dateOffsetY: 0,
         badges: [],
+        customElements: [],
         seriesId: t.seriesId && seriesIds.has(t.seriesId) ? t.seriesId : undefined,
       }));
 
@@ -269,7 +303,20 @@ export function StartPage() {
 
   return (
     <div className="start-page-shell">
-      <TopBar currentId={id} currentLabel="New calendar" summaries={summaries} onSwitch={handleSwitch} onNew={handleNew} onDelete={handleDelete} />
+      <TopBar
+        currentId={id}
+        currentLabel="New calendar"
+        summaries={summaries}
+        onSwitch={handleSwitch}
+        onNew={handleNew}
+        onDelete={handleDelete}
+        onDuplicate={handleDuplicateById}
+        onRename={handleRename}
+        onOpenDefaultSettings={() => setDefaultSettingsOpen(true)}
+      />
+      {defaultSettingsOpen && (
+        <DefaultSettingsModal calendar={draft} onClose={() => setDefaultSettingsOpen(false)} onApplyToCalendar={(theme) => setDraft({ ...draft, theme })} />
+      )}
       <div className="start-page">
         <div className="start-head">
           <div>
@@ -304,11 +351,11 @@ export function StartPage() {
         </div>
         <div className="title-list-actions">
           <button type="button" className="add-row-btn" onClick={addTitle} disabled={titles.length >= MAX_TITLES}>
-            + Add title
+            <Icon name="add_movie_card" size={14} /> Add title
           </button>
           <div className="more-menu-wrap">
             <button type="button" className="more-menu-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="More options" title="More options">
-              ⋯
+              <Icon name="more_options" />
             </button>
             {menuOpen && (
               <>
@@ -322,14 +369,22 @@ export function StartPage() {
             )}
           </div>
         </div>
-        {genError && <div className="form-error">{genError}</div>}
+        {genError && (
+          <div className="form-error">
+            <Icon name="warning" size={13} /> {genError}
+          </div>
+        )}
         <div className="count-note">
           {filledCount} of {MIN_TITLES}–{MAX_TITLES} titles filled in
         </div>
 
         <SeriesEditor titles={titles} series={series} onChange={setSeries} onTitlesChange={setTitles} />
 
-        {error && <div className="form-error">{error}</div>}
+        {error && (
+          <div className="form-error">
+            <Icon name="warning" size={13} /> {error}
+          </div>
+        )}
 
         <div className="create-row">
           <button type="button" className="btn-primary" onClick={handleCreate} disabled={creating}>

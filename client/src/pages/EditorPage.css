@@ -13,7 +13,7 @@
 .editor-left {
   width: 300px;
   flex: none;
-  border-right: 1px solid var(--border);
+  border-right: 2px solid var(--bevel-dark);
   background: var(--surface-2);
   padding: 0.9rem;
   overflow-y: auto;

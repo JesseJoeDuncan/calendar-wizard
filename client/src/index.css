@@ -1,42 +1,84 @@
 @import "./fonts.css";
 
 :root {
-  --bg: #eeeae1;
-  --surface: #ffffff;
-  --surface-2: #f5f1e8;
-  --surface-3: #e9e2d2;
-  --text: #221f1a;
-  --text-muted: #6f6655;
-  --border: #d9d0bd;
-  --border-strong: #c2b69d;
-  --accent: #b8420c;
-  --accent-ink: #fff8ef;
-  --accent-soft: #f2d9c4;
-  --focus: #1c6e8c;
-  --chip-bg: #221f1a;
-  --chip-ink: #fdf8ee;
-  --danger: #b0362b;
-  --shadow: 0 20px 45px -20px rgba(40, 30, 15, 0.35);
+  --bg: #ede7db;
+  --surface: #fffdf8;
+  --surface-2: #ede7db;
+  --surface-3: #e3dccb;
+  --text: #2b2b28;
+  --text-muted: #6b6656;
+  --border: #8a8375;
+  --border-strong: #6b6656;
+  --accent: #d2694f;
+  --accent-ink: #fffdf8;
+  --accent-soft: #f3ddd3;
+  --focus: #1d6579;
+  --chip-bg: #1d6579;
+  --chip-ink: #fffdf8;
+  --danger: #a83a2c;
+  --shadow: 2px 2px 0 rgba(43, 43, 40, 0.28);
+
+  /* Skeuomorphic chrome: two-tone borders simulate a raised or inset physical edge. Deliberately
+     a shade darker than --surface (not an exact match) — an inset field's "light" edge (right/
+     bottom) sits directly against a surface-colored background, and an identical value there was
+     rendering as an invisible border. */
+  --bevel-light: #f2ece0;
+  --bevel-dark: #8a8375;
+  --titlebar-bg: #1d6579;
+  --titlebar-text: #fffdf8;
+  --radius-sm: 3px;
 }
 
+/* Dark tokens apply when the OS prefers dark (unless the in-app toggle explicitly chose light),
+   and again under an explicit dark choice so the toggle wins over the OS either way. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #16130f;
-    --surface: #1f1b15;
-    --surface-2: #262019;
-    --surface-3: #332b20;
+  :root:not([data-theme="light"]) {
+    --bg: #2b2823;
+    --surface: #211f1b;
+    --surface-2: #2b2823;
+    --surface-3: #363228;
     --text: #f1ebdd;
-    --text-muted: #a99d86;
-    --border: #3a3225;
-    --border-strong: #4c422f;
-    --accent: #e2762f;
-    --accent-ink: #1a1006;
-    --accent-soft: #4a2c17;
-    --focus: #5fb8d9;
-    --chip-bg: #e2762f;
-    --chip-ink: #1a1006;
-    --shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.6);
+    --text-muted: #a89e88;
+    --border: #4a453a;
+    --border-strong: #5c5646;
+    --accent: #e0876a;
+    --accent-ink: #211f1b;
+    --accent-soft: #4a352c;
+    --focus: #6bb6cc;
+    --chip-bg: #2f7085;
+    --chip-ink: #f1ebdd;
+    --danger: #d4695a;
+    --shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+
+    --bevel-light: #4a453a;
+    --bevel-dark: #141310;
+    --titlebar-bg: #2f7085;
+    --titlebar-text: #f1ebdd;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #2b2823;
+  --surface: #211f1b;
+  --surface-2: #2b2823;
+  --surface-3: #363228;
+  --text: #f1ebdd;
+  --text-muted: #a89e88;
+  --border: #4a453a;
+  --border-strong: #5c5646;
+  --accent: #e0876a;
+  --accent-ink: #211f1b;
+  --accent-soft: #4a352c;
+  --focus: #6bb6cc;
+  --chip-bg: #2f7085;
+  --chip-ink: #f1ebdd;
+  --danger: #d4695a;
+  --shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+
+  --bevel-light: #4a453a;
+  --bevel-dark: #141310;
+  --titlebar-bg: #2f7085;
+  --titlebar-text: #f1ebdd;
 }
 
 * {
@@ -53,7 +95,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: Tahoma, "Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
 }
 
 button {
@@ -62,4 +104,102 @@ button {
 
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Reusable bevel utilities — apply directly, or use as a reference for component-local rules. */
+.win-raised {
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
+}
+
+.win-inset {
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
+}
+
+.win-titlebar {
+  background: var(--titlebar-bg);
+  color: var(--titlebar-text);
+}
+
+/* Range sliders, checkboxes, and color swatches aren't restyled per-component elsewhere, so a
+   single global skin here reaches every instance across the app. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+  flex: 1;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--surface);
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 18px;
+  margin-top: -7px;
+  background: var(--surface-2);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  background: var(--surface);
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 18px;
+  background: var(--surface-2);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
+}
+
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex: none;
+  position: relative;
+  vertical-align: middle;
+  background: var(--surface);
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  cursor: pointer;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: -1px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+input[type="color"] {
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  background: var(--surface);
+  cursor: pointer;
 }

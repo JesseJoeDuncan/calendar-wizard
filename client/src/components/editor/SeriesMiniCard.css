@@ -1,7 +1,8 @@
 .series-mini {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 9px;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
   padding: 0.55rem 0.7rem;
   margin-bottom: 0.5rem;
   font-size: 0.78rem;
@@ -29,14 +30,19 @@
 }
 
 .sm-style-btn {
-  border: 1px solid var(--border);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   background: var(--surface-2);
-  border-radius: 6px;
-  width: 1.6rem;
-  height: 1.6rem;
+  border-radius: var(--radius-sm);
+  width: 1.7rem;
+  height: 1.7rem;
   font-size: 0.8rem;
   cursor: pointer;
   flex: none;
+}
+
+.sm-style-btn:active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
 
 .sm-sub {
@@ -83,9 +89,10 @@
 .sm-num {
   flex: none;
   width: 3.2rem;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--surface-2);
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   color: var(--text);
   padding: 0.15rem 0.3rem;
   font-size: 0.72rem;
@@ -97,10 +104,11 @@
 }
 
 .sm-just-btn {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-strong);
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
   background: var(--surface);
   font-size: 0.68rem;
   cursor: pointer;
@@ -108,7 +116,7 @@
 
 .sm-just-btn.sel {
   background: var(--accent-soft);
-  border-color: var(--accent);
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
   color: var(--accent);
 }
 

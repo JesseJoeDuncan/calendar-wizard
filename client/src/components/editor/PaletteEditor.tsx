@@ -1,4 +1,5 @@
 import { HexColorInput } from "../HexColorInput";
+import { Icon } from "../Icon";
 import { COLORABLE_ELEMENTS, isBuiltinCategory, nextAddedCategoryName, PALETTE_SEASONS } from "../../lib/colorPalette";
 import type { ColorableElementId, ColorPalette, Season } from "../../types/calendar";
 import "./PaletteEditor.css";
@@ -8,6 +9,8 @@ interface Props {
   onSeasonChange: (season: Season) => void;
   palette: ColorPalette;
   onChange: (palette: ColorPalette) => void;
+  /** Hides the season tab row — used when editing a single calendar's own palette, where switching season doesn't make sense. */
+  lockedSeason?: boolean;
 }
 
 /**
@@ -16,7 +19,7 @@ interface Props {
  * element (see colorPalette.ts) is grouped under one of the palette's categories; moving an element
  * or recoloring a category updates every element that shares it at once.
  */
-export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange }: Props) {
+export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange, lockedSeason }: Props) {
   function elementsFor(categoryId: string) {
     return COLORABLE_ELEMENTS.filter((el) => palette.assignments[el.id] === categoryId);
   }
@@ -54,13 +57,15 @@ export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange 
 
   return (
     <div className="palette-editor">
-      <div className="pe-tabs">
-        {PALETTE_SEASONS.map((s) => (
-          <button key={s} type="button" className={`pe-tab ${s === activeSeason ? "sel" : ""}`} onClick={() => onSeasonChange(s)}>
-            {s}
-          </button>
-        ))}
-      </div>
+      {!lockedSeason && (
+        <div className="pe-tabs">
+          {PALETTE_SEASONS.map((s) => (
+            <button key={s} type="button" className={`pe-tab ${s === activeSeason ? "sel" : ""}`} onClick={() => onSeasonChange(s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="pe-categories">
         {palette.categories.map((cat, idx) => {
@@ -82,7 +87,7 @@ export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange 
                 <HexColorInput value={cat.color} onChange={(hex) => recolorCategory(cat.id, hex)} />
                 {!builtin && (
                   <button type="button" className="pe-cat-delete" title="Delete this color" onClick={() => deleteCategory(cat.id)}>
-                    🗑
+                    <Icon name="delete" size={13} />
                   </button>
                 )}
               </div>
@@ -93,7 +98,7 @@ export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange 
                     <span>{el.label}</span>
                     <div className="pe-element-move">
                       <button type="button" disabled={idx === 0} title="Move to previous color" onClick={() => moveElement(el.id, idx, -1)}>
-                        ^
+                        <Icon name="up" size={11} />
                       </button>
                       <button
                         type="button"
@@ -101,7 +106,7 @@ export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange 
                         title="Move to next color"
                         onClick={() => moveElement(el.id, idx, 1)}
                       >
-                        v
+                        <Icon name="down" size={11} />
                       </button>
                     </div>
                   </div>
@@ -111,7 +116,7 @@ export function PaletteEditor({ activeSeason, onSeasonChange, palette, onChange 
           );
         })}
         <button type="button" className="pe-add-color" onClick={addCategory}>
-          + Add color
+          <Icon name="add_minor" size={13} /> Add color
         </button>
       </div>
     </div>

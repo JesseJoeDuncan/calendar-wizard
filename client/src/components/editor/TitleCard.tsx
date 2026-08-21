@@ -1,4 +1,5 @@
 import type { Series, Title } from "../../types/calendar";
+import { Icon } from "../Icon";
 import "./TitleCard.css";
 
 interface Props {
@@ -38,8 +39,8 @@ export function TitleCard({ title, series, selected, onChange, onSeriesChange, o
           ))}
         </select>
       </div>
-      <button className="tc-details-btn" onClick={onOpenDetails}>
-        Details
+      <button className="tc-details-btn" onClick={onOpenDetails} title="Details">
+        <Icon name="edit" size={14} />
       </button>
     </div>
   );

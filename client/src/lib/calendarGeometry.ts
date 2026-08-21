@@ -62,6 +62,7 @@ export const DEFAULT_CARD_TEXT: CardTextDefaults = {
     dropShadowBlur: 5,
     marginX: 8,
     bottomGapPct: 0.05,
+    wrapCharThreshold: 12,
   },
   runtime: {
     fontFamily: "Futura Wizard",

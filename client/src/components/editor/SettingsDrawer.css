@@ -5,8 +5,8 @@
   flex: none;
   width: 340px;
   max-width: 90vw;
-  border-left: 1px solid var(--border);
-  background: var(--surface);
+  border-left: 2px solid var(--bevel-dark);
+  background: var(--surface-2);
   padding: 1.2rem;
   overflow-y: auto;
 }
@@ -53,10 +53,11 @@
 .drawer-field input[type="text"],
 .drawer-field input:not([type]) {
   flex: 1;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border: 2px solid;
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  border-radius: var(--radius-sm);
   padding: 0.35rem 0.55rem;
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -70,32 +71,45 @@
   gap: 0.5rem;
   margin-top: 1.6rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--bevel-dark);
 }
 
 .drawer-reset-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   background: var(--chip-bg);
   color: var(--chip-ink);
-  border: none;
-  border-radius: 8px;
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  border-radius: var(--radius-sm);
   padding: 0.6rem;
   font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
+.drawer-reset-all:active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+}
+
 .drawer-save-default {
-  background: none;
-  border: 1px solid var(--border-strong);
-  color: var(--text-muted);
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: var(--surface-2);
+  border: 2px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  color: var(--text);
+  border-radius: var(--radius-sm);
   padding: 0.5rem;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.drawer-save-default:hover {
-  color: var(--text);
-  border-color: var(--text-muted);
+.drawer-save-default:active {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
 }
